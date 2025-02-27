@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Flask应用服务
+  app:
+    image: ${DOCKER_USERNAME:-username}/flask-backend:latest
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=wsgi.py
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - SECRET_KEY=${SECRET_KEY:-default_secret_key}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///prod.db}
+      - REMOTE_SERVICE_URL=${REMOTE_SERVICE_URL:-http://remote-service:8000/api/process}
+    volumes:
+      - app_data:/app/uploads
+      - app_db:/app/instance
+    depends_on:
+      - redis
+      
+  # Redis缓存服务
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+      
+  # Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./static:/var/www/static
+    depends_on:
+      - app
+
+volumes:
+  app_data:
+  app_db:
+  redis_data: 
