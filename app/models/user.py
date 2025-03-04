@@ -1,3 +1,8 @@
+"""
+用户数据模型
+定义与用户相关的数据库表结构
+"""
+
 import datetime
 
 from app.extensions import db

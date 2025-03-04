@@ -12,8 +12,8 @@ api_bp = Blueprint("api", __name__)
 api = Api(
     api_bp,
     version="1.0",
-    title="算法微服务化 API",
-    description="算法代码微服务化和用户管理API接口",
+    title="ioeb项目后端 API",
+    description="ioeb项目后端 API接口",
     doc="/docs",  # 将Swagger文档设置在/api/docs路径下
     # 自定义Swagger UI样式
     specs_route="/docs/",

@@ -1,8 +1,7 @@
 from flask import request
 from flask_restx import Namespace, Resource, fields
 
-from app.extensions import db
-from app.models import User
+from app.services.user_service import UserServiceError, user_service
 
 # 创建命名空间
 api = Namespace("users", description="用户管理API")
@@ -51,8 +50,8 @@ class UserList(Resource):
     @api.marshal_with(users_response, code=200)
     def get(self):
         """获取所有用户"""
-        users = User.query.all()
-        return {"status": "success", "users": [user.to_dict() for user in users]}, 200
+        users = user_service.get_all_users()
+        return {"status": "success", "users": users}, 200
 
     @api.doc("create_user")
     @api.expect(user_post_model)
@@ -66,16 +65,15 @@ class UserList(Resource):
         if not data or not data.get("username") or not data.get("email"):
             api.abort(400, "缺少必要的用户信息")
 
-        # 检查用户是否已存在
-        if User.query.filter_by(email=data.get("email")).first():
-            api.abort(409, "用户已存在")
+        try:
+            user_data, is_new = user_service.create_user(data.get("username"), data.get("email"))
 
-        new_user = User(username=data.get("username"), email=data.get("email"))
+            if not is_new:
+                return {"status": "warning", "message": "用户已存在", "user": user_data}, 200
 
-        db.session.add(new_user)
-        db.session.commit()
-
-        return {"status": "success", "message": "用户创建成功", "user": new_user.to_dict()}, 201
+            return {"status": "success", "message": "用户创建成功", "user": user_data}, 201
+        except UserServiceError as e:
+            api.abort(400, str(e))
 
 
 @api.route("/<int:id>")
@@ -86,8 +84,8 @@ class UserResource(Resource):
     @api.marshal_with(user_response)
     def get(self, id):
         """获取指定ID的用户"""
-        user = User.query.get(id)
-        if not user:
-            api.abort(404, f"用户ID {id} 不存在")
-
-        return {"status": "success", "message": "获取用户成功", "user": user.to_dict()}
+        try:
+            user = user_service.get_user_by_id(id)
+            return {"status": "success", "message": "获取用户成功", "user": user}
+        except UserServiceError as e:
+            api.abort(404, str(e))
