@@ -11,7 +11,7 @@ on:
 
 # 环境变量
 env:
-  PYTHON_VERSION: '3.9'
+  PYTHON_VERSION: '3.10'
   FLASK_ENV: testing
 
 jobs:
