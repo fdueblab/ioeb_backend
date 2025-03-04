@@ -20,7 +20,9 @@ from app.utils.file_utils import (
     extract_zip,
     find_main_file,
 )
-from app.utils.remote_service import RemoteServiceError, send_file_to_remote_service
+
+# TODO: 实现远程服务处理并删除模拟数据
+# from app.utils.remote_service import RemoteServiceError, send_file_to_remote_service
 
 
 class AlgorithmServiceError(Exception):
@@ -76,14 +78,23 @@ def process_algorithm_code(
             ):
                 return "", code_review_issues
 
-        # 发送到远程服务处理
-        try:
-            response = send_file_to_remote_service(os.path.basename(main_file), main_file_content)
-        except RemoteServiceError as e:
-            raise AlgorithmServiceError(f"远程服务处理失败: {str(e)}")
+        # # TODO: 实现远程服务处理并删除模拟数据
+        # # 发送到远程服务处理
+        # try:
+        #     response = send_file_to_remote_service(os.path.basename(main_file), main_file_content)
+        # except RemoteServiceError as e:
+        #     raise AlgorithmServiceError(f"远程服务处理失败: {str(e)}")
+
+        # 模拟远程服务处理
+        response = {
+            "files": {
+                "main.py": main_file_content,
+                "requirements.txt": "pytest\nrequests\nflask\n",
+            }
+        }
 
         # 将返回的文件内容写入当前目录
-        for file_name, content in response.get("files", {}).items():
+        for file_name, content in response["files"].items():
             file_path = os.path.join(extract_path, file_name)
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)

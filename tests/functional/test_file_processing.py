@@ -1,5 +1,6 @@
 import io
 import os
+import shutil
 import tempfile
 import zipfile
 
@@ -15,10 +16,11 @@ class TestFileProcessing:
         # 创建临时目录
         test_dir = tempfile.mkdtemp()
 
-        # 创建测试Python文件
+        # 测试Python文件
         main_file_path = os.path.join(test_dir, "main.py")
-        with open(main_file_path, "w") as f:
-            f.write("print('This is the main file')")
+
+        # 把tests\mocks\main.py复制到main.py
+        shutil.copy("tests/mocks/main.py", main_file_path)
 
         # 创建ZIP文件
         zip_buffer = io.BytesIO()
@@ -68,5 +70,5 @@ class TestFileProcessing:
         )
 
         # 验证响应
-        assert response.status_code == 200 or True
-        assert response.mimetype == "application/zip" or True
+        assert response.status_code == 200
+        assert response.mimetype == "application/zip"
