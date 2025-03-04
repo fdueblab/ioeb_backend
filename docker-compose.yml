@@ -9,7 +9,7 @@ services:
       - "5000:5000"
     environment:
       - FLASK_APP=wsgi.py
-      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-1}
       - SECRET_KEY=${SECRET_KEY:-default_secret_key}
       - DATABASE_URL=${DATABASE_URL:-sqlite:///prod.db}
       - REMOTE_SERVICE_URL=${REMOTE_SERVICE_URL:-http://remote-service:8000/api/process}

@@ -62,7 +62,7 @@ class TestFileProcessing:
 
         # 发送请求
         response = client.post(
-            "/api/process",
+            "api/algorithm_service",
             data={"file": (zip_file, "test.zip")},
             content_type="multipart/form-data",
         )

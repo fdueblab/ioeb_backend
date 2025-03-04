@@ -87,7 +87,7 @@ pip install -r requirements.txt
 
 ```
 FLASK_APP=wsgi.py
-FLASK_ENV=development
+FLASK_DEBUG=1
 SECRET_KEY=your_secret_key
 DATABASE_URL=sqlite:///dev.db
 REMOTE_SERVICE_URL=http://your-remote-service.com/api/process

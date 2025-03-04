@@ -1,10 +1,9 @@
-import os
-
 from app import create_app
 from app.extensions import db, migrate
+from app.utils.flask_utils import get_flask_env
 
 # 获取环境配置
-env = os.getenv("FLASK_ENV", "default")
+env = get_flask_env()
 app = create_app(env)
 
 # 添加数据库迁移支持
