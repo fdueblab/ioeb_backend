@@ -4,8 +4,6 @@ import tempfile
 import uuid
 import zipfile
 
-from werkzeug.utils import secure_filename
-
 
 def create_temp_dir():
     """创建临时目录"""

@@ -1,6 +1,10 @@
 from flask import Blueprint
 from flask_restx import Api
 
+from app.api.namespaces.algorithm_service_ns import api as algorithm_service_ns
+from app.api.namespaces.health_ns import api as health_ns
+from app.api.namespaces.user_ns import api as user_ns
+
 # 创建蓝图
 api_bp = Blueprint("api", __name__)
 
@@ -15,16 +19,7 @@ api = Api(
     specs_route="/docs/",
 )
 
-from app.api.namespaces.algorithm_service_ns import api as algorithm_service_ns
-from app.api.namespaces.health_ns import api as health_ns
-
-# 导入命名空间
-from app.api.namespaces.user_ns import api as user_ns
-
 # 注册命名空间
 api.add_namespace(health_ns)
 api.add_namespace(user_ns)
 api.add_namespace(algorithm_service_ns)
-
-# 导入路由模块
-from app.api import routes

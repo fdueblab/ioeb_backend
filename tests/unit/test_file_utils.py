@@ -6,8 +6,6 @@ import pytest
 from app.utils.file_utils import (
     cleanup,
     create_temp_dir,
-    create_zip,
-    extract_zip,
     find_main_file,
 )
 

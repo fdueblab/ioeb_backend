@@ -38,11 +38,16 @@ def process_file():
     file_content = data["file_content"]
 
     print(f"收到文件: {file_name}")
-    print(f"文件内容: {file_content[:100]}..." if len(file_content) > 100 else f"文件内容: {file_content}")
+    print(
+        f"文件内容: {file_content[:100]}..."
+        if len(file_content) > 100
+        else f"文件内容: {file_content}"
+    )
 
     # 模拟处理逻辑
     generated_files = {
-        f"generated_{file_name}": f"# 这是由远程服务生成的文件\n# 基于源文件: {file_name}\n\n{file_content}\n\n# 添加了一些新功能\nprint('这是由远程服务生成的内容')",
+        f"generated_{file_name}": f"# 这是由远程服务生成的文件\n# 基于源文件: {file_name}\n\n"
+        f"{file_content}\n\n# 添加了一些新功能\nprint('这是由远程服务生成的内容')",
         "helper.py": "# 辅助函数\n\ndef helper_function():\n    print('这是一个辅助函数')\n    return 'helper result'",
     }
 

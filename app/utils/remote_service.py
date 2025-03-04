@@ -8,8 +8,6 @@ from flask import current_app
 class RemoteServiceError(Exception):
     """远程服务错误"""
 
-    pass
-
 
 def send_file_to_remote_service(file_path, file_content):
     """

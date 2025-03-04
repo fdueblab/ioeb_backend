@@ -1,6 +1,6 @@
 import ast
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Tuple
 
 
 class CodeStandardIssue:
@@ -43,7 +43,9 @@ def check_function_encapsulation(tree: ast.Module) -> List[CodeStandardIssue]:
     ]
 
     if len(executable_nodes) > 5:  # 超过5个执行语句认为有问题
-        issues.append(CodeStandardIssue(1, "代码中存在过多未封装到函数中的执行代码，请将核心逻辑封装为函数"))
+        issues.append(
+            CodeStandardIssue(1, "代码中存在过多未封装到函数中的执行代码，请将核心逻辑封装为函数")
+        )
 
     # 检查是否存在函数定义
     if not functions:
@@ -82,12 +84,16 @@ def check_function_docstrings(tree: ast.Module) -> List[CodeStandardIssue]:
 
             if arg_count > 0 and not has_args_section:
                 issues.append(
-                    CodeStandardIssue(node.lineno, f"函数 '{node.name}' 文档缺少Args部分，应使用Google风格注释")
+                    CodeStandardIssue(
+                        node.lineno, f"函数 '{node.name}' 文档缺少Args部分，应使用Google风格注释"
+                    )
                 )
 
             if has_return and not has_returns_section:
                 issues.append(
-                    CodeStandardIssue(node.lineno, f"函数 '{node.name}' 文档缺少Returns部分，应使用Google风格注释")
+                    CodeStandardIssue(
+                        node.lineno, f"函数 '{node.name}' 文档缺少Returns部分，应使用Google风格注释"
+                    )
                 )
 
     return issues
@@ -115,13 +121,17 @@ def check_type_annotations(tree: ast.Module) -> List[CodeStandardIssue]:
 
                 if arg.annotation is None:
                     issues.append(
-                        CodeStandardIssue(arg.lineno, f"函数 '{node.name}' 的参数 '{arg.arg}' 缺少类型注解")
+                        CodeStandardIssue(
+                            arg.lineno, f"函数 '{node.name}' 的参数 '{arg.arg}' 缺少类型注解"
+                        )
                     )
 
             # 检查返回值类型注解
             has_return_stmt = any(isinstance(stmt, ast.Return) and stmt.value for stmt in node.body)
             if has_return_stmt and node.returns is None:
-                issues.append(CodeStandardIssue(node.lineno, f"函数 '{node.name}' 缺少返回值类型注解"))
+                issues.append(
+                    CodeStandardIssue(node.lineno, f"函数 '{node.name}' 缺少返回值类型注解")
+                )
 
     return issues
 

@@ -30,4 +30,4 @@ USER appuser
 EXPOSE 5000
 
 # 启动命令
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"] 
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:app"]

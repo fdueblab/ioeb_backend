@@ -18,14 +18,14 @@ services:
       - app_db:/app/instance
     depends_on:
       - redis
-      
+
   # Redis缓存服务
   redis:
     image: redis:alpine
     restart: always
     volumes:
       - redis_data:/data
-      
+
   # Nginx反向代理
   nginx:
     image: nginx:alpine
@@ -43,4 +43,4 @@ services:
 volumes:
   app_data:
   app_db:
-  redis_data: 
+  redis_data:

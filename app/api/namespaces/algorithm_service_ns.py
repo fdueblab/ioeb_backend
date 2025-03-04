@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from flask import current_app, request, send_file
+from flask import current_app, send_file
 from flask_restx import Namespace, Resource, fields
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
@@ -48,7 +48,12 @@ code_review_response = api.model(
 @api.route("")
 class AlgorithmServiceGenerator(Resource):
     @api.doc(
-        "algorithm_to_service", responses={200: "算法代码微服务化成功，返回处理后的ZIP文件", 400: "请求错误", 500: "服务器错误"}
+        "algorithm_to_service",
+        responses={
+            200: "算法代码微服务化成功，返回处理后的ZIP文件",
+            400: "请求错误",
+            500: "服务器错误",
+        },
     )
     @api.expect(upload_parser)
     @api.produces(["application/zip"])
