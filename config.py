@@ -30,7 +30,14 @@ class DevelopmentConfig(Config):
     """开发环境配置"""
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///dev.db")
+
+    username = os.getenv("DB_USERNAME", "default_username")
+    password = os.getenv("DB_PASSWORD", "default_password")
+    host = os.getenv("DB_HOST", "sh-cynosdbmysql-grp-gfzuhdpw.sql.tencentcdb.com")
+    port = os.getenv("DB_PORT", "22254")
+    database = os.getenv("DB_NAME", "ioeb-dev")
+
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
 
 
 class TestingConfig(Config):
@@ -38,16 +45,28 @@ class TestingConfig(Config):
 
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///test.db")
+
+    username = os.getenv("DB_USERNAME", "default_username")
+    password = os.getenv("DB_PASSWORD", "default_password")
+    host = os.getenv("DB_HOST", "sh-cynosdbmysql-grp-gfzuhdpw.sql.tencentcdb.com")
+    port = os.getenv("DB_PORT", "22254")
+    database = os.getenv("DB_NAME", "ioeb-dev")
+
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
 
 
 class ProductionConfig(Config):
     """生产环境配置"""
 
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///prod.db")
-    # 在生产环境中应该使用更安全的配置
-    # 例如使用PostgreSQL或MySQL
+
+    username = os.getenv("DB_USERNAME", "default_username")
+    password = os.getenv("DB_PASSWORD", "default_password")
+    host = os.getenv("DB_HOST", "sh-cynosdbmysql-grp-gfzuhdpw.sql.tencentcdb.com")
+    port = os.getenv("DB_PORT", "22254")
+    database = os.getenv("DB_NAME", "ioeb-prod")
+
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
 
     # 生产环境中更安全的算法代码上传设置
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB
