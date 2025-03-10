@@ -1,3 +1,6 @@
+# developing
+app/services/openapi_parser/
+
 # Python
 __pycache__/
 *.py[cod]
