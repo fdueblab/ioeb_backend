@@ -15,6 +15,8 @@ services:
     volumes:
       - app_data:/app/uploads
       - app_db:/app/instance
+    networks:
+      - ioeb_app-network  # 加入现有网络
   #   depends_on:
   #     - redis
 
@@ -43,3 +45,7 @@ volumes:
   app_data:
   app_db:
   redis_data:
+
+networks:
+  ioeb_app-network:
+    external: true  # 使用外部网络
