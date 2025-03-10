@@ -187,5 +187,5 @@ jobs:
             cd ~/ioeb-backend
             export DB_USERNAME=${{ secrets.PRODUCTION_DB_USERNAME }}
             export DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}
-            docker-compose pull
-            docker-compose up -d
+            sudo docker-compose pull
+            sudo docker-compose up -d
