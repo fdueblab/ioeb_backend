@@ -2,7 +2,6 @@ import logging
 import os
 
 from flask import Flask, send_from_directory
-from flask_cors import CORS
 
 from config import config_by_name
 
@@ -32,7 +31,7 @@ def create_app(config_name):
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     # 注册CORS
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    # CORS(app, resources={r"/*": {"origins": "*"}})
 
     # 注册蓝图
     from app.api import api_bp
