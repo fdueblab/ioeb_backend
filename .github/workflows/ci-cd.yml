@@ -187,10 +187,9 @@ jobs:
             cd ~/ioeb-backend
             cp .env_prod .env
 
-            # 创建或更新.env文件
-            echo "DB_USERNAME=${{ secrets.PRODUCTION_DB_USERNAME }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}" >> .env
-            echo "SECRET_KEY=production_secret_key" >> .env
+            # 使用环境变量替换
+            sed -i "s/\${PRODUCTION_DB_USERNAME}/${{ secrets.PRODUCTION_DB_USERNAME }}/g" .env
+            sed -i "s/\${PRODUCTION_DB_PASSWORD}/${{ secrets.PRODUCTION_DB_PASSWORD }}/g" .env
 
             sudo docker-compose pull
             sudo docker-compose up -d
