@@ -3,9 +3,9 @@ from flask.cli import FlaskGroup
 
 from app import create_app
 from app.extensions import db
-from app.models import Role, RolePermission, User, UserToken
+from app.models import Role, RolePermission, User
 from app.utils.flask_utils import get_flask_env
-from mocks.user import MOCK_ROLES, MOCK_ROLES_PERMISSIONS, MOCK_USER_TOCKENS, MOCK_USERS
+from mocks.user import MOCK_ROLES, MOCK_ROLES_PERMISSIONS, MOCK_USERS
 
 env = get_flask_env()
 app = create_app(env)
@@ -39,9 +39,6 @@ def seed_db():
     # 添加示例角色权限
     for role_permission in MOCK_ROLES_PERMISSIONS:
         db.session.add(RolePermission(**role_permission))
-    # 添加示例用户令牌
-    for user_token in MOCK_USER_TOCKENS:
-        db.session.add(UserToken(**user_token))
     db.session.commit()
     click.echo("示例数据添加成功")
 

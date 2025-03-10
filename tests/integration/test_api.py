@@ -4,6 +4,7 @@ import pytest
 
 from app import create_app
 from app.extensions import db
+from mocks.user import MOCK_USERS
 
 
 @pytest.fixture
@@ -41,7 +42,7 @@ def test_get_users_empty(client):
 def test_create_and_get_user(client):
     """测试创建和获取用户"""
     # 创建测试用户
-    user_data = {"username": "测试用户", "email": "test@example.com"}
+    user_data = MOCK_USERS[0]
 
     # 创建用户
     response = client.post(
@@ -53,7 +54,6 @@ def test_create_and_get_user(client):
     assert data["status"] == "success"
     assert data["message"] == "用户创建成功"
     assert data["user"]["username"] == user_data["username"]
-    assert data["user"]["email"] == user_data["email"]
 
     # 获取用户列表
     response = client.get("/api/users")

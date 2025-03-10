@@ -87,7 +87,13 @@ MOCK_ROLES_PERMISSIONS = [
         "permission_name": "发布者",
         "data_access": 1,
     },
-    {"id": 2, "role_id": "user", "permission_id": "2", "permission_name": "用户", "data_access": 1},
+    {
+        "id": 2,
+        "role_id": "user",
+        "permission_id": "2",
+        "permission_name": "用户",
+        "data_access": 1,
+    },
     {
         "id": 3,
         "role_id": "admin",
@@ -95,10 +101,4 @@ MOCK_ROLES_PERMISSIONS = [
         "permission_name": "管理员",
         "data_access": 1,
     },
-]
-
-MOCK_USER_TOCKENS = [
-    {"user_id": "4291d7da9005377ec9aec4a71ea837d", "token": "4291d7da9005377ec9aec4a71ea838f"},
-    {"user_id": "4291d7da9005377ec9aec4a71ea837e", "token": "4291d7da9005377ec9aec4a71ea838f"},
-    {"user_id": "4291d7da9005377ec9aec4a71ea837f", "token": "4291d7da9005377ec9aec4a71ea838f"},
 ]
