@@ -8,14 +8,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - FLASK_APP=wsgi.py
-      - FLASK_DEBUG=${FLASK_DEBUG:-0}
-      - SECRET_KEY=${SECRET_KEY:-default_secret_key}
-      - DB_USERNAME=${DB_USERNAME:-default_username}
-      - DB_PASSWORD=${DB_PASSWORD:-default_password}
-      - DB_HOST=${DB_HOST:-sh-cynosdbmysql-grp-gfzuhdpw.sql.tencentcdb.com}
-      - DB_PORT=${DB_PORT:-22254}
-      - DB_NAME=${DB_NAME:-ioeb-dev}
+      - PYTHONUNBUFFERED=1
 
     volumes:
       - app_data:/app/uploads
