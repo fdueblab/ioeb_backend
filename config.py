@@ -46,13 +46,7 @@ class TestingConfig(Config):
     DEBUG = True
     TESTING = True
 
-    username = os.getenv("DB_USERNAME", "default_username")
-    password = os.getenv("DB_PASSWORD", "default_password")
-    host = os.getenv("DB_HOST", "sh-cynosdbmysql-grp-gfzuhdpw.sql.tencentcdb.com")
-    port = os.getenv("DB_PORT", "22254")
-    database = os.getenv("DB_NAME", "ioeb-dev")
-
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 class ProductionConfig(Config):
