@@ -1,12 +1,16 @@
 from flask import Blueprint
+from flask_cors import CORS
 from flask_restx import Api
 
 from app.api.namespaces.algorithm_service_ns import api as algorithm_service_ns
+from app.api.namespaces.auth_ns import api as auth_ns
 from app.api.namespaces.health_ns import api as health_ns
 from app.api.namespaces.user_ns import api as user_ns
 
 # 创建蓝图
 api_bp = Blueprint("api", __name__)
+
+CORS(api_bp, resources={r"/*": {"origins": "*"}})
 
 # 创建API
 api = Api(
@@ -23,3 +27,4 @@ api = Api(
 api.add_namespace(health_ns)
 api.add_namespace(user_ns)
 api.add_namespace(algorithm_service_ns)
+api.add_namespace(auth_ns, path="/auth")  # 添加认证命名空间
