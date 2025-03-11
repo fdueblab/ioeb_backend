@@ -11,6 +11,7 @@ from flask_restx import Namespace, Resource, fields
 
 from app.extensions import db
 from app.models.user.role import Role
+from app.models.user.role_permission import RolePermission
 from app.models.user.user import User
 from app.models.user.user_tokens import UserToken
 
@@ -26,6 +27,17 @@ login_model = api.model(
     },
 )
 
+# 添加权限模型
+permission_model = api.model(
+    "Permission",
+    {
+        "roleId": fields.String(description="角色ID"),
+        "permissionId": fields.String(description="权限ID"),
+        "permissionName": fields.String(description="权限名称"),
+        "dataAccess": fields.Raw(description="数据访问权限"),
+    },
+)
+
 # 定义角色模型
 role_model = api.model(
     "Role",
@@ -37,6 +49,10 @@ role_model = api.model(
         "creatorId": fields.String(description="创建者ID"),
         "createTime": fields.Integer(description="创建时间"),
         "deleted": fields.Integer(description="是否删除"),
+        # 以下两个字段在login的response中无要求，但在info的response中要求
+        # 为了保持response的一致性，在login的response中也添加这两个字段
+        "permissions": fields.List(fields.Nested(permission_model), description="权限详情"),
+        "permissionList": fields.List(fields.String, description="权限ID列表"),
     },
 )
 
@@ -60,6 +76,17 @@ user_response = api.model(
         "deleted": fields.Integer(description="是否删除"),
         "roleId": fields.String(description="角色ID"),
         "role": fields.Nested(role_model, description="角色信息"),
+    },
+)
+
+# 定义标准响应模型
+standard_response = api.model(
+    "StandardResponse",
+    {
+        "message": fields.String(description="响应消息"),
+        "timestamp": fields.Integer(description="时间戳"),
+        "result": fields.Nested(user_response, description="响应结果"),
+        "code": fields.Integer(description="响应代码"),
     },
 )
 
@@ -193,8 +220,21 @@ class UserInfo(Resource):
         # 查询用户角色
         role = Role.query.filter_by(id=user.role_id, deleted=0).first()
 
+        # 获取权限信息
+        role_permissions = RolePermission.query.filter(RolePermission.role_id == role.id).all()
+
+        if role:
+            role_dict = role.to_dict()
+            # 这里需要根据你的实际模型结构来获取权限信息
+            role_dict["permissions"] = [
+                p.to_dict() for p in role_permissions
+            ]  # 从数据库获取权限信息
+            role_dict["permissionList"] = [
+                p.data_access for p in role_permissions
+            ]  # 从数据库获取权限ID列表
+
         # 构建响应
-        response = {
+        user_data = {
             "id": user.id,
             "name": user.name,
             "username": user.username,
@@ -210,7 +250,14 @@ class UserInfo(Resource):
             "merchantCode": user.merchant_code or "",
             "deleted": user.deleted,
             "roleId": user.role_id or "",
-            "role": role.to_dict() if role else None,
+            "role": role_dict if role_dict else None,
+        }
+
+        response = {
+            "message": "",
+            "timestamp": int(datetime.datetime.now().timestamp() * 1000),  # 转换为毫秒
+            "result": user_data,
+            "code": 200,
         }
 
         return response, 200

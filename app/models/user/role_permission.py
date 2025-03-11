@@ -16,9 +16,7 @@ class RolePermission(db.Model):
     role_id = db.Column(db.String(36), db.ForeignKey("roles.id"), nullable=False, comment="角色ID")
     permission_id = db.Column(db.String(36), nullable=False, comment="权限ID")
     permission_name = db.Column(db.String(100), nullable=False, comment="权限名称")
-    data_access = db.Column(
-        db.Integer, nullable=False, default=0, comment="数据访问权限：0-无，1-有"
-    )
+    data_access = db.Column(db.String(36), nullable=True, default="", comment="访问权限")
 
     # # 添加关系属性（可选）
     # role = db.relationship('Role', backref=db.backref('role_permissions', lazy=True))
