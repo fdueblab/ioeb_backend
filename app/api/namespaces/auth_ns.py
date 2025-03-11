@@ -239,7 +239,6 @@ class UserInfo(Resource):
             "name": user.name,
             "username": user.username,
             "password": "",  # 不返回密码
-            "token": token,
             "avatar": user.avatar or "",
             "status": user.status,
             "telephone": user.telephone or "",
