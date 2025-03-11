@@ -85,20 +85,20 @@ MOCK_ROLES_PERMISSIONS = [
         "role_id": "publisher",
         "permission_id": "1",
         "permission_name": "发布者",
-        "data_access": "publisher",
+        "data_access": None,
     },
     {
         "id": 2,
         "role_id": "user",
         "permission_id": "2",
         "permission_name": "用户",
-        "data_access": "user",
+        "data_access": None,
     },
     {
         "id": 3,
         "role_id": "admin",
         "permission_id": "3",
         "permission_name": "管理员",
-        "data_access": "admin",
+        "data_access": None,
     },
 ]

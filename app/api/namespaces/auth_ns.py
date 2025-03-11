@@ -230,7 +230,7 @@ class UserInfo(Resource):
                 p.to_dict() for p in role_permissions
             ]  # 从数据库获取权限信息
             role_dict["permissionList"] = [
-                p.data_access for p in role_permissions
+                p.permission_id for p in role_permissions
             ]  # 从数据库获取权限ID列表
 
         # 构建响应
