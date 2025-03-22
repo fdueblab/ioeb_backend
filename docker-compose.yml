@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  app-network:
+    driver: bridge
+
 services:
   # Flask应用服务
   app:
@@ -45,7 +49,3 @@ volumes:
   app_data:
   app_db:
   redis_data:
-
-networks:
-  ioeb_app-network:
-    external: true  # 使用外部网络
