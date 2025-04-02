@@ -50,7 +50,7 @@ MOCK_SERVICE_SOURCES = [
 # 模拟服务API数据
 MOCK_SERVICE_APIS = [
     {
-        "id": "api-" + str(uuid.uuid4()),
+        "id": str(uuid.uuid4()),  # UUID正好是36个字符
         "service_id": SERVICE_ID,
         "name": "predict",
         "url": "/api/project1/predict",
@@ -61,7 +61,7 @@ MOCK_SERVICE_APIS = [
         "is_fake": False,
     },
     {
-        "id": "api-" + str(uuid.uuid4()),
+        "id": str(uuid.uuid4()),  # UUID正好是36个字符
         "service_id": SERVICE_ID,
         "name": "healthCheck",
         "url": "/api/project1/health",
