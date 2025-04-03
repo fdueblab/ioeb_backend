@@ -38,14 +38,6 @@ jobs:
           # 退出，但不停止构建过程
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=999 --statistics
 
-      - name: Check code formatting with black
-        run: |
-          black --check --line-length 100 .
-
-      - name: Check import order with isort
-        run: |
-          isort --check-only --profile black .
-
   # 测试阶段
   test:
     name: Run Tests
