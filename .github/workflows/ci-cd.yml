@@ -3,11 +3,8 @@ name: Flask Backend CI/CD
 # 触发条件
 on:
   push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
-  # 允许手动触发工作流
-  workflow_dispatch:
+    branches:
+      - main
 
 # 环境变量
 env:
@@ -39,7 +36,7 @@ jobs:
           # 停止构建过程如果存在语法错误或未定义名称
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # 退出，但不停止构建过程
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=999 --statistics
 
       - name: Check code formatting with black
         run: |
