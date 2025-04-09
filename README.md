@@ -14,17 +14,34 @@
 │   │   │   ├── __init__.py
 │   │   │   ├── health_ns.py        # 健康检查API
 │   │   │   ├── user_ns.py          # 用户管理API
+│   │   │   ├── service_ns.py       # 微服务管理API
 │   │   │   └── algorithm_service_ns.py  # 算法微服务化API
 │   │   └── routes.py       # API路由定义(已迁移到命名空间)
 │   ├── services            # 服务层 - 处理业务逻辑
 │   │   ├── __init__.py     # 服务层初始化
 │   │   ├── user_service.py # 用户服务
+│   │   ├── service_service.py # 微服务管理服务
 │   │   └── algorithm_service.py # 算法微服务生成服务
 │   ├── repositories        # 数据访问层 - 处理数据持久化
 │   │   ├── __init__.py     # 数据访问层初始化
 │   │   ├── base_repository.py # 基础数据访问仓库
-│   │   └── user_repository.py  # 用户数据访问仓库
-│   ├── models.py           # 数据模型定义
+│   │   ├── user_repository.py  # 用户数据访问仓库
+│   │   └── service_repository.py  # 微服务数据访问仓库
+│   ├── models              # 数据模型定义
+│   │   ├── __init__.py
+│   │   ├── user            # 用户相关模型
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   │   ├── role.py
+│   │   │   ├── role_permission.py
+│   │   │   └── user_tokens.py
+│   │   └── service         # 微服务相关模型
+│   │       ├── __init__.py
+│   │       ├── service.py
+│   │       ├── service_norm.py
+│   │       ├── service_source.py
+│   │       ├── service_api.py
+│   │       └── service_api_parameter.py
 │   ├── extensions.py       # 扩展模块
 │   └── utils               # 工具函数模块
 │       ├── __init__.py
@@ -74,6 +91,7 @@
 - CORS跨域支持
 - 环境配置管理
 - CLI管理命令
+- 微服务管理功能（增删改查、搜索、筛选）
 - 算法代码微服务化功能
 - 代码规范自动检查
 - 远程服务通信模块
@@ -103,6 +121,7 @@ API层位于`app/api/namespaces`目录，主要负责：
 服务层位于`app/services`目录，包含所有业务逻辑处理代码。主要服务包括：
 
 - **用户服务（UserService）**：处理用户注册、认证、查询等
+- **微服务管理服务（ServiceService）**：处理微服务的增删改查、搜索、筛选等
 - **算法微服务生成服务（AlgorithmService）**：处理算法代码的微服务化逻辑
 
 ### 数据访问层
@@ -111,6 +130,7 @@ API层位于`app/api/namespaces`目录，主要负责：
 
 - **基础仓库（BaseRepository）**：提供通用的CRUD操作
 - **用户仓库（UserRepository）**：处理用户表的特定数据访问操作
+- **微服务仓库（ServiceRepository）**：处理微服务相关表的数据访问操作
 
 数据访问层通过泛型和依赖注入的方式设计，便于扩展和测试。
 
@@ -121,6 +141,21 @@ API层位于`app/api/namespaces`目录，主要负责：
 - **可替换性**：底层实现可以替换而不影响上层代码
 - **可维护性**：各层职责明确，便于维护和扩展
 - **代码复用**：通用逻辑可以在各层之间复用
+
+## 数据模型设计
+
+### 用户相关模型
+- **User**：用户基本信息
+- **Role**：角色信息
+- **RolePermission**：角色权限关系
+- **UserToken**：用户令牌信息
+
+### 微服务相关模型
+- **Service**：微服务基本信息
+- **ServiceNorm**：服务规范评分
+- **ServiceSource**：服务来源信息
+- **ServiceApi**：服务API信息
+- **ServiceApiParameter**：API参数信息
 
 ## 快速开始
 
@@ -182,6 +217,15 @@ http://localhost:5000/api/docs
 - **POST /api/users**: 创建新用户
 - **GET /api/users/{id}**: 获取指定用户
 
+### 微服务管理API
+- **GET /api/services**: 获取所有微服务
+- **POST /api/services**: 创建新微服务
+- **GET /api/services/{id}**: 获取指定微服务
+- **PUT /api/services/{id}**: 更新指定微服务
+- **DELETE /api/services/{id}**: 删除指定微服务
+- **GET /api/services/search**: 根据关键词搜索微服务
+- **GET /api/services/filter**: 按条件筛选微服务
+
 ### 算法微服务化API
 - **POST /api/algorithm_service**: 将算法代码封装为微服务
   - 请求: `multipart/form-data` 格式，包含 `file` 字段（算法代码ZIP文件）
@@ -198,6 +242,22 @@ http://localhost:5000/api/docs
 7. 将生成的文件写入当前目录
 8. 重新打包为ZIP文件
 9. 返回生成的微服务项目ZIP文件给前端
+
+## 微服务管理功能
+
+微服务管理功能提供了对微服务的全生命周期管理，包括：
+
+1. **微服务创建**：创建新的微服务，包括基本信息、规范评分、来源信息和API定义
+2. **微服务查询**：按ID查询、关键词搜索或条件筛选微服务
+3. **微服务更新**：更新微服务的各项信息，包括关联数据
+4. **微服务删除**：软删除微服务（将deleted字段标记为1）
+
+微服务相关数据表包括：
+- `services`: 存储微服务基本信息
+- `service_norms`: 存储微服务规范评分
+- `service_sources`: 存储微服务来源信息
+- `service_apis`: 存储微服务API信息
+- `service_api_parameters`: 存储API参数信息
 
 ## 数据库操作
 
