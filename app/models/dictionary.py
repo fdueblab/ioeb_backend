@@ -12,7 +12,7 @@ class Dictionary(db.Model):
     __tablename__ = "dictionaries"
 
     # 主键和基本信息
-    id = db.Column(db.String(36), primary_key=True, comment="字典ID")
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment="字典ID")
     category = db.Column(db.String(50), nullable=False, comment="字典类别")
     code = db.Column(db.String(50), nullable=False, comment="字典编码")
     text = db.Column(db.String(100), nullable=False, comment="字典文本")
