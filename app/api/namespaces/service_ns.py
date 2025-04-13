@@ -15,7 +15,7 @@ api = Namespace("services", description="微服务管理API")
 norm_model = api.model(
     "Norm",
     {
-        "key": fields.Integer(description="规范类型"),
+        "key": fields.String(description="规范类型"),
         "score": fields.Integer(description="评分")
     }
 )
@@ -68,16 +68,16 @@ service_model = api.model(
     {
         "id": fields.String(description="服务ID"),
         "name": fields.String(required=True, description="服务名称"),
-        "attribute": fields.Integer(description="服务属性"),
-        "type": fields.Integer(description="服务类型"),
-        "domain": fields.Integer(description="领域"),
-        "industry": fields.Integer(description="行业"),
-        "scenario": fields.Integer(description="场景"),
-        "technology": fields.Integer(description="技术"),
+        "attribute": fields.String(description="服务属性"),
+        "type": fields.String(description="服务类型"),
+        "domain": fields.String(description="领域"),
+        "industry": fields.String(description="行业"),
+        "scenario": fields.String(description="场景"),
+        "technology": fields.String(description="技术"),
         "network": fields.String(description="网络类型"),
         "port": fields.String(description="端口映射"),
         "volume": fields.String(description="数据卷映射"),
-        "status": fields.Integer(description="服务状态"),
+        "status": fields.String(description="服务状态"),
         "number": fields.String(description="服务编号"),
         "deleted": fields.Integer(description="是否删除"),
         "createTime": fields.Integer(description="创建时间"),
@@ -93,16 +93,16 @@ service_create_model = api.model(
     "ServiceCreate",
     {
         "name": fields.String(required=True, description="服务名称"),
-        "attribute": fields.Integer(description="服务属性"),
-        "type": fields.Integer(description="服务类型"),
-        "domain": fields.Integer(description="领域"),
-        "industry": fields.Integer(description="行业"),
-        "scenario": fields.Integer(description="场景"),
-        "technology": fields.Integer(description="技术"),
+        "attribute": fields.String(description="服务属性"),
+        "type": fields.String(description="服务类型"),
+        "domain": fields.String(description="领域"),
+        "industry": fields.String(description="行业"),
+        "scenario": fields.String(description="场景"),
+        "technology": fields.String(description="技术"),
         "network": fields.String(description="网络类型"),
         "port": fields.String(description="端口映射"),
         "volume": fields.String(description="数据卷映射"),
-        "status": fields.Integer(description="服务状态"),
+        "status": fields.String(description="服务状态"),
         "number": fields.String(description="服务编号"),
         "norm": fields.List(fields.Nested(norm_model), description="规范评分"),
         "source": fields.Nested(source_model, description="来源信息"),
@@ -270,23 +270,24 @@ class ServiceFilter(Resource):
         筛选微服务接口，可以组合多个条件进行筛选。
         
         可用筛选参数及其含义：
-        - attribute: 服务属性 (0-普通服务, 1-智能服务, 2-金融服务)
-        - type: 服务类型 (0-数据处理, 1-模型训练, 2-推理服务)
-        - domain: 领域 (0-金融, 1-医疗, 2-教育, 3-制造)
-        - industry: 行业 (0-银行, 1-保险, 2-证券, 3-其他)
-        - scenario: 场景 (0-风控, 1-营销, 2-客服, 3-运维, 4-合规)
-        - technology: 技术 (0-机器学习, 1-深度学习, 2-知识图谱, 3-NLP, 4-图神经网络)
-        - status: 服务状态 (0-未部署, 1-部署中, 2-运行中, 3-已停止, 4-异常)
+        - attribute: 服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)
+        - type: 服务类型 (atomic-原子微服务, meta-元应用服务)
+        - domain: 领域 (对应各领域前缀，如aml, aircraft, health, agriculture, evtol, ecommerce, home_ai)
+        - industry: 行业 (取决于domain，查看对应domain的industry字典)
+        - scenario: 场景 (取决于domain，查看对应domain的scenario字典)
+        - technology: 技术 (取决于domain，查看对应domain的technology字典)
+        - status: 服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, success-运行中(已通过测评), processing-部署中)
         
-        示例请求：GET /api/services/filter?attribute=1&industry=0&status=4
+        示例请求：GET /api/services/filter?attribute=non_intelligent&domain=aml&status=success
+        注意：对于领域相关参数，同时支持传入数字或字符串代码
     """)
-    @api.param("attribute", "服务属性 (0-普通服务, 1-智能服务, 2-金融服务)", type=int)
-    @api.param("type", "服务类型 (0-数据处理, 1-模型训练, 2-推理服务)", type=int)
-    @api.param("domain", "领域 (0-金融, 1-医疗, 2-教育, 3-制造)", type=int)
-    @api.param("industry", "行业 (0-银行, 1-保险, 2-证券, 3-其他)", type=int)
-    @api.param("scenario", "场景 (0-风控, 1-营销, 2-客服, 3-运维, 4-合规)", type=int)
-    @api.param("technology", "技术 (0-机器学习, 1-深度学习, 2-知识图谱, 3-NLP, 4-图神经网络)", type=int)
-    @api.param("status", "服务状态 (0-未部署, 1-部署中, 2-运行中, 3-已停止, 4-异常)", type=int)
+    @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)")
+    @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)")
+    @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, home_ai-家庭陪伴AI应用)")
+    @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)")
+    @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)")
+    @api.param("technology", "技术 (取决于domain，查看对应domain的technology字典)")
+    @api.param("status", "服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, success-运行中(已通过测评), processing-部署中)")
     @api.marshal_with(services_response, code=200)
     def get(self):
         """筛选微服务"""
@@ -296,10 +297,8 @@ class ServiceFilter(Resource):
         for key in valid_filters:
             value = request.args.get(key)
             if value is not None:
-                try:
-                    filters[key] = int(value)
-                except ValueError:
-                    pass
+                # 数字和字符串都支持
+                filters[key] = str(value)
         
         try:
             services = service_service.filter_services(**filters)

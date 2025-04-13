@@ -16,12 +16,12 @@ class Service(db.Model):
     # 主键和基本信息
     id = db.Column(db.String(36), primary_key=True, comment="服务ID")
     name = db.Column(db.String(100), nullable=False, comment="服务名称")
-    attribute = db.Column(db.Integer, nullable=False, comment="服务属性")
-    type = db.Column(db.Integer, nullable=False, comment="服务类型")
-    domain = db.Column(db.Integer, nullable=False, comment="领域")
-    industry = db.Column(db.Integer, nullable=False, comment="行业")
-    scenario = db.Column(db.Integer, nullable=False, comment="场景")
-    technology = db.Column(db.Integer, nullable=False, comment="技术")
+    attribute = db.Column(db.String(50), nullable=False, comment="服务属性")
+    type = db.Column(db.String(50), nullable=False, comment="服务类型")
+    domain = db.Column(db.String(50), nullable=False, comment="领域")
+    industry = db.Column(db.String(50), nullable=False, comment="行业")
+    scenario = db.Column(db.String(50), nullable=False, comment="场景")
+    technology = db.Column(db.String(50), nullable=False, comment="技术")
 
     # 部署信息
     network = db.Column(db.String(50), nullable=False, comment="网络类型")
@@ -29,7 +29,7 @@ class Service(db.Model):
     volume = db.Column(db.String(200), nullable=False, comment="数据卷映射")
 
     # 状态信息
-    status = db.Column(db.Integer, nullable=False, comment="服务状态")
+    status = db.Column(db.String(50), nullable=False, comment="服务状态")
     number = db.Column(db.String(50), nullable=False, comment="服务编号")
     deleted = db.Column(
         db.Integer, nullable=False, default=0, comment="是否删除：0-未删除，1-已删除"
@@ -57,15 +57,31 @@ class Service(db.Model):
 
     def to_dict(self):
         """将模型转换为字典"""
+        # 尝试将字段转换为数字
+        try:
+            industry = int(self.industry)
+        except (ValueError, TypeError):
+            industry = self.industry
+            
+        try:
+            scenario = int(self.scenario)
+        except (ValueError, TypeError):
+            scenario = self.scenario
+            
+        try:
+            technology = int(self.technology)
+        except (ValueError, TypeError):
+            technology = self.technology
+        
         return {
             "id": self.id,
             "name": self.name,
             "attribute": self.attribute,
             "type": self.type,
             "domain": self.domain,
-            "industry": self.industry,
-            "scenario": self.scenario,
-            "technology": self.technology,
+            "industry": industry,
+            "scenario": scenario,
+            "technology": technology,
             "network": self.network,
             "port": self.port,
             "volume": self.volume,

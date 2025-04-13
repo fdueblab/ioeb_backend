@@ -57,7 +57,7 @@ class ServiceService:
                 raise
             raise ServiceServiceError(f"获取微服务失败: {str(e)}")
 
-    def get_services_by_attribute(self, attribute: int) -> List[Dict]:
+    def get_services_by_attribute(self, attribute: str) -> List[Dict]:
         """
         根据属性获取微服务列表
 
