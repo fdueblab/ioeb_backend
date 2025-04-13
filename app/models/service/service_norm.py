@@ -13,12 +13,18 @@ class ServiceNorm(db.Model):
 
     id = db.Column(db.String(36), primary_key=True, comment="规范ID")
     service_id = db.Column(db.String(36), db.ForeignKey("services.id"), nullable=False, comment="关联的服务ID")
-    key = db.Column(db.Integer, nullable=False, comment="规范类型")
+    key = db.Column(db.String(50), nullable=False, comment="规范类型")
     score = db.Column(db.Integer, nullable=False, comment="评分")
 
     def to_dict(self):
         """将模型转换为字典"""
+        # 尝试将key转换为数字
+        try:
+            key_value = int(self.key)
+        except ValueError:
+            key_value = self.key
+            
         return {
-            "key": self.key,
+            "key": key_value,
             "score": self.score
         } 

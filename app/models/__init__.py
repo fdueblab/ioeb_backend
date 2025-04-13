@@ -14,10 +14,11 @@ from app.models.service.service_norm import ServiceNorm
 from app.models.service.service_source import ServiceSource
 from app.models.service.service_api import ServiceApi
 from app.models.service.service_api_parameter import ServiceApiParameter
+from app.models.dictionary import Dictionary
 
 
 # 添加其他模型的导入
 # from app.models.other_model import OtherModel
 
 # 导出所有模型
-__all__ = ["User", "Role", "RolePermission", "UserToken", "Service", "ServiceNorm", "ServiceSource", "ServiceApi", "ServiceApiParameter"]
+__all__ = ["User", "Role", "RolePermission", "UserToken", "Service", "ServiceNorm", "ServiceSource", "ServiceApi", "ServiceApiParameter", "Dictionary"]
