@@ -2,6 +2,52 @@
 字典示例数据
 """
 
+# 领域分类字典
+MOCK_DOMAIN_DICTIONARIES = [
+    {
+        "category": "domain",
+        "code": "0",
+        "text": "跨境支付AI监测",
+        "sort": 1
+    },
+    {
+        "category": "domain",
+        "code": "1",
+        "text": "无人飞机AI监控",
+        "sort": 2
+    },
+    {
+        "category": "domain",
+        "code": "2",
+        "text": "乡村医疗AI服务",
+        "sort": 3
+    },
+    {
+        "category": "domain",
+        "code": "3",
+        "text": "数字农业AI服务",
+        "sort": 4
+    },
+    {
+        "category": "domain",
+        "code": "4",
+        "text": "低空飞行AI应用",
+        "sort": 5
+    },
+    {
+        "category": "domain",
+        "code": "5",
+        "text": "跨境电商AI应用",
+        "sort": 6
+    },
+    {
+        "category": "domain",
+        "code": "6",
+        "text": "家庭陪伴AI应用",
+        "sort": 7
+    }
+]
+
 # 通用字典数据
 MOCK_STATUS_DICTIONARIES = [
     {
@@ -899,6 +945,7 @@ MOCK_DICTIONARIES = (
     + MOCK_SERVICE_TYPE_DICTIONARIES
     + MOCK_PERFORMANCE_METRIC_DICTIONARIES
     + MOCK_ATTRIBUTE_DICTIONARIES
+    + MOCK_DOMAIN_DICTIONARIES
     + MOCK_AML_INDUSTRY_DICTIONARIES
     + MOCK_AML_SCENARIO_DICTIONARIES
     + MOCK_AML_TECHNOLOGY_DICTIONARIES
