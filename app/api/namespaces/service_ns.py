@@ -272,7 +272,7 @@ class ServiceFilter(Resource):
         可用筛选参数及其含义：
         - attribute: 服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)
         - type: 服务类型 (atomic-原子微服务, meta-元应用服务)
-        - domain: 领域 (对应各领域前缀，如aml, aircraft, health, agriculture, evtol, ecommerce, home_ai)
+        - domain: 领域 (对应各领域前缀，如aml, aircraft, health, agriculture, evtol, ecommerce, homeAI)
         - industry: 行业 (取决于domain，查看对应domain的industry字典)
         - scenario: 场景 (取决于domain，查看对应domain的scenario字典)
         - technology: 技术 (取决于domain，查看对应domain的technology字典)
@@ -283,7 +283,7 @@ class ServiceFilter(Resource):
     """)
     @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)")
     @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)")
-    @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, home_ai-家庭陪伴AI应用)")
+    @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)")
     @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)")
     @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)")
     @api.param("technology", "技术 (取决于domain，查看对应domain的technology字典)")
