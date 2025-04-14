@@ -6,43 +6,43 @@
 MOCK_DOMAIN_DICTIONARIES = [
     {
         "category": "domain",
-        "code": "0",
+        "code": "aml",
         "text": "跨境支付AI监测",
         "sort": 1
     },
     {
         "category": "domain",
-        "code": "1",
+        "code": "aircraft",
         "text": "无人飞机AI监控",
         "sort": 2
     },
     {
         "category": "domain",
-        "code": "2",
+        "code": "health",
         "text": "乡村医疗AI服务",
         "sort": 3
     },
     {
         "category": "domain",
-        "code": "3",
+        "code": "agriculture",
         "text": "数字农业AI服务",
         "sort": 4
     },
     {
         "category": "domain",
-        "code": "4",
+        "code": "evtol",
         "text": "低空飞行AI应用",
         "sort": 5
     },
     {
         "category": "domain",
-        "code": "5",
+        "code": "ecommerce",
         "text": "跨境电商AI应用",
         "sort": 6
     },
     {
         "category": "domain",
-        "code": "6",
+        "code": "homeAI",
         "text": "家庭陪伴AI应用",
         "sort": 7
     }
@@ -830,105 +830,105 @@ MOCK_ECOMMERCE_TECHNOLOGY_DICTIONARIES = [
 ]
 
 # 家庭陪伴AI应用领域
-MOCK_HOME_AI_INDUSTRY_DICTIONARIES = [
+MOCK_HOMEAI_INDUSTRY_DICTIONARIES = [
     {
-        "category": "home_ai_industry",
+        "category": "homeAI_industry",
         "code": "0",
         "text": "智能家居",
         "sort": 1
     },
     {
-        "category": "home_ai_industry",
+        "category": "homeAI_industry",
         "code": "1",
         "text": "健康管理",
         "sort": 2
     },
     {
-        "category": "home_ai_industry",
+        "category": "homeAI_industry",
         "code": "2",
         "text": "安防与应急",
         "sort": 3
     },
     {
-        "category": "home_ai_industry",
+        "category": "homeAI_industry",
         "code": "3",
         "text": "情感陪伴",
         "sort": 4
     },
     {
-        "category": "home_ai_industry",
+        "category": "homeAI_industry",
         "code": "4",
         "text": "家务处理",
         "sort": 5
     }
 ]
 
-MOCK_HOME_AI_SCENARIO_DICTIONARIES = [
+MOCK_HOMEAI_SCENARIO_DICTIONARIES = [
     {
-        "category": "home_ai_scenario",
+        "category": "homeAI_scenario",
         "code": "0",
         "text": "家务处理场景",
         "sort": 1
     },
     {
-        "category": "home_ai_scenario",
+        "category": "homeAI_scenario",
         "code": "1",
         "text": "疾病诊断场景",
         "sort": 2
     },
     {
-        "category": "home_ai_scenario",
+        "category": "homeAI_scenario",
         "code": "2",
         "text": "应急联络场景",
         "sort": 3
     },
     {
-        "category": "home_ai_scenario",
+        "category": "homeAI_scenario",
         "code": "3",
         "text": "来客接待场景",
         "sort": 4
     },
     {
-        "category": "home_ai_scenario",
+        "category": "homeAI_scenario",
         "code": "4",
         "text": "情感陪伴场景",
         "sort": 5
     }
 ]
 
-MOCK_HOME_AI_TECHNOLOGY_DICTIONARIES = [
+MOCK_HOMEAI_TECHNOLOGY_DICTIONARIES = [
     {
-        "category": "home_ai_technology",
+        "category": "homeAI_technology",
         "code": "0",
         "text": "计算机视觉",
         "sort": 1
     },
     {
-        "category": "home_ai_technology",
+        "category": "homeAI_technology",
         "code": "1",
         "text": "自然语言处理",
         "sort": 2
     },
     {
-        "category": "home_ai_technology",
+        "category": "homeAI_technology",
         "code": "2",
         "text": "强化学习",
         "sort": 3
     },
     {
-        "category": "home_ai_technology",
+        "category": "homeAI_technology",
         "code": "3",
         "text": "多传感器融合",
         "sort": 4
     },
     {
-        "category": "home_ai_technology",
+        "category": "homeAI_technology",
         "code": "4",
         "text": "具身智能",
         "sort": 5
     },
     {
-        "category": "home_ai_technology",
+        "category": "homeAI_technology",
         "code": "5",
         "text": "多模态技术",
         "sort": 6
@@ -964,7 +964,7 @@ MOCK_DICTIONARIES = (
     + MOCK_ECOMMERCE_INDUSTRY_DICTIONARIES
     + MOCK_ECOMMERCE_SCENARIO_DICTIONARIES
     + MOCK_ECOMMERCE_TECHNOLOGY_DICTIONARIES
-    + MOCK_HOME_AI_INDUSTRY_DICTIONARIES
-    + MOCK_HOME_AI_SCENARIO_DICTIONARIES
-    + MOCK_HOME_AI_TECHNOLOGY_DICTIONARIES
+    + MOCK_HOMEAI_INDUSTRY_DICTIONARIES
+    + MOCK_HOMEAI_SCENARIO_DICTIONARIES
+    + MOCK_HOMEAI_TECHNOLOGY_DICTIONARIES
 )

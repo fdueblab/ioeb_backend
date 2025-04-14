@@ -18,13 +18,7 @@ class ServiceNorm(db.Model):
 
     def to_dict(self):
         """将模型转换为字典"""
-        # 尝试将key转换为数字
-        try:
-            key_value = int(self.key)
-        except ValueError:
-            key_value = self.key
-            
         return {
-            "key": key_value,
+            "key": self.key,
             "score": self.score
         } 

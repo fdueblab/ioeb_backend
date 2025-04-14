@@ -6,15 +6,48 @@ import uuid
 import re
 import datetime
 
-# 领域类型常量
-DOMAINS = {
-    'aml': 'AML',
-    'aircraft': '无人机',
-    'health': '医疗健康',
-    'agriculture': '农业数智',
-    'evtol': 'eVTOL',
-    'ecommerce': '跨境电商',
-    'homeAI': '家庭机器人'
+
+# 域名数字映射
+DOMAIN_MAP = {
+    0: "aml",
+    1: "aircraft", 
+    2: "health",
+    3: "agriculture",
+    4: "evtol",
+    5: "ecommerce",
+    6: "homeAI"
+}
+
+# 属性类型映射
+ATTRIBUTE_MAP = {
+    0: "non_intelligent",
+    1: "open_source",
+    2: "paid",
+    3: "custom"
+}
+
+# 服务类型映射
+TYPE_MAP = {
+    0: "atomic",
+    1: "meta"
+}
+
+# 状态映射
+STATUS_MAP = {
+    0: "error",
+    1: "warning",
+    2: "default",
+    3: "error",
+    4: "success",
+    5: "processing"
+}
+
+# 规范类型映射
+NORM_KEY_MAP = {
+    0: "security",
+    1: "robustness",
+    2: "privacy",
+    3: "trustworthiness"
 }
 
 # API_IDS 存储，用于后续生成相同ID
@@ -63,21 +96,52 @@ def transform_service(service, domain):
     # 创建时间戳（毫秒级）
     create_time = int(datetime.datetime.now().timestamp() * 1000)
     
+    # 将number转换为整数类型，默认为0
+    number = 0
+    if "number" in service:
+        try:
+            number = int(service.get("number"))
+        except (ValueError, TypeError):
+            # 如果转换失败，使用默认值0
+            number = 0
+    
+    # 处理属性字段，将数字映射为字符串代码
+    attribute = service.get("attribute", 0)
+    if isinstance(attribute, int) or (isinstance(attribute, str) and attribute.isdigit()):
+        attribute = ATTRIBUTE_MAP.get(int(attribute), "non_intelligent")
+    
+    # 处理类型字段，将数字映射为字符串代码
+    type_value = service.get("type", 0)
+    if isinstance(type_value, int) or (isinstance(type_value, str) and type_value.isdigit()):
+        type_value = TYPE_MAP.get(int(type_value), "atomic")
+    
+    # 处理域名字段，将数字映射为字符串代码
+    domain_value = service.get("domain", 0)
+    if isinstance(domain_value, int) or (isinstance(domain_value, str) and domain_value.isdigit()):
+        domain_int = int(domain_value)
+        # 根据领域数字映射到对应的字符串代码
+        domain_value = DOMAIN_MAP.get(domain_int, "aml")
+    
+    # 处理状态字段，将数字映射为字符串代码
+    status = service.get("status", 2)  # 默认状态为default(2)
+    if isinstance(status, int) or (isinstance(status, str) and status.isdigit()):
+        status = STATUS_MAP.get(int(status), "default")
+    
     # 转换服务数据
     transformed = {
         "id": service_id,
         "name": service.get("name", ""),
-        "attribute": service.get("attribute", 0),
-        "type": service.get("type", 0),
-        "domain": service.get("domain", 0),
-        "industry": service.get("industry", 0),
-        "scenario": service.get("scenario", 0),
-        "technology": service.get("technology", 0),
+        "attribute": attribute,
+        "type": type_value,
+        "domain": domain_value,
+        "industry": str(service.get("industry", "")),
+        "scenario": str(service.get("scenario", "")),
+        "technology": str(service.get("technology", "")),
         "network": service.get("netWork", "bridge"),
         "port": service.get("port", ""),
         "volume": service.get("volume", ""),
-        "status": service.get("status", 0),
-        "number": service.get("number", "0"),
+        "status": status,
+        "number": number,
         "deleted": 0,
         "create_time": create_time,
         "creator_id": "",
@@ -87,10 +151,17 @@ def transform_service(service, domain):
 
 def transform_norm(norm, service_id):
     """将JS格式的规范数据转换为Python格式"""
+    # 获取key的值
+    key_value = norm.get("key", 0)
+    # 如果是数字类型，尝试转换为字符串代码
+    if isinstance(key_value, int) or (isinstance(key_value, str) and key_value.isdigit()):
+        key_num = int(key_value)
+        key_value = NORM_KEY_MAP.get(key_num, "security")  # 如果找不到映射，默认为security
+    
     return {
         "id": generate_uuid(),
         "service_id": service_id,
-        "key": norm.get("key", 0),
+        "key": key_value,
         "score": norm.get("score", 5),
     }
 
@@ -113,11 +184,11 @@ def transform_api(api, service_id):
     """将JS格式的API数据转换为Python格式"""
     api_name = api.get("name", "")
     
-    # 对于已存在的API名称，使用相同的ID
-    if api_name in API_IDS:
-        api_id = API_IDS[api_name]
-    else:
-        api_id = generate_uuid()
+    # 生成唯一的API ID - 每个服务的每个API都需要唯一ID
+    api_id = generate_uuid()
+    
+    # 如果API名称在API_IDS字典中不存在，将其添加进去（用于API_IDS字典导出）
+    if api_name not in API_IDS:
         API_IDS[api_name] = api_id
     
     # 获取API响应
