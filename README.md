@@ -211,25 +211,7 @@ http://localhost:5000/api/docs
 
 ## API端点
 
-### 基础API
-- **GET /api/health**: 健康检查
-- **GET /api/users**: 获取所有用户
-- **POST /api/users**: 创建新用户
-- **GET /api/users/{id}**: 获取指定用户
-
-### 微服务管理API
-- **GET /api/services**: 获取所有微服务
-- **POST /api/services**: 创建新微服务
-- **GET /api/services/{id}**: 获取指定微服务
-- **PUT /api/services/{id}**: 更新指定微服务
-- **DELETE /api/services/{id}**: 删除指定微服务
-- **GET /api/services/search**: 根据关键词搜索微服务
-- **GET /api/services/filter**: 按条件筛选微服务
-
-### 算法微服务化API
-- **POST /api/algorithm_service**: 将算法代码封装为微服务
-  - 请求: `multipart/form-data` 格式，包含 `file` 字段（算法代码ZIP文件）
-  - 响应: 生成的微服务项目ZIP文件或错误信息（包括代码规范检查报告）
+目前线上版本的API可通过访问[在线版本的Swagger文档](http://fdueblab.cn:5000/api/docs)查看
 
 ## 算法微服务化流程
 
