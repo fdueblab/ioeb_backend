@@ -78,7 +78,7 @@ service_model = api.model(
         "port": fields.String(description="端口映射"),
         "volume": fields.String(description="数据卷映射"),
         "status": fields.String(description="服务状态"),
-        "number": fields.String(description="服务编号"),
+        "number": fields.Integer(description="服务调用次数"),
         "deleted": fields.Integer(description="是否删除"),
         "createTime": fields.Integer(description="创建时间"),
         "creatorId": fields.String(description="创建者ID"),
@@ -103,7 +103,7 @@ service_create_model = api.model(
         "port": fields.String(description="端口映射"),
         "volume": fields.String(description="数据卷映射"),
         "status": fields.String(description="服务状态"),
-        "number": fields.String(description="服务编号"),
+        "number": fields.Integer(description="服务调用次数", default=0),
         "norm": fields.List(fields.Nested(norm_model), description="规范评分"),
         "source": fields.Nested(source_model, description="来源信息"),
         "apiList": fields.List(fields.Nested(api_model), description="API列表")
@@ -272,14 +272,15 @@ class ServiceFilter(Resource):
         可用筛选参数及其含义：
         - attribute: 服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)
         - type: 服务类型 (atomic-原子微服务, meta-元应用服务)
-        - domain: 领域 (对应各领域前缀，如aml, aircraft, health, agriculture, evtol, ecommerce, homeAI)
+        - domain: 领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, 
+                      evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)
         - industry: 行业 (取决于domain，查看对应domain的industry字典)
         - scenario: 场景 (取决于domain，查看对应domain的scenario字典)
         - technology: 技术 (取决于domain，查看对应domain的technology字典)
-        - status: 服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, success-运行中(已通过测评), processing-部署中)
+        - status: 服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, 
+                         success-运行中(已通过测评), processing-部署中)
         
-        示例请求：GET /api/services/filter?attribute=non_intelligent&domain=aml&status=success
-        注意：对于领域相关参数，同时支持传入数字或字符串代码
+        示例请求：GET /api/services/filter?attribute=open_source&domain=aml&status=success
     """)
     @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)")
     @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)")
@@ -297,8 +298,7 @@ class ServiceFilter(Resource):
         for key in valid_filters:
             value = request.args.get(key)
             if value is not None:
-                # 数字和字符串都支持
-                filters[key] = str(value)
+                filters[key] = value
         
         try:
             services = service_service.filter_services(**filters)

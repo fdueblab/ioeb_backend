@@ -6,43 +6,43 @@
 MOCK_DOMAIN_DICTIONARIES = [
     {
         "category": "domain",
-        "code": "0",
+        "code": "aml",
         "text": "跨境支付AI监测",
         "sort": 1
     },
     {
         "category": "domain",
-        "code": "1",
+        "code": "aircraft",
         "text": "无人飞机AI监控",
         "sort": 2
     },
     {
         "category": "domain",
-        "code": "2",
+        "code": "health",
         "text": "乡村医疗AI服务",
         "sort": 3
     },
     {
         "category": "domain",
-        "code": "3",
+        "code": "agriculture",
         "text": "数字农业AI服务",
         "sort": 4
     },
     {
         "category": "domain",
-        "code": "4",
+        "code": "evtol",
         "text": "低空飞行AI应用",
         "sort": 5
     },
     {
         "category": "domain",
-        "code": "5",
+        "code": "ecommerce",
         "text": "跨境电商AI应用",
         "sort": 6
     },
     {
         "category": "domain",
-        "code": "6",
+        "code": "homeAI",
         "text": "家庭陪伴AI应用",
         "sort": 7
     }

@@ -152,17 +152,17 @@ class ServiceRepository:
             service = Service(
                 id=service_id,
                 name=service_data.get("name"),
-                attribute=str(service_data.get("attribute", "non_intelligent")),
-                type=str(service_data.get("type", "atomic")),
-                domain=str(service_data.get("domain", "")),
-                industry=str(service_data.get("industry", "")),
-                scenario=str(service_data.get("scenario", "")),
-                technology=str(service_data.get("technology", "")),
-                network=service_data.get("network", "bridge"),
+                attribute=service_data.get("attribute", "non_intelligent"),
+                type=service_data.get("type", "atomic"),
+                domain=service_data.get("domain", "aml"),
+                industry=service_data.get("industry", ""),
+                scenario=service_data.get("scenario", ""),
+                technology=service_data.get("technology", ""),
+                network=service_data.get("network", ""),
                 port=service_data.get("port", ""),
                 volume=service_data.get("volume", ""),
-                status=str(service_data.get("status", "default")),
-                number=service_data.get("number", "0"),
+                status=service_data.get("status", "default"),
+                number=service_data.get("number", 0),
                 create_time=current_time,
                 creator_id=service_data.get("creator_id", "")
             )
@@ -174,7 +174,7 @@ class ServiceRepository:
                     norm = ServiceNorm(
                         id=str(uuid.uuid4()),
                         service_id=service_id,
-                        key=str(norm_data.get("key", "")),
+                        key=norm_data.get("key", ""),
                         score=norm_data.get("score", 0)
                     )
                     db.session.add(norm)
@@ -289,8 +289,6 @@ class ServiceRepository:
                 if key in ["name", "attribute", "type", "domain", "industry", 
                          "scenario", "technology", "network", "port", 
                          "volume", "status", "number"]:
-                    if key in ["attribute", "type", "domain", "industry", "scenario", "technology", "status"] and value is not None:
-                        value = str(value)
                     setattr(service, key, value)
             
             # 更新规范评分
@@ -303,7 +301,7 @@ class ServiceRepository:
                     norm = ServiceNorm(
                         id=str(uuid.uuid4()),
                         service_id=service_id,
-                        key=str(norm_data.get("key", "")),
+                        key=norm_data.get("key", ""),
                         score=norm_data.get("score", 0)
                     )
                     db.session.add(norm)
@@ -429,9 +427,6 @@ class ServiceRepository:
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
             if key in valid_filters and value is not None:
-                # 确保所有值都是字符串类型
-                if not isinstance(value, str):
-                    value = str(value)
                 query = query.filter(getattr(Service, key) == value)
         
         return query.all()

@@ -27,7 +27,7 @@ class Dictionary(db.Model):
         # 尝试将code转换为数字
         try:
             code_value = int(self.code)
-        except ValueError:
+        except (ValueError, TypeError):
             code_value = self.code
 
         return {
