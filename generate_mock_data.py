@@ -184,11 +184,11 @@ def transform_api(api, service_id):
     """将JS格式的API数据转换为Python格式"""
     api_name = api.get("name", "")
     
-    # 对于已存在的API名称，使用相同的ID
-    if api_name in API_IDS:
-        api_id = API_IDS[api_name]
-    else:
-        api_id = generate_uuid()
+    # 生成唯一的API ID - 每个服务的每个API都需要唯一ID
+    api_id = generate_uuid()
+    
+    # 如果API名称在API_IDS字典中不存在，将其添加进去（用于API_IDS字典导出）
+    if api_name not in API_IDS:
         API_IDS[api_name] = api_id
     
     # 获取API响应
