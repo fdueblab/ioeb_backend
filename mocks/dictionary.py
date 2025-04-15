@@ -52,39 +52,33 @@ MOCK_DOMAIN_DICTIONARIES = [
 MOCK_STATUS_DICTIONARIES = [
     {
         "category": "status",
-        "code": "error",
-        "text": "容器分配失败",
-        "sort": 1
-    },
-    {
-        "category": "status",
         "code": "warning",
         "text": "运行中(未通过测评)",
-        "sort": 2
+        "sort": 1
     },
     {
         "category": "status",
         "code": "default",
         "text": "未运行",
-        "sort": 3
+        "sort": 2
     },
     {
         "category": "status",
         "code": "error",
         "text": "异常",
-        "sort": 4
+        "sort": 3
     },
     {
         "category": "status",
         "code": "success",
         "text": "运行中(已通过测评)",
-        "sort": 5
+        "sort": 4
     },
     {
         "category": "status",
         "code": "processing",
         "text": "部署中",
-        "sort": 6
+        "sort": 5
     }
 ]
 

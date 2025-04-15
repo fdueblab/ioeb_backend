@@ -271,6 +271,7 @@ class ServiceFilter(Resource):
         
         可用筛选参数及其含义：
         - attribute: 服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)
+          可以指定多个attribute值，用逗号(,)分隔
         - type: 服务类型 (atomic-原子微服务, meta-元应用服务)
         - domain: 领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, 
                       evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)
@@ -280,9 +281,11 @@ class ServiceFilter(Resource):
         - status: 服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, 
                          success-运行中(已通过测评), processing-部署中)
         
-        示例请求：GET /api/services/filter?attribute=open_source&domain=aml&status=success
+        示例请求：
+        GET /api/services/filter?attribute=open_source&domain=aml&status=success
+        GET /api/services/filter?attribute=open_source,paid&domain=aml
     """)
-    @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)")
+    @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)，多个值用逗号分隔")
     @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)")
     @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)")
     @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)")
@@ -298,7 +301,11 @@ class ServiceFilter(Resource):
         for key in valid_filters:
             value = request.args.get(key)
             if value is not None:
-                filters[key] = value
+                # attribute为列表
+                if key == "attribute":
+                    filters[key] = value.split(",")
+                else:
+                    filters[key] = value
         
         try:
             services = service_service.filter_services(**filters)
