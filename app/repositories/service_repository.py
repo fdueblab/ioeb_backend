@@ -427,7 +427,10 @@ class ServiceRepository:
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
             if key in valid_filters and value is not None:
-                query = query.filter(getattr(Service, key) == value)
+                if key == "attribute":
+                    query = query.filter(getattr(Service, key).in_(value))
+                else:
+                    query = query.filter(getattr(Service, key) == value)
         
         return query.all()
     
@@ -481,4 +484,4 @@ class ServiceRepository:
 
 
 # 创建单例实例，方便导入使用
-service_repository = ServiceRepository() 
+service_repository = ServiceRepository()

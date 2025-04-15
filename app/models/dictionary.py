@@ -23,17 +23,10 @@ class Dictionary(db.Model):
         return f"<Dictionary {self.category}:{self.code}>"
 
     def to_dict(self):
-        """将模型转换为字典"""
-        # 尝试将code转换为数字
-        try:
-            code_value = int(self.code)
-        except (ValueError, TypeError):
-            code_value = self.code
-
         return {
             "id": self.id,
             "category": self.category,
-            "code": code_value,
+            "code": self.code,
             "text": self.text,
             "sort": self.sort,
             "memo": self.memo
