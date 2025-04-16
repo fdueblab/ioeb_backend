@@ -827,13 +827,24 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "41c84a36-8461-4801-abf5-62826c073638",
         "service_id": "4fda9469-dcd7-4032-affb-9c9df0cd2cc6",
-        "key": "security",
+        "key": "safety-fingerprint",
+        "score": 5
+    },{
+        "id": "5f7e2bd9-a317-42c5-9d82-8a43f5c27b14",
+        "service_id": "4fda9469-dcd7-4032-affb-9c9df0cd2cc6",
+        "key": "safety-watermark",
         "score": 5
     },
     {
         "id": "a14ef151-2d32-492e-8599-695d0623aa57",
         "service_id": "4fda9469-dcd7-4032-affb-9c9df0cd2cc6",
         "key": "privacy",
+        "score": 5
+    },
+    {
+        "id": "7c6d1e48-f592-4639-b058-ce94a12d8f73",
+        "service_id": "4fda9469-dcd7-4032-affb-9c9df0cd2cc6",
+        "key": "fairness",
         "score": 5
     },
     {
@@ -849,9 +860,15 @@ MOCK_SERVICE_NORMS = [
         "score": 5
     },
     {
+        "id": "2a8b3c9d-e517-49f6-84a0-1b2c3d4e5f67",
+        "service_id": "dce40ba0-b5bb-4508-bd09-38a95a2e2932",
+        "key": "fairness",
+        "score": 5
+    },
+    {
         "id": "7c750fb1-9e6f-4d7f-b151-7ab5323b9bed",
         "service_id": "01a951d1-09b1-4d65-9f6c-cf048e5f620e",
-        "key": "security",
+        "key": "safety-watermark",
         "score": 5
     },
     {
@@ -873,6 +890,12 @@ MOCK_SERVICE_NORMS = [
         "score": 5
     },
     {
+        "id": "3f2e1d0c-b9a8-4765-98f0-12e34d56c78a",
+        "service_id": "fde67dc7-39a2-4378-a5fe-ceec617d802f",
+        "key": "fairness",
+        "score": 5
+    },
+    {
         "id": "84dfba8d-960b-4b80-a805-2b58514d0fd7",
         "service_id": "fde67dc7-39a2-4378-a5fe-ceec617d802f",
         "key": "privacy",
@@ -887,7 +910,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "e05629f0-96e9-475e-93bd-6d41b2c287ac",
         "service_id": "1f464c6b-6b49-4fa2-8ec9-6942815f7d8f",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -941,7 +964,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "03d00783-4904-47a2-ba88-58edbd65eae4",
         "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -965,7 +988,13 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "6eb2e8de-3c3f-4aa9-b6a4-7c66bf21ad94",
         "service_id": "3c93a110-4618-4b12-83fd-4b5a6f89a105",
-        "key": "security",
+        "key": "safety-fingerprint",
+        "score": 5
+    },
+    {
+        "id": "9e8d7c6b-5a4f-4321-b0a9-87f6e5d4c3b2",
+        "service_id": "3c93a110-4618-4b12-83fd-4b5a6f89a105",
+        "key": "safety-watermark",
         "score": 5
     },
     {
@@ -983,7 +1012,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "ed382894-ec9d-4a07-8401-23ce26083630",
         "service_id": "77064ca6-3a5d-49cd-8a27-c6a7b52fc20e",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1007,7 +1036,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "613ae4ae-6b8b-4980-907f-00fa958a867d",
         "service_id": "da43a293-fb67-4efb-b65b-ec22d9cca5ae",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1043,7 +1072,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "9fb131d2-0d21-46e1-9b89-639b7756b006",
         "service_id": "57b897b2-f191-4ede-98d6-46aaee8bd4e8",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1067,7 +1096,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "2a28f619-33c5-43bf-b535-d83e3e9ec72a",
         "service_id": "fa3fafbb-fb30-492d-93cf-b608e06b4d99",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1079,7 +1108,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "027020a4-b9c8-41ae-bd71-3d3c3bd63a7d",
         "service_id": "f6c3c542-59ed-4277-b771-21f5191d8c5c",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1115,7 +1144,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "7608ef8c-55ee-4ad6-8330-0f9e95b8b4ed",
         "service_id": "957f8b36-d0c7-462a-9041-cfb2e063f328",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 4
     },
     {
@@ -1139,7 +1168,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "58079a6c-ab7d-4e31-ab28-9ae9e763ce3b",
         "service_id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1163,7 +1192,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "1863998c-4de9-4f44-acbb-2b98ad745e1d",
         "service_id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 4
     },
     {
@@ -1187,7 +1216,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "4f90a300-78a8-4b4a-aea6-eee7a3403174",
         "service_id": "4f35b674-4a5b-4b69-a55c-ef0a0ccf2553",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1199,7 +1228,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "06546963-9dfb-4c5e-9b54-a6170f0dfd80",
         "service_id": "f6be78dc-ac2b-485f-93ec-0f7215797d21",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1211,7 +1240,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "64181cc3-bb6d-469e-ae49-210df869d21e",
         "service_id": "c5f36a0f-888f-4900-b970-890b13bc0e86",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 4
     },
     {
@@ -1223,7 +1252,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "8c2e7dd4-8dd2-4e19-8bbc-c12c79b3a286",
         "service_id": "241009ad-8465-44a8-befb-bfb9c000c2cb",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 4
     },
     {
@@ -1235,7 +1264,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "5f9e4029-eae3-4fc3-8f7f-b89b64051c15",
         "service_id": "9fe9c51a-aa30-44b0-95ff-01827ce3b0bf",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1247,7 +1276,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "b1222b86-88ef-47c0-aed5-07aee391e9eb",
         "service_id": "ac7a408b-f01c-4565-b73f-fedc8b01a0e3",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1271,7 +1300,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "15883807-61d2-4f20-baea-e58bd48b38c3",
         "service_id": "94c085b9-fc0e-4c5b-830f-e97d7d54ede6",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1289,7 +1318,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "102cf40f-8c70-4242-bc0c-96cd36443b95",
         "service_id": "49e9dd74-e61e-4d21-854d-94fe91d8ddd8",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 4
     },
     {
@@ -1319,7 +1348,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "221109b5-b6fe-41a0-b011-fa53b564e80a",
         "service_id": "264342fa-649d-47f9-b589-41f0c592ea14",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1343,7 +1372,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "6e46a0b7-be85-4a79-bd65-a104ec4ecfa8",
         "service_id": "334d0e8d-dcfe-4f7f-a41e-eb3989147a2a",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1367,7 +1396,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "913d0d22-100c-49f0-85ac-f500972bf1f3",
         "service_id": "9bd7eb41-81a0-48bf-bfdb-b7f6e7eb33d5",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1385,7 +1414,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "45134a7b-0041-4c22-bd9c-b4cefc052e9b",
         "service_id": "0969a474-c3b2-4ddf-99e9-61c3ec4fb076",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1403,7 +1432,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "845c5890-3024-44a1-8083-c6cdf0779356",
         "service_id": "5290d2a8-777d-4cfa-8ddb-39568bcc25f3",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1427,7 +1456,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "c2333bf2-841e-4dff-9d3e-aab7c5d923cd",
         "service_id": "57260e5e-66d0-4d56-8281-a28ee3d550ab",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1469,7 +1498,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "c48d31ec-ee21-46eb-b43d-65f8541488a3",
         "service_id": "845f73ed-f998-4e3b-b3f1-74dbdb93a34e",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -1487,7 +1516,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "87c1fa43-a229-48b8-9f19-8764b0f519ca",
         "service_id": "0247718c-34c6-46b7-9a75-abd4b8e615af",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
