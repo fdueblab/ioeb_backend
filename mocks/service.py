@@ -815,7 +815,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "27203121-5787-455c-8a56-cc4da52e48aa",
         "service_id": "3b3d4e4d-36e4-4436-bea1-63af2117d0bc",
-        "key": "security",
+        "key": "safety-fingerprint",
         "score": 5
     },
     {
@@ -863,7 +863,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "7e5113e4-4422-452f-a657-7052091d21bb",
         "service_id": "01a951d1-09b1-4d65-9f6c-cf048e5f620e",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -881,7 +881,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "2231c15e-bac0-4621-81aa-6b3c3eb1eb57",
         "service_id": "fde67dc7-39a2-4378-a5fe-ceec617d802f",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -917,7 +917,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "493fda23-6ea6-48e0-901d-e1ecb0d68c5e",
         "service_id": "b352ae47-92db-4281-8faf-9491ab6baea3",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -935,7 +935,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "e48498df-6f7c-4d1f-bc54-945b596746e7",
         "service_id": "c482ad98-4a7b-4498-a4d5-a52f991d1c0d",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -959,7 +959,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "2715e0f3-9eb1-4c9d-ba15-35a883ea02f1",
         "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1019,7 +1019,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "10975b41-5bb8-403f-b57b-906799295c56",
         "service_id": "da43a293-fb67-4efb-b65b-ec22d9cca5ae",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1037,7 +1037,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "1b2be93e-1c82-4eb2-808e-2bef6cd04e84",
         "service_id": "aacc5100-a017-49d9-a784-c7fe210d234c",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1061,7 +1061,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "887f1daf-39ac-4dd4-a7e8-18c0983fb7cb",
         "service_id": "57b897b2-f191-4ede-98d6-46aaee8bd4e8",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1097,7 +1097,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "e98a07db-8919-4cad-9a13-b31d618e9130",
         "service_id": "fd918206-0564-408b-a096-efd3b64c4efc",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1121,7 +1121,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "64a0cb4a-c21d-45ea-bfc7-34faa6d96302",
         "service_id": "957f8b36-d0c7-462a-9041-cfb2e063f328",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1133,7 +1133,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "22fa925d-2f75-4da7-9478-5960b1d876cd",
         "service_id": "cd670e2a-8567-437d-8dd2-27eee559be19",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1157,7 +1157,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "95c47236-96c8-440c-93b5-32f54f396883",
         "service_id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1181,7 +1181,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "31d2ec1a-4924-43ab-8ebe-b3857dbd13c2",
         "service_id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1265,7 +1265,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "e43f8b9e-566e-488e-a67d-3beb6a1112dd",
         "service_id": "b10e3b56-9f2d-43ff-a14f-fb89810d3557",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 4
     },
     {
@@ -1295,7 +1295,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "8b4746ca-1c4f-410d-8680-2d973330971b",
         "service_id": "49e9dd74-e61e-4d21-854d-94fe91d8ddd8",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1313,7 +1313,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "da78439c-7d27-4bc2-8ec6-57bd4541bde5",
         "service_id": "46b8c837-2450-4b87-9b41-d91242f51803",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1337,7 +1337,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "cec57c30-5853-4792-8960-ff9d29d22497",
         "service_id": "264342fa-649d-47f9-b589-41f0c592ea14",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1361,7 +1361,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "80af7db5-f542-4cb7-9d22-08e9d99bcc91",
         "service_id": "334d0e8d-dcfe-4f7f-a41e-eb3989147a2a",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1379,7 +1379,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "ee478388-3878-47f1-9ee6-8faa659625a2",
         "service_id": "9bd7eb41-81a0-48bf-bfdb-b7f6e7eb33d5",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1397,7 +1397,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "4fe82efb-d413-4729-ab79-95327f4a0235",
         "service_id": "0969a474-c3b2-4ddf-99e9-61c3ec4fb076",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1421,7 +1421,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "d4c9fb77-f8dc-4820-b262-dc97372b0b2f",
         "service_id": "5290d2a8-777d-4cfa-8ddb-39568bcc25f3",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1445,7 +1445,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "9e2d5d2f-a262-4c97-884c-c0d7e1b0b381",
         "service_id": "57260e5e-66d0-4d56-8281-a28ee3d550ab",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1463,7 +1463,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "aa5c3d3b-4721-4dec-b482-456938f55863",
         "service_id": "88a6773d-7274-4071-87df-d4763855f899",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {
@@ -1481,7 +1481,7 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "e55aacf6-be15-496a-bf33-89cd2d551016",
         "service_id": "845f73ed-f998-4e3b-b3f1-74dbdb93a34e",
-        "key": "trustworthiness",
+        "key": "explainability",
         "score": 5
     },
     {

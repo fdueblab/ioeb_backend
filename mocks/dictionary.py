@@ -85,27 +85,39 @@ MOCK_STATUS_DICTIONARIES = [
 MOCK_NORM_DICTIONARIES = [
     {
         "category": "norm",
-        "code": "security",
-        "text": "安全性",
+        "code": "safety-fingerprint",
+        "text": "安全性-指纹",
         "sort": 1
+    },
+    {
+        "category": "norm",
+        "code": "safety-watermark",
+        "text": "安全性-水印",
+        "sort": 2
     },
     {
         "category": "norm",
         "code": "robustness",
         "text": "鲁棒性",
-        "sort": 2
+        "sort": 3
+    },
+    {
+        "category": "norm",
+        "code": "fairness",
+        "text": "公平性",
+        "sort": 4
     },
     {
         "category": "norm",
         "code": "privacy",
         "text": "隐私性",
-        "sort": 3
+        "sort": 5
     },
     {
         "category": "norm",
-        "code": "trustworthiness",
-        "text": "可信性",
-        "sort": 4
+        "code": "explainability",
+        "text": "可解释性",
+        "sort": 6
     }
 ]
 
