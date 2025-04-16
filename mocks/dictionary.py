@@ -19,13 +19,13 @@ MOCK_DOMAIN_DICTIONARIES = [
     {
         "category": "domain",
         "code": "health",
-        "text": "乡村医疗AI服务",
+        "text": "乡村医疗AI应用",
         "sort": 3
     },
     {
         "category": "domain",
         "code": "agriculture",
-        "text": "数字农业AI服务",
+        "text": "数字农业AI应用",
         "sort": 4
     },
     {
