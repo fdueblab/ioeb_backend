@@ -208,7 +208,7 @@ class ServiceResource(Resource):
     @api.response(400, "Invalid input", error_response)
     @api.response(404, "Service not found", error_response)
     @api.response(500, "Server error", error_response)
-    def put(self, id):
+    def post(self, id):
         """更新指定ID的微服务"""
         data = request.get_json()
 
