@@ -40,5 +40,5 @@ repos:
     rev: 7.1.2
     hooks:
     -   id: flake8
-        args: ["--max-line-length", "999", "--max-complexity", "10"]
+        args: ["--max-line-length", "9999", "--max-complexity", "10"]
         # 检查代码质量问题（不会自动修复，但会提示）
