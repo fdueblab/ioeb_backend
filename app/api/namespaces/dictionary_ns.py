@@ -172,7 +172,7 @@ class Dictionary(Resource):
     @api.doc("更新字典")
     @api.expect(dictionary_create_model)
     @api.response(200, "Success", dictionary_response)
-    def put(self, category, code):
+    def post(self, category, code):
         """更新字典"""
         try:
             data = request.json
