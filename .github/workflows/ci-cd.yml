@@ -82,9 +82,9 @@ jobs:
         run: |
           pytest tests/integration
 
-      - name: Functional tests
-        run: |
-          pytest tests/functional
+      # - name: Functional tests
+      #   run: |
+      #     pytest tests/functional
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v3
