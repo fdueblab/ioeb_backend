@@ -16,6 +16,25 @@ class DictionaryRepository(BaseRepository[Dictionary]):
         """初始化字典数据仓库"""
         super().__init__(Dictionary)
 
+    def get_all(self) -> List[Dictionary]:
+        """
+        获取所有字典
+
+        Returns:
+            List[Dictionary]: 所有字典对象
+        """
+        return self.model_class.query.order_by(Dictionary.category, Dictionary.sort).all()
+
+    def get_all_with_dict(self) -> List[Dict]:
+        """
+        获取所有字典的字典表示
+
+        Returns:
+            List[Dict]: 所有字典的字典表示
+        """
+        dictionaries = self.get_all()
+        return [dictionary.to_dict() for dictionary in dictionaries]
+
     def get_by_category(self, category: str) -> List[Dictionary]:
         """
         根据类别获取字典列表
