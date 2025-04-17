@@ -25,8 +25,8 @@ class Service(db.Model):
 
     # 部署信息
     network = db.Column(db.String(50), nullable=False, comment="网络类型")
-    port = db.Column(db.String(100), nullable=False, comment="端口映射")
-    volume = db.Column(db.String(200), nullable=False, comment="数据卷映射")
+    port = db.Column(db.String(500), nullable=False, comment="端口映射")
+    volume = db.Column(db.String(500), nullable=False, comment="数据卷映射")
 
     # 状态信息
     status = db.Column(db.String(50), nullable=False, comment="服务状态")
