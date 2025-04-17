@@ -57,6 +57,38 @@ dictionaries_response = api.model(
     }
 )
 
+# 定义字典分组响应模型
+grouped_dictionaries_response = api.model(
+    "GroupedDictionariesResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+        "dictionaries": fields.Raw(description="按类别分组的字典数据")
+    }
+)
+
+
+@api.route("/all")
+class AllDictionaries(Resource):
+    """所有字典资源"""
+
+    @api.doc("获取所有字典")
+    @api.response(200, "Success", grouped_dictionaries_response)
+    def get(self):
+        """获取所有字典，按类别分组"""
+        try:
+            dictionaries = dictionary_service.get_all_dictionaries()
+            return {
+                "status": "success",
+                "message": "获取所有字典成功",
+                "dictionaries": dictionaries
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": str(e)
+            }, 500
+
 
 @api.route("/<string:category>")
 class DictionaryList(Resource):

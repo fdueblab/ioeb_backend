@@ -21,6 +21,24 @@ class DictionaryService:
         """初始化字典服务"""
         self.repository = DictionaryRepository()
 
+    def get_all_dictionaries(self) -> Dict[str, List[Dict]]:
+        """
+        获取所有字典数据，按类别分组
+
+        Returns:
+            Dict[str, List[Dict]]: 按类别分组的字典数据
+        """
+        all_dictionaries = self.repository.get_all_with_dict()
+        result = {}
+        
+        for dictionary in all_dictionaries:
+            category = dictionary['category']
+            if category not in result:
+                result[category] = []
+            result[category].append(dictionary)
+            
+        return result
+
     def get_by_category(self, category: str) -> List[Dict]:
         """
         根据类别获取字典列表
