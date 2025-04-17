@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - zfy
 
 # 环境变量
 env:
@@ -105,7 +106,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push micro-agent Docker image
+      - name: Build and push ioeb-backend Docker image
         run: |
           docker build -t polarsnowleopard/ioeb-backend:latest .
           docker push polarsnowleopard/ioeb-backend:latest
@@ -188,15 +189,15 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USERNAME }}
+          username: ${{ secrets.DEVELOPMENT_DB_USERNAME }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
             cd ~/ioeb-backend
             cp .env_dev .env
 
             # 使用环境变量替换
-            sed -i "s/\${PRODUCTION_DB_USERNAME}/${{ secrets.PRODUCTION_DB_USERNAME }}/g" .env
-            sed -i "s/\${PRODUCTION_DB_PASSWORD}/${{ secrets.PRODUCTION_DB_PASSWORD }}/g" .env
+            sed -i "s/\${DEVELOPMENT_DB_USERNAME}/${{ secrets.DEVELOPMENT_DB_USERNAME }}/g" .env
+            sed -i "s/\${DEVELOPMENT_DB_PASSWORD}/${{ secrets.DEVELOPMENT_DB_PASSWORD }}/g" .env
 
             sudo docker pull polarsnowleopard/ioeb-backend:latest
 

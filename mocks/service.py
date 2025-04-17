@@ -777,7 +777,7 @@ MOCK_SERVICES = [
         "name": "家务辅助微服务",
         "attribute": "non_intelligent",
         "type": "atomic",
-        "domain": "aml",
+        "domain": "homeAI",
         "industry": "4",
         "scenario": "0",
         "technology": "2",
