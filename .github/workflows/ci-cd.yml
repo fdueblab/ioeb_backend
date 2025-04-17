@@ -36,7 +36,7 @@ jobs:
           # 停止构建过程如果存在语法错误或未定义名称
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # 退出，但不停止构建过程
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=999 --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=9999 --statistics
 
   # 测试阶段
   test:
@@ -155,9 +155,9 @@ jobs:
   #             docker-compose pull
   #             docker-compose up -d
 
-  # 部署到生产环境
+  # 部署到线上开发测试环境
   deploy-production:
-    name: Deploy to Production
+    name: Deploy to Online Development Test Environment
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
@@ -180,7 +180,7 @@ jobs:
           host: ${{ secrets.PRODUCTION_HOST }}
           username: ${{ secrets.PRODUCTION_USERNAME }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          source: "docker-compose.yml, .env_prod"
+          source: "docker-compose.yml, .env_dev"
           target: "~/ioeb-backend"
           strip_components: 0
 
@@ -192,7 +192,7 @@ jobs:
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
             cd ~/ioeb-backend
-            cp .env_prod .env
+            cp .env_dev .env
 
             # 使用环境变量替换
             sed -i "s/\${PRODUCTION_DB_USERNAME}/${{ secrets.PRODUCTION_DB_USERNAME }}/g" .env
