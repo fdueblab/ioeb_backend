@@ -52,32 +52,77 @@ MOCK_DOMAIN_DICTIONARIES = [
 MOCK_STATUS_DICTIONARIES = [
     {
         "category": "status",
-        "code": "warning",
-        "text": "运行中(未通过测评)",
+        "code": "not_deployed",
+        "text": "未部署",
         "sort": 1
     },
     {
         "category": "status",
-        "code": "default",
-        "text": "未运行",
+        "code": "deploying",
+        "text": "部署中",
         "sort": 2
     },
     {
         "category": "status",
-        "code": "error",
-        "text": "异常",
+        "code": "pre_release_unrated",
+        "text": "预发布(未测评)",
         "sort": 3
     },
     {
         "category": "status",
-        "code": "success",
-        "text": "运行中(已通过测评)",
+        "code": "pre_release_pending",
+        "text": "预发布(待平台测评)",
         "sort": 4
     },
     {
         "category": "status",
-        "code": "processing",
-        "text": "部署中",
+        "code": "released",
+        "text": "已发布",
+        "sort": 5
+    },
+    {
+        "category": "status",
+        "code": "error",
+        "text": "服务异常",
+        "sort": 6
+    }
+]
+
+MOCK_STATUS_STYLE_DICTIONARIES = [
+    {
+        "category": "status_style",
+        "code": "pre_release_unrated",
+        "text": "warning",
+        "sort": 1
+    },
+    {
+        "category": "status_style",
+        "code": "pre_release_pending",
+        "text": "warning",
+        "sort": 1
+    },
+    {
+        "category": "status_style",
+        "code": "not_deployed",
+        "text": "default",
+        "sort": 2
+    },
+    {
+        "category": "status_style",
+        "code": "error",
+        "text": "error",
+        "sort": 3
+    },
+    {
+        "category": "status_style",
+        "code": "released",
+        "text": "success",
+        "sort": 4
+    },
+    {
+        "category": "status_style",
+        "code": "deploying",
+        "text": "processing",
         "sort": 5
     }
 ]
@@ -85,27 +130,39 @@ MOCK_STATUS_DICTIONARIES = [
 MOCK_NORM_DICTIONARIES = [
     {
         "category": "norm",
-        "code": "security",
-        "text": "安全性",
+        "code": "safety-fingerprint",
+        "text": "安全性-指纹",
         "sort": 1
+    },
+    {
+        "category": "norm",
+        "code": "safety-watermark",
+        "text": "安全性-水印",
+        "sort": 2
     },
     {
         "category": "norm",
         "code": "robustness",
         "text": "鲁棒性",
-        "sort": 2
+        "sort": 3
+    },
+    {
+        "category": "norm",
+        "code": "fairness",
+        "text": "公平性",
+        "sort": 4
     },
     {
         "category": "norm",
         "code": "privacy",
         "text": "隐私性",
-        "sort": 3
+        "sort": 5
     },
     {
         "category": "norm",
-        "code": "trustworthiness",
-        "text": "可信性",
-        "sort": 4
+        "code": "explainability",
+        "text": "可解释性",
+        "sort": 6
     }
 ]
 
@@ -932,6 +989,7 @@ MOCK_HOMEAI_TECHNOLOGY_DICTIONARIES = [
 # 合并所有字典数据
 MOCK_DICTIONARIES = (
     MOCK_STATUS_DICTIONARIES
+    + MOCK_STATUS_STYLE_DICTIONARIES
     + MOCK_NORM_DICTIONARIES
     + MOCK_API_TYPE_DICTIONARIES
     + MOCK_METHOD_TYPE_DICTIONARIES
