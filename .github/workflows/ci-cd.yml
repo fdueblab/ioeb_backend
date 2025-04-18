@@ -192,15 +192,7 @@ jobs:
           username: ${{ secrets.PRODUCTION_USERNAME }}
           key: ${{ secrets.PRODUCTION_SSH_KEY }}
           script: |
-            cd ~/ioeb-backend
-            cp .env_dev .env
-
-            # 使用环境变量替换
-            sed -i "s/\${DEVELOPMENT_DB_USERNAME}/${{ secrets.DEVELOPMENT_DB_USERNAME }}/g" .env
-            sed -i "s/\${DEVELOPMENT_DB_PASSWORD}/${{ secrets.DEVELOPMENT_DB_PASSWORD }}/g" .env
-
-            sudo docker pull polarsnowleopard/ioeb-backend:latest
-
             cd ~/ioeb
+            sudo docker pull polarsnowleopard/ioeb-backend:latest
             sudo docker-compose down || true
             sudo docker-compose up -d
