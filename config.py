@@ -22,8 +22,11 @@ class Config:
     CODE_STANDARDS_CHECK = True  # 是否启用代码规范检查
     CODE_STANDARDS_STRICT = True  # 严格模式（True: 必须通过检查才处理，False: 仅警告）
 
-    # 微服务生成服务配置
-    REMOTE_SERVICE_URL = os.getenv("REMOTE_SERVICE_URL", "http://localhost:8000/api/process")
+    # 腾讯云对象存储配置
+    COS_SECRET_ID = os.getenv("COS_SECRET_ID", None)
+    COS_SECRET_KEY = os.getenv("COS_SECRET_KEY", None)
+    COS_REGION = os.getenv("COS_REGION", "ap-beijing")
+    COS_BUCKET = os.getenv("COS_BUCKET", None)
 
 
 class DevelopmentConfig(Config):

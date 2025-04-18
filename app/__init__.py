@@ -40,9 +40,15 @@ def create_app(config_name):
     app.register_blueprint(api_bp, url_prefix="/api")
 
     # 注册数据库
-    from app.extensions import db
+    from app.extensions import db, migrate
 
     db.init_app(app)
+    migrate.init_app(app, db)
+
+    # 初始化COS工具
+    from app.utils.cos_utils import cos_utils
+
+    cos_utils.init_app(app)
 
     # 添加首页路由
     @app.route("/")
