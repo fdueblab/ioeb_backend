@@ -1,3 +1,6 @@
+# docs
+docs/
+
 # scripts
 scripts/
 
@@ -31,6 +34,7 @@ instance/
 .webassets-cache
 .env
 .flaskenv
+migrations/
 
 # SQLite
 *.db
