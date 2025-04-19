@@ -47,7 +47,11 @@ class ServiceApi(db.Model):
         if self.is_fake:
             result["isFake"] = True
             if self.response:
-                result["response"] = json.loads(self.response)
+                try:
+                    result["response"] = json.loads(self.response)
+                except json.JSONDecodeError:
+                    # 如果响应不是有效JSON，则返回原始字符串
+                    result["response"] = self.response
             if self.response_file_name:
                 result["responseFileName"] = self.response_file_name
         
