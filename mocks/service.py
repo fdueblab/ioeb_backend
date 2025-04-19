@@ -154,7 +154,7 @@ MOCK_SERVICES = [
         "network": "bridge",
         "port": "0.0.0.0:8004/TCP → 0.0.0.0:80004",
         "volume": "/var/opt/gitlab/mnt/user  →  /appdata/aml/data",
-        "status": "error",
+        "status": "deploying",
         "number": 0,
         "deleted": 0,
         "create_time": 1744635999632,
