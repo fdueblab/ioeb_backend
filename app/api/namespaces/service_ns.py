@@ -59,7 +59,12 @@ api_model = api.model(
         "isFake": fields.Boolean(description="是否为模拟数据"),
         "response": fields.Raw(description="模拟响应数据"),
         "responseFileName": fields.String(description="响应文件名"),
-        "parameters": fields.List(fields.Nested(api_parameter_model), description="API参数")
+        "parameters": fields.List(fields.Nested(api_parameter_model), description="API参数"),
+        # 元应用专用字段
+        "inputName": fields.String(description="输入名称(元应用专用)"),
+        "outputName": fields.String(description="输出名称(元应用专用)"),
+        "outputVisualization": fields.Boolean(description="是否可视化输出(元应用专用)"),
+        "submitButtonText": fields.String(description="提交按钮文本(元应用专用)")
     }
 )
 

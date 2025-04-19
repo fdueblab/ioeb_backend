@@ -221,7 +221,11 @@ class ServiceRepository:
                         response_type=api_data.get("responseType", 0),
                         is_fake=api_data.get("isFake", False),
                         response=response,
-                        response_file_name=api_data.get("responseFileName")
+                        response_file_name=api_data.get("responseFileName"),
+                        input_name=api_data.get("inputName"),
+                        output_name=api_data.get("outputName"),
+                        output_visualization=api_data.get("outputVisualization", False),
+                        submit_button_text=api_data.get("submitButtonText")
                     )
                     db.session.add(api)
                     
@@ -365,7 +369,11 @@ class ServiceRepository:
                         response_type=api_data.get("responseType", 0),
                         is_fake=api_data.get("isFake", False),
                         response=response,
-                        response_file_name=api_data.get("responseFileName")
+                        response_file_name=api_data.get("responseFileName"),
+                        input_name=api_data.get("inputName"),
+                        output_name=api_data.get("outputName"),
+                        output_visualization=api_data.get("outputVisualization", False),
+                        submit_button_text=api_data.get("submitButtonText")
                     )
                     db.session.add(api)
                     
