@@ -908,7 +908,7 @@ MOCK_SERVICE_NORMS = [
         "service_id": "1f464c6b-6b49-4fa2-8ec9-6942815f7d8f",
         "key": "safety-fingerprint",
         "score": 5,
-        "platform_checked": 0,
+        "platform_checked": 1,
     },
     {
         "id": "7161e1d8-2dc4-4e78-b669-af72694aeff1",
@@ -971,7 +971,7 @@ MOCK_SERVICE_NORMS = [
         "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
         "key": "recall",
         "score": 5,
-        "platform_checked": 1,
+        "platform_checked": 0,
     },
     {
         "id": "01789004-8cb5-410e-9706-cc0b4038f666",
