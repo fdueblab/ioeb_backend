@@ -24,6 +24,11 @@ class ServiceApi(db.Model):
     is_fake = db.Column(db.Boolean, default=False, comment="是否为模拟数据")
     response = db.Column(db.Text, nullable=True, comment="模拟响应数据")
     response_file_name = db.Column(db.String(100), nullable=True, comment="响应文件名")
+    # 元应用专用字段
+    input_name = db.Column(db.String(100), nullable=True, comment="输入名称")
+    output_name = db.Column(db.String(100), nullable=True, comment="输出名称")
+    output_visualization = db.Column(db.Boolean, default=False, comment="是否可视化输出")
+    submit_button_text = db.Column(db.String(50), nullable=True, comment="提交按钮文本")
 
     # 关联关系
     parameters = db.relationship("ServiceApiParameter", backref="api", lazy=True)
@@ -45,6 +50,16 @@ class ServiceApi(db.Model):
                 result["response"] = json.loads(self.response)
             if self.response_file_name:
                 result["responseFileName"] = self.response_file_name
+        
+        # 添加元应用相关字段
+        if self.input_name:
+            result["inputName"] = self.input_name
+        if self.output_name:
+            result["outputName"] = self.output_name
+        if self.output_visualization:
+            result["outputVisualization"] = self.output_visualization
+        if self.submit_button_text:
+            result["submitButtonText"] = self.submit_button_text
 
         if self.parameters:
             result["parameters"] = [param.to_dict() for param in self.parameters]
