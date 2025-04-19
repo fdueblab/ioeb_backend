@@ -15,10 +15,12 @@ class ServiceNorm(db.Model):
     service_id = db.Column(db.String(36), db.ForeignKey("services.id"), nullable=False, comment="关联的服务ID")
     key = db.Column(db.String(50), nullable=False, comment="规范类型")
     score = db.Column(db.Integer, nullable=False, comment="评分")
+    platform_checked = db.Column(db.Integer, nullable=False, default=0, comment="是否经过平台检测：0-否，1-是")
 
     def to_dict(self):
         """将模型转换为字典"""
         return {
             "key": self.key,
-            "score": self.score
+            "score": self.score,
+            "platformChecked": self.platform_checked
         } 

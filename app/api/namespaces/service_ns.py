@@ -16,7 +16,8 @@ norm_model = api.model(
     "Norm",
     {
         "key": fields.String(description="规范类型"),
-        "score": fields.Integer(description="评分")
+        "score": fields.Integer(description="评分"),
+        "platformChecked": fields.Integer(description="是否经过平台检测：0-否，1-是", default=0)
     }
 )
 

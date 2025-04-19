@@ -175,7 +175,8 @@ class ServiceRepository:
                         id=str(uuid.uuid4()),
                         service_id=service_id,
                         key=norm_data.get("key", ""),
-                        score=norm_data.get("score", 0)
+                        score=norm_data.get("score", 0),
+                        platform_checked=norm_data.get("platformChecked", 0)
                     )
                     db.session.add(norm)
             
@@ -302,7 +303,8 @@ class ServiceRepository:
                         id=str(uuid.uuid4()),
                         service_id=service_id,
                         key=norm_data.get("key", ""),
-                        score=norm_data.get("score", 0)
+                        score=norm_data.get("score", 0),
+                        platform_checked=norm_data.get("platformChecked", 0)
                     )
                     db.session.add(norm)
             
