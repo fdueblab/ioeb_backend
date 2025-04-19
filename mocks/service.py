@@ -965,25 +965,19 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "03d00783-4904-47a2-ba88-58edbd65eae4",
         "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "01789004-8cb5-410e-9706-cc0b4038f666",
         "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
-        "key": "robustness",
+        "key": "precision",
         "score": 5,
     },
     {
         "id": "7988b3d2-0a00-4096-9a3f-e7e5d9688894",
         "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
-        "key": "privacy",
-        "score": 5,
-    },
-    {
-        "id": "2715e0f3-9eb1-4c9d-ba15-35a883ea02f1",
-        "service_id": "b1b8417a-145c-43e3-b0d1-1aa3d7279c6b",
-        "key": "explainability",
+        "key": "computation_efficiency",
         "score": 5,
     },
     {
@@ -1073,25 +1067,19 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "9fb131d2-0d21-46e1-9b89-639b7756b006",
         "service_id": "57b897b2-f191-4ede-98d6-46aaee8bd4e8",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "2e545236-6ace-4434-8ced-dfcfaca6393d",
         "service_id": "57b897b2-f191-4ede-98d6-46aaee8bd4e8",
-        "key": "robustness",
+        "key": "precision",
         "score": 5,
     },
     {
         "id": "69dd1da1-b134-4749-9fb7-f72a18326847",
         "service_id": "57b897b2-f191-4ede-98d6-46aaee8bd4e8",
-        "key": "privacy",
-        "score": 5,
-    },
-    {
-        "id": "887f1daf-39ac-4dd4-a7e8-18c0983fb7cb",
-        "service_id": "57b897b2-f191-4ede-98d6-46aaee8bd4e8",
-        "key": "explainability",
+        "key": "computation_efficiency",
         "score": 5,
     },
     {
@@ -1169,50 +1157,38 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "58079a6c-ab7d-4e31-ab28-9ae9e763ce3b",
         "service_id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "d60870d0-3984-4491-9968-3385b4a0d9a4",
         "service_id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
-        "key": "robustness",
+        "key": "precision",
         "score": 4,
     },
     {
         "id": "73b9f11d-c857-4664-98bf-4ffbafe7b019",
         "service_id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
-        "key": "privacy",
-        "score": 5,
-    },
-    {
-        "id": "95c47236-96c8-440c-93b5-32f54f396883",
-        "service_id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
-        "key": "explainability",
+        "key": "computation_efficiency",
         "score": 5,
     },
     {
         "id": "1863998c-4de9-4f44-acbb-2b98ad745e1d",
         "service_id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 4,
     },
     {
         "id": "cd4a69ae-8164-4cea-996c-69d69d5d1412",
         "service_id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
-        "key": "robustness",
+        "key": "precision",
         "score": 5,
     },
     {
         "id": "2d0f8165-470f-488e-b45c-94e1148541ed",
         "service_id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
-        "key": "privacy",
+        "key": "computation_efficiency",
         "score": 4,
-    },
-    {
-        "id": "31d2ec1a-4924-43ab-8ebe-b3857dbd13c2",
-        "service_id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
-        "key": "explainability",
-        "score": 5,
     },
     {
         "id": "4f90a300-78a8-4b4a-aea6-eee7a3403174",
@@ -1265,13 +1241,13 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "5f9e4029-eae3-4fc3-8f7f-b89b64051c15",
         "service_id": "9fe9c51a-aa30-44b0-95ff-01827ce3b0bf",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "7e24dd96-4fe8-487e-8378-42f3e2e2ee2f",
         "service_id": "9fe9c51a-aa30-44b0-95ff-01827ce3b0bf",
-        "key": "privacy",
+        "key": "precision",
         "score": 5,
     },
     {
@@ -1349,25 +1325,19 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "221109b5-b6fe-41a0-b011-fa53b564e80a",
         "service_id": "264342fa-649d-47f9-b589-41f0c592ea14",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "fea2dc46-81a9-4a36-b133-3c291a782273",
         "service_id": "264342fa-649d-47f9-b589-41f0c592ea14",
-        "key": "robustness",
+        "key": "precision",
         "score": 5,
     },
     {
         "id": "725beead-6b88-4ee1-b40c-66f5c22408fe",
         "service_id": "264342fa-649d-47f9-b589-41f0c592ea14",
-        "key": "privacy",
-        "score": 5,
-    },
-    {
-        "id": "cec57c30-5853-4792-8960-ff9d29d22497",
-        "service_id": "264342fa-649d-47f9-b589-41f0c592ea14",
-        "key": "explainability",
+        "key": "computation_efficiency",
         "score": 5,
     },
     {
@@ -1415,19 +1385,19 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "45134a7b-0041-4c22-bd9c-b4cefc052e9b",
         "service_id": "0969a474-c3b2-4ddf-99e9-61c3ec4fb076",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "e1279006-4d42-4fa1-b9e5-901c677b3c87",
         "service_id": "0969a474-c3b2-4ddf-99e9-61c3ec4fb076",
-        "key": "robustness",
+        "key": "precision",
         "score": 5,
     },
     {
         "id": "4fe82efb-d413-4729-ab79-95327f4a0235",
         "service_id": "0969a474-c3b2-4ddf-99e9-61c3ec4fb076",
-        "key": "explainability",
+        "key": "computation_efficiency",
         "score": 5,
     },
     {
@@ -1517,19 +1487,19 @@ MOCK_SERVICE_NORMS = [
     {
         "id": "87c1fa43-a229-48b8-9f19-8764b0f519ca",
         "service_id": "0247718c-34c6-46b7-9a75-abd4b8e615af",
-        "key": "safety-fingerprint",
+        "key": "recall",
         "score": 5,
     },
     {
         "id": "1aa41c26-68f2-424b-a2a9-9eefa3e2bb1d",
         "service_id": "0247718c-34c6-46b7-9a75-abd4b8e615af",
-        "key": "robustness",
+        "key": "precision",
         "score": 5,
     },
     {
         "id": "b12af483-ae11-4b13-b4b6-31e5094bdc89",
         "service_id": "0247718c-34c6-46b7-9a75-abd4b8e615af",
-        "key": "privacy",
+        "key": "computation_efficiency",
         "score": 5,
     },
 ]
