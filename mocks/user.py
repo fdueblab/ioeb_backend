@@ -47,6 +47,22 @@ MOCK_USERS = [
         "create_time": 1497160610259,
         "creator_id": "system",
     },
+    {
+        "id": "4291d7da9005377ec9aec4a71ea837c",
+        "username": "root",
+        "name": "root",
+        "password": "e10adc3949ba59abbe56e057f20f883e",
+        "avatar": "/avatar2.svg",
+        "telephone": "",
+        "merchant_code": "TLif2btpzg079h15bk",
+        "role_id": "root",
+        "status": 1,
+        "deleted": 0,
+        "last_login_ip": "27.154.74.117",
+        "last_login_time": 1534837621348,
+        "create_time": 1497160610259,
+        "creator_id": "system",
+    },
 ]
 
 MOCK_ROLES = [
@@ -77,8 +93,19 @@ MOCK_ROLES = [
         "create_time": 1497160610259,
         "deleted": 0,
     },
+    {
+        "id": "root",
+        "name": "root",
+        "describe": "拥有所有权限",
+        "status": 1,
+        "creator_id": "system",
+        "create_time": 1497160610259,
+        "deleted": 0,
+    },
 ]
 
+# 前端根据permission_id字段的取值确认权限
+# 一个用户只能有一个角色，一个角色可以有多个权限
 MOCK_ROLES_PERMISSIONS = [
     {
         "id": 1,
@@ -90,14 +117,35 @@ MOCK_ROLES_PERMISSIONS = [
     {
         "id": 2,
         "role_id": "user",
-        "permission_id": "publisher",
+        "permission_id": "user",
         "permission_name": "用户",
         "data_access": None,
     },
     {
         "id": 3,
         "role_id": "admin",
+        "permission_id": "admin",
+        "permission_name": "管理员",
+        "data_access": None,
+    },
+    {
+        "id": 4,
+        "role_id": "root",
         "permission_id": "publisher",
+        "permission_name": "发布者",
+        "data_access": None,
+    },
+    {
+        "id": 5,
+        "role_id": "root",
+        "permission_id": "user",
+        "permission_name": "用户",
+        "data_access": None,
+    },
+    {
+        "id": 6,
+        "role_id": "root",
+        "permission_id": "admin",
         "permission_name": "管理员",
         "data_access": None,
     },
