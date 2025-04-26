@@ -1,4 +1,7 @@
+import os
+
 import click
+import dotenv
 from flask.cli import FlaskGroup
 
 from app import create_app
@@ -15,7 +18,7 @@ from app.models import (
     User,
 )
 from app.utils.flask_utils import get_flask_env
-from mocks.dictionary import MOCK_DICTIONARIES
+from mocks.dictionary import MOCK_DICTIONARIES, MOCK_DICTIONARIES_UMS
 from mocks.service import (
     MOCK_SERVICE_API_PARAMETERS,
     MOCK_SERVICE_APIS,
@@ -24,6 +27,8 @@ from mocks.service import (
     MOCK_SERVICES,
 )
 from mocks.user import MOCK_ROLES, MOCK_ROLES_PERMISSIONS, MOCK_USERS
+
+dotenv.load_dotenv()
 
 env = get_flask_env()
 app = create_app(env)
@@ -74,8 +79,12 @@ def seed_db():
     for param in MOCK_SERVICE_API_PARAMETERS:
         db.session.add(ServiceApiParameter(**param))
     # 添加示例字典数据
-    for dictionary in MOCK_DICTIONARIES:
-        db.session.add(Dictionary(**dictionary))
+    if "dev" in os.getenv("DB_NAME"):
+        for dictionary in MOCK_DICTIONARIES:
+            db.session.add(Dictionary(**dictionary))
+    elif "prod" in os.getenv("DB_NAME"):
+        for dictionary in MOCK_DICTIONARIES_UMS:
+            db.session.add(Dictionary(**dictionary))
 
     db.session.commit()
     click.echo("示例数据添加成功")

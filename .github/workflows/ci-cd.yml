@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - zfy
+      - deploy/ums
 
 # 环境变量
 env:
@@ -37,7 +38,7 @@ jobs:
           # 停止构建过程如果存在语法错误或未定义名称
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # 退出，但不停止构建过程
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=9999 --statistics
+          flake8 . --count --exit-zero --max-complexity=30 --max-line-length=9999 --statistics
 
   # 测试阶段
   test:
@@ -111,50 +112,24 @@ jobs:
           docker build -t polarsnowleopard/ioeb-backend:latest .
           docker push polarsnowleopard/ioeb-backend:latest
 
-  # # 构建并发布镜像
-  # build:
-  #   name: Build and Push Docker Image
-  #   runs-on: ubuntu-latest
-  #   needs: test
-  #   if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+  build-ums:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/deploy/ums')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #   steps:
-  #     - uses: actions/checkout@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v2
-
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v2
-  #       with:
-  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-  #     - name: Build and push
-  #       uses: docker/build-push-action@v4
-  #       with:
-  #         context: .
-  #         push: true
-  #         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:latest
-
-  #   # 部署到生产环境
-  #   deploy-staging:
-  #     name: Deploy to Staging
-  #     runs-on: ubuntu-latest
-  #     needs: build
-  #     if: github.event_name == 'push' && (github.ref == 'refs/heads/develop')
-
-  #     steps:
-  #       - name: Deploy to staging server
-  #         uses: appleboy/ssh-action@master
-  #         with:
-  #           host: ${{ secrets.STAGING_HOST }}
-  #           username: ${{ secrets.STAGING_USERNAME }}
-  #           key: ${{ secrets.STAGING_SSH_KEY }}
-  #           script: |
-  #             cd /path/to/application
-  #             docker-compose pull
-  #             docker-compose up -d
+      - name: Build and push ioeb-backend Docker image
+        run: |
+          docker build -t polarsnowleopard/ioeb-backend:deploy_ums .
+          docker push polarsnowleopard/ioeb-backend:deploy_ums
 
   # 部署到线上开发测试环境
   deploy-production:
