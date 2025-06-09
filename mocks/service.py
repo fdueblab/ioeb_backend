@@ -2307,7 +2307,7 @@ MOCK_SERVICE_APIS = [
         "name": "generate-report",
         "url": "/project3/generate-report",
         "method": "get",
-        "des": "根据自然语言需求生成风险评估报告",
+        "des": "根据节点编号生成报告",
         "parameter_type": 1,
         "response_type": 2,
         "is_fake": 0,
@@ -3032,9 +3032,9 @@ MOCK_SERVICE_API_PARAMETERS = [
     {
         "id": "c5cfc860-72f7-4489-a23c-ea74127ac81f",
         "api_id": "4ba7146b-2bdc-4b78-bc50-35026f466b8a",
-        "name": "query",
-        "type": "string",
-        "des": "用自然语言描述想要生成的报告",
+        "name": "node_id",
+        "type": "int",
+        "des": "节点编号",
     },
     {
         "id": "1cf72f85-5ac0-4cf3-ae7f-990df1de4edb",
