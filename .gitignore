@@ -2,7 +2,7 @@
 docs/
 
 # scripts
-scripts/
+# scripts/
 
 # developing
 app/services/openapi_parser/
