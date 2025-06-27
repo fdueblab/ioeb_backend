@@ -420,13 +420,13 @@ class ServiceRepository:
 
         Args:
             **filters: 筛选条件，可包括:
-                - attribute: 服务属性
-                - type: 服务类型
-                - domain: 领域
-                - industry: 行业
-                - scenario: 场景
-                - technology: 技术
-                - status: 服务状态
+                - attribute: 服务属性（支持多个值）
+                - type: 服务类型（支持多个值）
+                - domain: 领域（支持多个值）
+                - industry: 行业（支持多个值）
+                - scenario: 场景（支持多个值）
+                - technology: 技术（支持多个值）
+                - status: 服务状态（支持多个值）
 
         Returns:
             List[Service]: 符合条件的微服务对象列表
@@ -437,9 +437,10 @@ class ServiceRepository:
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
             if key in valid_filters and value is not None:
-                if key == "attribute":
+                # 支持所有条件都能使用多个值
+                if isinstance(value, list) and len(value) > 0:
                     query = query.filter(getattr(Service, key).in_(value))
-                else:
+                elif not isinstance(value, list) and value:
                     query = query.filter(getattr(Service, key) == value)
         
         return query.all()

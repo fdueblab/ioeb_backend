@@ -194,13 +194,13 @@ class ServiceService:
 
         Args:
             **filters: 筛选条件，可包括:
-                - attribute: 服务属性
-                - type: 服务类型
-                - domain: 领域
-                - industry: 行业
-                - scenario: 场景
-                - technology: 技术
-                - status: 服务状态
+                - attribute: 服务属性（支持单个值或多个值列表）
+                - type: 服务类型（支持单个值或多个值列表）
+                - domain: 领域（支持单个值或多个值列表）
+                - industry: 行业（支持单个值或多个值列表）
+                - scenario: 场景（支持单个值或多个值列表）
+                - technology: 技术（支持单个值或多个值列表）
+                - status: 服务状态（支持单个值或多个值列表）
 
         Returns:
             List[Dict]: 符合条件的微服务列表
