@@ -285,13 +285,12 @@ class ServiceFilter(Resource):
         - industry: 行业 (取决于domain，查看对应domain的industry字典)
         - scenario: 场景 (取决于domain，查看对应domain的scenario字典)
         - technology: 技术 (取决于domain，查看对应domain的technology字典)
-        - status: 服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, 
-                         success-运行中(已通过测评), processing-部署中)
+        - status: 服务状态 (not_deployed-未部署, deploying-部署中, pre_release_unrated-预发布(未测评), pre_release_pending-预发布(待平台测评), released-已发布, error-服务异常)
         
         示例请求：
-        GET /api/services/filter?attribute=open_source&domain=aml&status=success
+        GET /api/services/filter?attribute=open_source&domain=aml&status=released
         GET /api/services/filter?attribute=open_source,paid&domain=aml,health&type=atomic,meta
-        GET /api/services/filter?status=success,warning&domain=aml
+        GET /api/services/filter?status=released,error&domain=aml
     """)
     @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)，多个值用逗号分隔")
     @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)，多个值用逗号分隔")
@@ -299,7 +298,7 @@ class ServiceFilter(Resource):
     @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)，多个值用逗号分隔")
     @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)，多个值用逗号分隔")
     @api.param("technology", "技术 (取决于domain，查看对应domain的technology字典)，多个值用逗号分隔")
-    @api.param("status", "服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, success-运行中(已通过测评), processing-部署中)，多个值用逗号分隔")
+    @api.param("status", "服务状态 (not_deployed-未部署, deploying-部署中, pre_release_unrated-预发布(未测评), pre_release_pending-预发布(待平台测评), released-已发布, error-服务异常)，多个值用逗号分隔")
     @api.marshal_with(services_response, code=200)
     def get(self):
         """筛选微服务"""
@@ -308,8 +307,10 @@ class ServiceFilter(Resource):
         
         for key in valid_filters:
             value = request.args.get(key)
-            if value is not None:
+            # 只处理非空且有实际内容的参数值
+            if value is not None and value.strip():
                 # 所有参数都支持多个值，用逗号分隔
+                # 过滤掉空字符串和只包含空白字符的值
                 value_list = [v.strip() for v in value.split(",") if v.strip()]
                 if value_list:
                     filters[key] = value_list
