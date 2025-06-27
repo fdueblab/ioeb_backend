@@ -293,7 +293,7 @@ class ServiceFilter(Resource):
         GET /api/services/filter?status=released,error&domain=aml
     """)
     @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)，多个值用逗号分隔")
-    @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)，多个值用逗号分隔")
+    @api.param("type", "服务类型 (atomic-原子微服务-REST, atomic_mcp-原子微服务-MCP, meta-元应用服务)，多个值用逗号分隔")
     @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)，多个值用逗号分隔")
     @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)，多个值用逗号分隔")
     @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)，多个值用逗号分隔")
