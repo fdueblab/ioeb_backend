@@ -275,10 +275,11 @@ class ServiceFilter(Resource):
     @api.doc("filter_services", description="""
         筛选微服务接口，可以组合多个条件进行筛选。
         
+        所有参数都支持多个值，多个值用逗号(,)分隔。
+        
         可用筛选参数及其含义：
         - attribute: 服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)
-          可以指定多个attribute值，用逗号(,)分隔
-        - type: 服务类型 (atomic-原子微服务, meta-元应用服务)
+        - type: 服务类型 (atomic-原子微服务-REST, atomic_mcp-原子微服务-MCP, meta-元应用服务)
         - domain: 领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, 
                       evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)
         - industry: 行业 (取决于domain，查看对应domain的industry字典)
@@ -289,15 +290,16 @@ class ServiceFilter(Resource):
         
         示例请求：
         GET /api/services/filter?attribute=open_source&domain=aml&status=success
-        GET /api/services/filter?attribute=open_source,paid&domain=aml
+        GET /api/services/filter?attribute=open_source,paid&domain=aml,health&type=atomic,meta
+        GET /api/services/filter?status=success,warning&domain=aml
     """)
     @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)，多个值用逗号分隔")
-    @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)")
-    @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)")
-    @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)")
-    @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)")
-    @api.param("technology", "技术 (取决于domain，查看对应domain的technology字典)")
-    @api.param("status", "服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, success-运行中(已通过测评), processing-部署中)")
+    @api.param("type", "服务类型 (atomic-原子微服务, meta-元应用服务)，多个值用逗号分隔")
+    @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)，多个值用逗号分隔")
+    @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)，多个值用逗号分隔")
+    @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)，多个值用逗号分隔")
+    @api.param("technology", "技术 (取决于domain，查看对应domain的technology字典)，多个值用逗号分隔")
+    @api.param("status", "服务状态 (error-容器分配失败/异常, warning-运行中(未通过测评), default-未运行, success-运行中(已通过测评), processing-部署中)，多个值用逗号分隔")
     @api.marshal_with(services_response, code=200)
     def get(self):
         """筛选微服务"""
@@ -307,11 +309,10 @@ class ServiceFilter(Resource):
         for key in valid_filters:
             value = request.args.get(key)
             if value is not None:
-                # attribute为列表
-                if key == "attribute":
-                    filters[key] = value.split(",")
-                else:
-                    filters[key] = value
+                # 所有参数都支持多个值，用逗号分隔
+                value_list = [v.strip() for v in value.split(",") if v.strip()]
+                if value_list:
+                    filters[key] = value_list
         
         try:
             services = service_service.filter_services(**filters)
