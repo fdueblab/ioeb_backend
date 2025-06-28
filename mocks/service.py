@@ -224,7 +224,7 @@ MOCK_SERVICES = [
     },
     {
         "id": "c48aad98-4a7b-4498-a4d5-ac2f991d1c0d",
-        "name": "基于多智能体协作的金融欺诈检测推理服务",
+        "name": "基于多智能体协作的金融欺诈检测推理MCP服务",
         "attribute": "custom",
         "type": "atomic_mcp",
         "domain": "aml",
@@ -260,7 +260,7 @@ MOCK_SERVICES = [
     },
     {
         "id": "ad43a293-fb67-4efb-b65b-ec22d9cca5ae",
-        "name": "围标检测微服务",
+        "name": "围标检测MCP服务",
         "attribute": "custom",
         "type": "atomic_mcp",
         "domain": "aml",
@@ -404,7 +404,7 @@ MOCK_SERVICES = [
     },
     {
         "id": "fa3fafbb-fb30-492d-93cf-b608e06b4d9a",
-        "name": "肝移植患者利奈唑胺给药方案优化微服务",
+        "name": "肝移植患者利奈唑胺给药方案优化MCP服务",
         "attribute": "open_source",
         "type": "atomic_mcp",
         "domain": "health",
