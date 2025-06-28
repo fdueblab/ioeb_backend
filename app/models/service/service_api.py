@@ -24,6 +24,7 @@ class ServiceApi(db.Model):
     is_fake = db.Column(db.Boolean, default=False, comment="是否为模拟数据")
     response = db.Column(db.Text, nullable=True, comment="模拟响应数据")
     response_file_name = db.Column(db.String(100), nullable=True, comment="响应文件名")
+    example_msg = db.Column(db.Text, nullable=True, comment="示例消息")
     # 元应用专用字段
     input_name = db.Column(db.String(100), nullable=True, comment="输入名称")
     output_name = db.Column(db.String(100), nullable=True, comment="输出名称")
@@ -71,5 +72,13 @@ class ServiceApi(db.Model):
 
         if self.parameters:
             result["parameters"] = [param.to_dict() for param in self.parameters]
+
+        # 添加示例消息字段
+        if self.example_msg:
+            try:
+                result["exampleMsg"] = json.loads(self.example_msg)
+            except json.JSONDecodeError:
+                # 如果不是有效JSON，则返回原始字符串
+                result["exampleMsg"] = self.example_msg
 
         return result 
