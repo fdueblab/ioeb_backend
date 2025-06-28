@@ -3023,7 +3023,6 @@ MOCK_SERVICE_APIS = [
         "method": "sse",
         "url": "http://fdueblab.cn:8778/sse",
         "des": "供智能体调用的基于多智能体协作的金融欺诈检测推理服务",
-
         "parameter_type": 1,
         "response_type": 1,
         "is_fake": 0,
