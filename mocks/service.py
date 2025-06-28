@@ -56,6 +56,7 @@ API_IDS = {
     "fraudDetectionAgentsStatus": "fd005a2b-3c4d-5e6f-7890-1234567890ab",
     "fraudDetectionModelInfo": "fd006a2b-3c4d-5e6f-7890-1234567890ab",
     "多智能体欺诈检测MCP Server": "afd0b-3a4a-5aaf-7890-1234567890ab",
+    "课题二多方安全计算模型推理MCP Server": "9c8e7a6b-4d3f-2018-9c8e-7a6b4d3f2018",
 }
 
 # MOCK_SERVICES 数据
@@ -110,6 +111,24 @@ MOCK_SERVICES = [
         "volume": "/home/ubuntu/ioeb/api/Project_2/checkpoint -> /app/checkpoint",
         "status": "released",
         "number": 512,
+        "deleted": 0,
+        "create_time": 1744635999632,
+        "creator_id": "",
+    },
+    {
+        "id": "5fda9469-dcd7-4032-affb-9c9df0cd2cc7",
+        "name": "课题二多方安全计算模型推理MCP服务",
+        "attribute": "open_source",
+        "type": "atomic_mcp",
+        "domain": "aml",
+        "industry": "0",
+        "scenario": "1",
+        "technology": "1",
+        "network": "ioeb_app-network",
+        "port": "8770/tcp → 0.0.0.0:8770 :::8770",
+        "volume": "/home/ubuntu/ioeb/api/Project_2/mcp -> /app/mcp",
+        "status": "pre_release_unrated",
+        "number": 112,
         "deleted": 0,
         "create_time": 1744635999632,
         "creator_id": "",
@@ -3223,7 +3242,7 @@ MOCK_SERVICE_APIS = [
         "name": "样例报告生成MCP Server",
         "url": "https://myMcpServer.com/report-generation/sse",
         "method": "sse",
-        "des": "供智能体调用的基于课题五算法的mcp服务，可用于自动化报告生成和文档处理",
+        "des": "供智能体调用的课题五mcp样例服务，用于功能演示",
         "parameter_type": 1,
         "response_type": 1,
         "is_fake": 1,
@@ -3242,6 +3261,19 @@ MOCK_SERVICE_APIS = [
         "is_fake": 1,
         "example_msg": "[{\"title\":\"商户跨境交易风险识别\",\"content\":\"请对以下商户跨境交易进行风险识别：商户ID M002156，单笔交易金额15.2万美元，交易对手位于开曼群岛，交易时间凌晨3点，该商户历史平均交易额3.5万美元\"}]",
         "response": "{\"steps\":[{\"step\":\"连接课题一风险识别模型推理MCP服务器\",\"status\":\"completed\",\"message\":\"成功连接到课题一风险识别模型推理MCP服务器\"},{\"step\":\"跨境交易数据预处理\",\"status\":\"completed\",\"message\":\"正在对商户跨境交易数据进行标准化和特征提取\"},{\"step\":\"反洗钱模型推理\",\"status\":\"completed\",\"message\":\"正在运行课题一反洗钱风险识别算法进行推理分析\"},{\"step\":\"交易风险评估\",\"status\":\"completed\",\"message\":\"正在计算交易金额、地理位置、时间等维度风险指标\"},{\"step\":\"风险等级输出\",\"status\":\"completed\",\"message\":\"正在生成风险识别结果和监管建议\"}],\"final_result\":{\"response\":\"跨境交易风险识别分析完成。该商户交易风险评级为高风险。主要风险因素：①交易金额异常（超出历史均值334%）②交易对手位于高风险司法管辖区（开曼群岛）③交易时间异常（非工作时间）。建议：立即启动增强尽职调查程序，要求提供详细的交易背景文件，暂停该笔交易处理并上报监管部门。\"}}"
+    },
+    {
+        "id": "9c8e7a6b-4d3f-2018-9c8e-7a6b4d3f2018",
+        "service_id": "5fda9469-dcd7-4032-affb-9c9df0cd2cc7",
+        "name": "课题二多方安全计算模型推理MCP Server",
+        "url": "https://myMcpServer.com/multi-party-computation/sse",
+        "method": "sse",
+        "des": "供智能体调用的基于课题二多方安全计算算法的mcp服务，可用于多机构联合反洗钱分析而无需共享敏感数据",
+        "parameter_type": 1,
+        "response_type": 1,
+        "is_fake": 1,
+        "example_msg": "[{\"title\":\"多机构联合反洗钱分析\",\"content\":\"请启动多方安全计算，联合分析商户M003789在银行A、支付机构B、信用卡公司C的跨境交易数据，识别潜在洗钱网络\"}]",
+        "response": "{\"steps\":[{\"step\":\"连接课题二多方安全计算MCP服务器\",\"status\":\"completed\",\"message\":\"成功连接到课题二多方安全计算MCP服务器\"},{\"step\":\"建立安全计算协议\",\"status\":\"completed\",\"message\":\"正在与各参与机构建立隐私保护的安全计算协议\"},{\"step\":\"数据加密分片\",\"status\":\"completed\",\"message\":\"正在对各机构的交易数据进行同态加密和秘密分享\"},{\"step\":\"联合模型推理\",\"status\":\"completed\",\"message\":\"正在运行课题二MPC算法进行跨机构联合反洗钱分析\"},{\"step\":\"隐私保护结果聚合\",\"status\":\"completed\",\"message\":\"正在保护各方隐私的前提下聚合分析结果\"}],\"final_result\":{\"response\":\"多机构联合反洗钱分析完成。在保护各机构敏感数据的前提下，发现商户M003789存在跨机构洗钱嫌疑：①在银行A有大额现金存款模式②在支付机构B进行频繁小额跨境转账③在信用卡公司C有异常消费地理分布。综合风险评级：极高风险。建议各机构协调启动联合调查，同时上报金融情报中心。\"}}"
     },
     {
         "id": "6e5d4c3b-2a19-0827-6e5d-4c3b2a190827",
@@ -3998,6 +4030,25 @@ MOCK_SERVICE_API_TOOLS = [
         "api_id": "7a9b8c6d-5e4f-3029-8b7a-6c5d4e3f2019",
         "name": "evaluate",
         "description": "评估风险等级和给出风控建议",
+    },
+    # 课题二多方安全计算模型推理MCP Server 的工具
+    {
+        "id": "tool-037-mpc-health-check",
+        "api_id": "9c8e7a6b-4d3f-2018-9c8e-7a6b4d3f2018",
+        "name": "healthCheck",
+        "description": "判断课题二多方安全计算MCP服务状态是否正常可用",
+    },
+    {
+        "id": "tool-038-mpc-compute",
+        "api_id": "9c8e7a6b-4d3f-2018-9c8e-7a6b4d3f2018",
+        "name": "multiPartyCompute",
+        "description": "启动多方安全计算协议，联合分析多机构数据而不泄露隐私",
+    },
+    {
+        "id": "tool-039-mpc-analyze",
+        "api_id": "9c8e7a6b-4d3f-2018-9c8e-7a6b4d3f2018",
+        "name": "jointAnalyze",
+        "description": "执行跨机构联合反洗钱分析和洗钱网络识别",
     },
     # 课题三金融风险报告生成MCP Server 的工具
     {
