@@ -10,6 +10,7 @@ from app.models import (
     Service,
     ServiceApi,
     ServiceApiParameter,
+    ServiceApiTool,
     ServiceNorm,
     ServiceSource,
     User,
@@ -18,6 +19,7 @@ from app.utils.flask_utils import get_flask_env
 from mocks.dictionary import MOCK_DICTIONARIES
 from mocks.service import (
     MOCK_SERVICE_API_PARAMETERS,
+    MOCK_SERVICE_API_TOOLS,
     MOCK_SERVICE_APIS,
     MOCK_SERVICE_NORMS,
     MOCK_SERVICE_SOURCES,
@@ -73,6 +75,9 @@ def seed_db():
     # 添加示例服务API参数数据
     for param in MOCK_SERVICE_API_PARAMETERS:
         db.session.add(ServiceApiParameter(**param))
+    # 添加示例服务API工具数据
+    for tool in MOCK_SERVICE_API_TOOLS:
+        db.session.add(ServiceApiTool(**tool))
     # 添加示例字典数据
     for dictionary in MOCK_DICTIONARIES:
         db.session.add(Dictionary(**dictionary))

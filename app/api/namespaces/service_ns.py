@@ -64,7 +64,9 @@ api_model = api.model(
         "inputName": fields.String(description="输入名称(元应用专用)"),
         "outputName": fields.String(description="输出名称(元应用专用)"),
         "outputVisualization": fields.Boolean(description="是否可视化输出(元应用专用)"),
-        "submitButtonText": fields.String(description="提交按钮文本(元应用专用)")
+        "submitButtonText": fields.String(description="提交按钮文本(元应用专用)"),
+        # MCP专用字段
+        "tools": fields.List(fields.Raw, description="MCP工具列表(MCP专用)")
     }
 )
 

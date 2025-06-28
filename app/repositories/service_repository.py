@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Union
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
-from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter
+from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
 
 
 class ServiceRepository:
@@ -240,6 +240,17 @@ class ServiceRepository:
                                 des=param_data.get("des", "")
                             )
                             db.session.add(param)
+                    
+                    # 添加API工具
+                    if "tools" in api_data and isinstance(api_data["tools"], list):
+                        for tool_data in api_data["tools"]:
+                            tool = ServiceApiTool(
+                                id=str(uuid.uuid4()),
+                                api_id=api_id,
+                                name=tool_data.get("name", ""),
+                                description=tool_data.get("description", tool_data.get("des", ""))
+                            )
+                            db.session.add(tool)
             
             # 提交事务
             db.session.commit()
@@ -339,9 +350,10 @@ class ServiceRepository:
                 existing_apis = ServiceApi.query.filter_by(service_id=service_id).all()
                 existing_api_ids = [api.id for api in existing_apis]
                 
-                # 删除相关的参数
+                # 删除相关的参数和工具
                 for api_id in existing_api_ids:
                     ServiceApiParameter.query.filter_by(api_id=api_id).delete()
+                    ServiceApiTool.query.filter_by(api_id=api_id).delete()
                 
                 # 删除API
                 ServiceApi.query.filter_by(service_id=service_id).delete()
@@ -388,6 +400,17 @@ class ServiceRepository:
                                 des=param_data.get("des", "")
                             )
                             db.session.add(param)
+                    
+                    # 添加API工具
+                    if "tools" in api_data and isinstance(api_data["tools"], list):
+                        for tool_data in api_data["tools"]:
+                            tool = ServiceApiTool(
+                                id=str(uuid.uuid4()),
+                                api_id=api_id,
+                                name=tool_data.get("name", ""),
+                                description=tool_data.get("description", tool_data.get("des", ""))
+                            )
+                            db.session.add(tool)
             
             # 提交事务
             db.session.commit()
