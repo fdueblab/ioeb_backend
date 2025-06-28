@@ -3023,28 +3023,7 @@ MOCK_SERVICE_APIS = [
         "method": "sse",
         "url": "http://fdueblab.cn:8778/sse",
         "des": "供智能体调用的基于多智能体协作的金融欺诈检测推理服务",
-        "tools": [
-            {
-                "name": "healthCheck",
-                "des": "判断微服务状态是否正常可用",
-            },
-            {
-                "name": "analyzeTransaction",
-                "description": "单笔交易风险分析",
-            },
-            {
-                "name": "batchAnalyzeTransactions",
-                "description": "批量交易风险分析",
-            },
-            {
-                "name": "getAgentsStatus",
-                "des": "获取各智能体状态",
-            },
-            {
-                "name": "getModelInfo",
-                "des": "获取模型信息",
-            }
-        ],
+
         "parameter_type": 1,
         "response_type": 1,
         "is_fake": 0,
@@ -3057,16 +3036,7 @@ MOCK_SERVICE_APIS = [
         "url": "http://fdueblab.cn:25013/sse",
         "method": "sse",
         "des": "供智能体调用的利奈唑胺给药方案优化服务",
-        "tools": [
-            {
-                "name": "healthCheck",
-                "des": "判断微服务状态是否正常可用",
-            },
-            {
-                "name": "calculate",
-                "des": "根据患者的基本信息计算推荐的利奈唑胺给药剂量",
-            }
-        ],
+
         "parameter_type": 1,
         "response_type": 1,
         "is_fake": 0,
@@ -3079,20 +3049,7 @@ MOCK_SERVICE_APIS = [
         "url": "http://fdueblab.cn:26023/sse",
         "method": "sse",
         "des": "提供机器学习模型预测和风险调整功能的MCP服务",
-        "tools": [
-            {
-                "name": "healthCheck",
-                "des": "判断微服务状态是否正常可用",
-            },
-            {
-                "name": "flask_predict",
-                "des": "传入特征数组，获取模型预测结果和解释",
-            },
-            {
-                "name": "risk_adjust",
-                "des": "对输入数据数组进行风险调整处理",
-            }
-        ],
+
         "parameter_type": 1,
         "response_type": 1,
         "is_fake": 0,
@@ -3663,5 +3620,72 @@ MOCK_SERVICE_API_PARAMETERS = [
         "name": "transactions",
         "type": "array",
         "des": "数组格式的交易数据列表。例如：[{\"src_id\": 0,\"dst_id\": 0,\"label\": 0,\"feat\": {\"features\": [\"string\",0]}}]",
+    },
+]
+
+# MOCK_SERVICE_API_TOOLS 数据
+MOCK_SERVICE_API_TOOLS = [
+    # 多智能体欺诈检测MCP Server 的工具
+    {
+        "id": "tool-001-health-check-mcp1",
+        "api_id": "afd0b-3a4a-5aaf-7890-1234567890ab",
+        "name": "healthCheck",
+        "description": "判断微服务状态是否正常可用",
+    },
+    {
+        "id": "tool-002-analyze-transaction",
+        "api_id": "afd0b-3a4a-5aaf-7890-1234567890ab",
+        "name": "analyzeTransaction",
+        "description": "单笔交易风险分析",
+    },
+    {
+        "id": "tool-003-batch-analyze-transactions",
+        "api_id": "afd0b-3a4a-5aaf-7890-1234567890ab",
+        "name": "batchAnalyzeTransactions",
+        "description": "批量交易风险分析",
+    },
+    {
+        "id": "tool-004-get-agents-status",
+        "api_id": "afd0b-3a4a-5aaf-7890-1234567890ab",
+        "name": "getAgentsStatus",
+        "description": "获取各智能体状态",
+    },
+    {
+        "id": "tool-005-get-model-info",
+        "api_id": "afd0b-3a4a-5aaf-7890-1234567890ab",
+        "name": "getModelInfo",
+        "description": "获取模型信息",
+    },
+    # 利奈唑胺给药方案优化MCP Server 的工具
+    {
+        "id": "tool-006-health-check-mcp2",
+        "api_id": "402cb58e-5214-4a5d-b945-16f7c8651308",
+        "name": "healthCheck",
+        "description": "判断微服务状态是否正常可用",
+    },
+    {
+        "id": "tool-007-calculate-dosage",
+        "api_id": "402cb58e-5214-4a5d-b945-16f7c8651308",
+        "name": "calculate",
+        "description": "根据患者的基本信息计算推荐的利奈唑胺给药剂量",
+    },
+    # 围标检测MCP Server 的工具
+    {
+        "id": "tool-008-health-check-mcp3",
+        "api_id": "702cb58e-1111-2222-3333-16f7c8651308",
+        "name": "healthCheck",
+        "description": "判断微服务状态是否正常可用",
+    },
+    {
+        "id": "tool-009-flask-predict",
+        "api_id": "702cb58e-1111-2222-3333-16f7c8651308",
+        "name": "flask_predict",
+        "description": "传入特征数组，获取模型预测结果和解释",
+    },
+    {
+        "id": "tool-010-risk-adjust",
+        "api_id": "702cb58e-1111-2222-3333-16f7c8651308",
+        "name": "risk_adjust",
+        "description": "对输入数据数组进行风险调整处理",
     },
 ]
