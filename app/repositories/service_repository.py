@@ -210,6 +210,14 @@ class ServiceRepository:
                         else:
                             response = api_data["response"]
                     
+                    # 处理可能的JSON字符串示例消息
+                    example_msg = None
+                    if api_data.get("example_msg"):
+                        if isinstance(api_data["example_msg"], (list, dict)):
+                            example_msg = json.dumps(api_data["example_msg"])
+                        else:
+                            example_msg = api_data["example_msg"]
+                    
                     api = ServiceApi(
                         id=api_id,
                         service_id=service_id,
@@ -222,6 +230,7 @@ class ServiceRepository:
                         is_fake=api_data.get("isFake", False),
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
+                        example_msg=example_msg,
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
@@ -370,6 +379,14 @@ class ServiceRepository:
                         else:
                             response = api_data["response"]
                     
+                    # 处理可能的JSON字符串示例消息
+                    example_msg = None
+                    if api_data.get("example_msg"):
+                        if isinstance(api_data["example_msg"], (list, dict)):
+                            example_msg = json.dumps(api_data["example_msg"])
+                        else:
+                            example_msg = api_data["example_msg"]
+                    
                     api = ServiceApi(
                         id=api_id,
                         service_id=service_id,
@@ -382,6 +399,7 @@ class ServiceRepository:
                         is_fake=api_data.get("isFake", False),
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
+                        example_msg=example_msg,
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
