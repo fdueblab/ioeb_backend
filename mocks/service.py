@@ -694,6 +694,7 @@ MOCK_SERVICES = [
     {
         "id": "fa4c11e8-e76a-49c5-903a-9634dc3abe67",
         "name": "乡村医疗AI辅助诊断元应用",
+        "des": "基于大模型智能体的元应用样例，用于在乡村医疗场景下辅助诊断",
         "attribute": "custom",
         "type": "meta",
         "domain": "health",
@@ -712,6 +713,7 @@ MOCK_SERVICES = [
     {
         "id": "80b3b5e1-f2bc-4cd2-a196-0298aa8cc57a",
         "name": "农村公共卫生监测元应用",
+        "des": "基于大模型智能体的元应用，用于在农业场景下进行作物分析和预测",
         "attribute": "custom",
         "type": "meta",
         "domain": "health",
@@ -802,6 +804,7 @@ MOCK_SERVICES = [
     {
         "id": "9fe9c51a-aa30-44b0-95ff-01827ce3b0bf",
         "name": "智慧农业综合管理元应用",
+        "des": "基于大模型智能体的元应用，用于在低空飞行场景下辅助无人机控制",
         "attribute": "paid",
         "type": "meta",
         "domain": "agriculture",
@@ -910,6 +913,7 @@ MOCK_SERVICES = [
     {
         "id": "264342fa-649d-47f9-b589-41f0c592ea14",
         "name": "eVTOL智能飞行控制元应用",
+        "des": "基于大模型智能体的元应用，用于在低空飞行场景下辅助无人机控制",
         "attribute": "open_source",
         "type": "meta",
         "domain": "evtol",
@@ -964,6 +968,7 @@ MOCK_SERVICES = [
     {
         "id": "0969a474-c3b2-4ddf-99e9-61c3ec4fb076",
         "name": "跨境电商智能营销元应用",
+        "des": "基于大模型智能体的元应用，用于在跨境电商场景下进行智能营销",
         "attribute": "open_source",
         "type": "meta",
         "domain": "ecommerce",
@@ -1054,6 +1059,7 @@ MOCK_SERVICES = [
     {
         "id": "0247718c-34c6-46b7-9a75-abd4b8e615af",
         "name": "家庭智能助手元应用",
+        "des": "基于大模型智能体的元应用，用于在家庭场景下提供智能助手服务",
         "attribute": "open_source",
         "type": "meta",
         "domain": "homeAI",
@@ -2561,7 +2567,7 @@ MOCK_SERVICE_APIS = [
         "name": "safety-fingerprint",
         "url": "/project4/safety/safety-fingerprint",
         "method": "post",
-        "des": "",
+        "des": "基于课题四的算法进行模型的安全性指纹评测",
         "parameter_type": 2,
         "response_type": 1,
         "is_fake": 0,
@@ -2585,7 +2591,7 @@ MOCK_SERVICE_APIS = [
         "name": "技术评测元应用",
         "url": "https://myApiServer.com/metaApp",
         "method": "post",
-        "des": "",
+        "des": "用于进行原子微服务的技术评测的元应用样例",
         "parameter_type": 3,
         "response_type": 1,
         "is_fake": 1,
