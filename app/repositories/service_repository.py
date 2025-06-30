@@ -61,6 +61,49 @@ class ServiceRepository:
         service = self.get_service_by_id(service_id)
         return service.to_dict() if service else None
     
+    def get_services_by_ids(self, service_ids: List[str]) -> List[Service]:
+        """
+        根据ID列表批量获取微服务
+
+        Args:
+            service_ids: 微服务ID列表
+
+        Returns:
+            List[Service]: 微服务对象列表，按输入ID顺序返回，不存在的ID会被跳过
+        """
+        if not service_ids:
+            return []
+        
+        # 使用IN操作符一次性查询所有服务，性能优化
+        services = Service.query.filter(
+            Service.id.in_(service_ids),
+            Service.deleted == 0
+        ).all()
+        
+        # 创建ID到服务对象的映射以便按输入顺序返回
+        services_map = {service.id: service for service in services}
+        
+        # 按输入ID的顺序返回结果，跳过不存在的ID
+        result = []
+        for service_id in service_ids:
+            if service_id in services_map:
+                result.append(services_map[service_id])
+        
+        return result
+    
+    def get_services_dict_by_ids(self, service_ids: List[str]) -> List[Dict]:
+        """
+        根据ID列表批量获取微服务的字典表示
+
+        Args:
+            service_ids: 微服务ID列表
+
+        Returns:
+            List[Dict]: 微服务字典列表，按输入ID顺序返回，不存在的ID会被跳过
+        """
+        services = self.get_services_by_ids(service_ids)
+        return [service.to_dict() for service in services]
+    
     def find_by_name(self, name: str) -> Optional[Service]:
         """
         根据名称查找微服务
