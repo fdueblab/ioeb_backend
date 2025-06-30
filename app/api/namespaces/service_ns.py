@@ -149,6 +149,26 @@ error_response = api.model(
     }
 )
 
+# 定义批量获取请求模型
+batch_request_model = api.model(
+    "BatchRequest",
+    {
+        "ids": fields.List(fields.String, required=True, description="服务ID列表", min_items=1, max_items=100)
+    }
+)
+
+# 定义批量获取响应模型
+batch_response_model = api.model(
+    "BatchResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+        "total": fields.Integer(description="成功获取的记录数"),
+        "services": fields.List(fields.Nested(service_model), description="成功获取的微服务列表"),
+        "notFound": fields.List(fields.String, description="不存在的服务ID列表")
+    }
+)
+
 
 @api.route("")
 class ServiceList(Resource):
@@ -325,6 +345,82 @@ class ServiceFilter(Resource):
                 "message": "筛选微服务成功",
                 "total": len(services),
                 "services": services
+            }, 200
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
+@api.route("/batch")
+class ServiceBatch(Resource):
+    @api.doc("batch_get_services", description="""
+        批量获取微服务接口，通过服务ID列表一次性获取多个服务的信息。
+        
+        该接口具有以下特点：
+        - 支持一次性获取多个服务信息，提高性能
+        - 最多支持一次获取100个服务
+        - 会返回成功获取的服务列表和不存在的服务ID列表
+        - 服务按输入ID的顺序返回
+        - 自动去重，重复的ID只会返回一次
+        
+        请求体示例：
+        {
+            "ids": ["service-id-1", "service-id-2", "service-id-3"]
+        }
+        
+        响应示例：
+        {
+            "status": "success",
+            "message": "批量获取微服务成功",
+            "total": 2,
+            "services": [
+                {服务1信息},
+                {服务2信息}
+            ],
+            "notFound": ["service-id-3"]
+        }
+    """)
+    @api.expect(batch_request_model)
+    @api.marshal_with(batch_response_model, code=200)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self):
+        """批量获取微服务"""
+        data = request.get_json()
+
+        if not data:
+            return {"status": "error", "message": "缺少请求数据"}, 400
+
+        service_ids = data.get("ids")
+        if not service_ids:
+            return {"status": "error", "message": "服务ID列表不能为空"}, 400
+
+        if not isinstance(service_ids, list):
+            return {"status": "error", "message": "服务ID列表必须是数组格式"}, 400
+
+        if len(service_ids) == 0:
+            return {"status": "error", "message": "服务ID列表不能为空"}, 400
+
+        if len(service_ids) > 100:
+            return {"status": "error", "message": "一次最多只能获取100个服务"}, 400
+
+        # 检查所有ID是否为字符串
+        for service_id in service_ids:
+            if not isinstance(service_id, str) or not service_id.strip():
+                return {"status": "error", "message": "服务ID必须是非空字符串"}, 400
+
+        try:
+            services, not_found_ids = service_service.get_services_by_ids(service_ids)
+            
+            message = "批量获取微服务成功"
+            if not_found_ids:
+                message += f"，其中{len(not_found_ids)}个服务不存在"
+            
+            return {
+                "status": "success",
+                "message": message,
+                "total": len(services),
+                "services": services,
+                "notFound": not_found_ids
             }, 200
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 500 
