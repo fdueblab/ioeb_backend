@@ -26,6 +26,8 @@ class ServiceApi(db.Model):
     response_file_name = db.Column(db.String(100), nullable=True, comment="响应文件名")
     example_msg = db.Column(db.Text, nullable=True, comment="示例消息")
     # 元应用专用字段
+    subtitle = db.Column(db.String(200), nullable=True, comment="元应用副标题")
+    services = db.Column(db.Text, nullable=True, comment="元应用使用的服务ID列表(逗号分隔)")
     input_name = db.Column(db.String(100), nullable=True, comment="输入名称")
     output_name = db.Column(db.String(100), nullable=True, comment="输出名称")
     output_visualization = db.Column(db.Boolean, default=False, comment="是否可视化输出")
@@ -33,6 +35,29 @@ class ServiceApi(db.Model):
     # 关联关系
     parameters = db.relationship("ServiceApiParameter", backref="api", lazy=True)
     tools = db.relationship("ServiceApiTool", backref="api", lazy=True)
+
+    def _parse_services_string(self, services_str):
+        """
+        解析services字符串为服务ID列表
+        
+        Args:
+            services_str: 逗号分隔的服务ID字符串
+            
+        Returns:
+            List[str]: 服务ID列表，如果解析失败返回空列表
+        """
+        try:
+            if not services_str or not isinstance(services_str, str):
+                return []
+            
+            # 去除前后空格并按逗号分割，过滤掉空字符串
+            service_ids = [sid.strip() for sid in services_str.split(',') if sid.strip()]
+            
+            return service_ids
+            
+        except Exception:
+            # 如果解析过程中出现任何异常，返回空列表
+            return []
 
     def to_dict(self):
         """将模型转换为字典"""
@@ -57,6 +82,10 @@ class ServiceApi(db.Model):
                 result["responseFileName"] = self.response_file_name
         
         # 添加元应用相关字段
+        if self.subtitle:
+            result["subtitle"] = self.subtitle
+        if self.services:
+            result["services"] = self._parse_services_string(self.services)
         if self.input_name:
             result["inputName"] = self.input_name
         if self.output_name:

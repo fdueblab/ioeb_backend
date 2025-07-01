@@ -17,6 +17,36 @@ from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceA
 class ServiceRepository:
     """微服务数据仓库"""
 
+    def _convert_services_list_to_string(self, services_list):
+        """
+        将服务ID列表转换为逗号分隔的字符串
+        
+        Args:
+            services_list: 服务ID列表，可以是list或None
+            
+        Returns:
+            str: 逗号分隔的服务ID字符串，如果输入为空返回None
+        """
+        try:
+            if not services_list or not isinstance(services_list, list):
+                return None
+            
+            # 过滤掉空值和非字符串值
+            valid_ids = []
+            for service_id in services_list:
+                if isinstance(service_id, str) and service_id.strip():
+                    valid_ids.append(service_id.strip())
+            
+            # 如果没有有效的ID，返回None
+            if not valid_ids:
+                return None
+                
+            return ','.join(valid_ids)
+            
+        except Exception:
+            # 如果处理过程中出现任何异常，返回None
+            return None
+
     def get_all_services(self) -> List[Service]:
         """
         获取所有微服务
@@ -274,6 +304,8 @@ class ServiceRepository:
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
                         example_msg=example_msg,
+                        subtitle=api_data.get("subtitle"),
+                        services=self._convert_services_list_to_string(api_data.get("services")),
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
@@ -443,6 +475,8 @@ class ServiceRepository:
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
                         example_msg=example_msg,
+                        subtitle=api_data.get("subtitle"),
+                        services=self._convert_services_list_to_string(api_data.get("services")),
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
