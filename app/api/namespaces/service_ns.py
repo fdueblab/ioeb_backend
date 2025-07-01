@@ -61,6 +61,8 @@ api_model = api.model(
         "responseFileName": fields.String(description="响应文件名"),
         "parameters": fields.List(fields.Nested(api_parameter_model), description="API参数"),
         # 元应用专用字段
+        "subtitle": fields.String(description="元应用副标题(元应用专用)"),
+        "services": fields.List(fields.String, description="元应用使用的服务ID列表(元应用专用)"),
         "inputName": fields.String(description="输入名称(元应用专用)"),
         "outputName": fields.String(description="输出名称(元应用专用)"),
         "outputVisualization": fields.Boolean(description="是否可视化输出(元应用专用)"),
