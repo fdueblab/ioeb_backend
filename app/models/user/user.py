@@ -43,7 +43,7 @@ class User(db.Model):
         """初始化用户实例"""
         super().__init__(**kwargs)
         if not self.create_time:
-            self.create_time = int(datetime.datetime.now().timestamp())
+            self.create_time = int(datetime.datetime.now().timestamp() * 1000) # 毫秒时间戳
         if not self.id:
             import uuid
 

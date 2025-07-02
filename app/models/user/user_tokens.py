@@ -31,7 +31,7 @@ class UserToken(db.Model):
         super().__init__(**kwargs)
         if not self.expires_at:
             # 过期时间设置为7天
-            self.expires_at = int(datetime.datetime.now().timestamp()) + 7 * 24 * 60 * 60
+            self.expires_at = int(datetime.datetime.now().timestamp() * 1000) + 7 * 24 * 60 * 60 * 1000
         if not self.user_id:
             raise ValueError("User ID is required")
         if not self.token:

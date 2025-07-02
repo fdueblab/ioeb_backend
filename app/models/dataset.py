@@ -48,7 +48,7 @@ class Dataset(db.Model):
         super().__init__(**kwargs)
         if not self.id:
             self.id = str(uuid.uuid4())
-        current_time = int(datetime.datetime.now().timestamp())
+        current_time = int(datetime.datetime.now().timestamp() * 1000) # 毫秒时间戳
         if not self.create_time:
             self.create_time = current_time
         if not self.update_time:
