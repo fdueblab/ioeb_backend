@@ -119,7 +119,7 @@ class DatasetRepository(BaseRepository[Dataset]):
         if "id" not in dataset_data:
             dataset_data["id"] = str(uuid.uuid4())
 
-        current_time = int(datetime.now().timestamp())
+        current_time = int(datetime.now().timestamp() * 1000) # 毫秒时间戳
         if "create_time" not in dataset_data:
             dataset_data["create_time"] = current_time
         if "update_time" not in dataset_data:
@@ -147,7 +147,7 @@ class DatasetRepository(BaseRepository[Dataset]):
             return None
 
         # 更新时间戳
-        dataset_data["update_time"] = int(datetime.now().timestamp())
+        dataset_data["update_time"] = int(datetime.now().timestamp() * 1000) # 毫秒时间戳
 
         # 更新数据集
         for key, value in dataset_data.items():
@@ -178,7 +178,7 @@ class DatasetRepository(BaseRepository[Dataset]):
         else:
             # 软删除
             dataset.status = "deleted"
-            dataset.update_time = int(datetime.now().timestamp())
+            dataset.update_time = int(datetime.now().timestamp() * 1000) # 毫秒时间戳
 
         db.session.commit()
         return True

@@ -219,7 +219,7 @@ class ServiceRepository:
         try:
             # 开始数据库事务
             service_id = str(uuid.uuid4())
-            current_time = int(datetime.now().timestamp() * 1000)  # 毫秒时间戳
+            current_time = int(datetime.now().timestamp() * 1000) # 毫秒时间戳
 
             # 创建服务基本信息
             service = Service(

@@ -84,7 +84,7 @@ standard_response = api.model(
     "StandardResponse",
     {
         "message": fields.String(description="响应消息"),
-        "timestamp": fields.Integer(description="时间戳"),
+        "timestamp": fields.Integer(description="时间戳（毫秒）"),
         "result": fields.Nested(user_response, description="响应结果"),
         "code": fields.Integer(description="响应代码"),
     },
@@ -138,13 +138,13 @@ class Login(Resource):
 
         # 更新用户登录信息
         user.last_login_ip = request.remote_addr
-        user.last_login_time = int(datetime.datetime.now().timestamp())
+        user.last_login_time = int(datetime.datetime.now().timestamp() * 1000) # 毫秒时间戳
 
         # 查询用户角色
         role = Role.query.filter_by(id=user.role_id, deleted=0).first()
 
         # 创建或更新令牌
-        expires_at = int(datetime.datetime.now().timestamp()) + 7 * 24 * 60 * 60  # 7天过期
+        expires_at = int(datetime.datetime.now().timestamp() * 1000) + 7 * 24 * 60 * 60 * 1000 # 7天过期
         user_token = UserToken.query.filter_by(user_id=user.id).first()
 
         if user_token:
@@ -203,7 +203,7 @@ class UserInfo(Resource):
             return {"code": 401, "message": "无效的认证令牌"}, 401
 
         # 检查令牌是否过期
-        now = int(datetime.datetime.now().timestamp())
+        now = int(datetime.datetime.now().timestamp() * 1000) # 毫秒时间戳
         if user_token.expires_at < now:
             return {"code": 401, "message": "认证令牌已过期"}, 401
 
