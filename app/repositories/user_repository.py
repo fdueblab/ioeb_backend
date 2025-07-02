@@ -28,18 +28,30 @@ class UserRepository(BaseRepository[User]):
         """
         return self.find_one_by(email=email)
 
-    def create_user(self, username: str, email: str) -> User:
+    def find_by_username(self, username: str) -> Optional[User]:
+        """
+        根据用户名查找用户
+
+        Args:
+            username: 用户名
+
+        Returns:
+            User: 找到的用户，如果不存在则返回None
+        """
+        return self.find_one_by(username=username)
+
+    def create_user(self, username: str, name: str) -> User:
         """
         创建新用户
 
         Args:
             username: 用户名
-            email: 邮箱
+            name: 用户姓名
 
         Returns:
             User: 创建的用户
         """
-        return self.create(username=username, email=email)
+        return self.create(username=username, name=name)
 
     def get_all_users_with_dict(self) -> List[Dict]:
         """
@@ -51,12 +63,12 @@ class UserRepository(BaseRepository[User]):
         users = self.get_all()
         return [user.to_dict() for user in users]
 
-    def get_user_dict_by_id(self, user_id: int) -> Optional[Dict]:
+    def get_user_dict_by_id(self, user_id: str) -> Optional[Dict]:
         """
         根据ID获取用户字典
 
         Args:
-            user_id: 用户ID
+            user_id: 用户ID（UUID字符串）
 
         Returns:
             Dict: 用户字典，如果不存在则返回None
