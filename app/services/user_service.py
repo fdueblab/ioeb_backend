@@ -33,12 +33,12 @@ class UserService:
         except Exception as e:
             raise UserServiceError(f"获取用户列表失败: {str(e)}")
 
-    def get_user_by_id(self, user_id: int) -> Dict:
+    def get_user_by_id(self, user_id: str) -> Dict:
         """
         根据ID获取用户
 
         Args:
-            user_id: 用户ID
+            user_id: 用户ID（UUID字符串）
 
         Returns:
             Dict: 用户信息字典
@@ -74,13 +74,13 @@ class UserService:
         except Exception as e:
             raise UserServiceError(f"查询用户失败: {str(e)}")
 
-    def create_user(self, username: str, email: str) -> Tuple[Dict, bool]:
+    def create_user(self, username: str, name: str) -> Tuple[Dict, bool]:
         """
         创建新用户
 
         Args:
             username: 用户名
-            email: 邮箱
+            name: 用户姓名
 
         Returns:
             Tuple[Dict, bool]: 用户信息字典和是否为新创建的用户
@@ -88,17 +88,17 @@ class UserService:
         Raises:
             UserServiceError: 创建过程中出错
         """
-        if not username or not email:
-            raise UserServiceError("用户名和邮箱不能为空")
+        if not username or not name:
+            raise UserServiceError("用户名和姓名不能为空")
 
         try:
-            # 检查用户是否已存在
-            existing_user = self.user_repository.find_by_email(email)
+            # 检查用户是否已存在（通过用户名检查）
+            existing_user = self.user_repository.find_by_username(username)
             if existing_user:
                 return existing_user.to_dict(), False
 
             # 创建新用户
-            new_user = self.user_repository.create_user(username, email)
+            new_user = self.user_repository.create_user(username, name)
             return new_user.to_dict(), True
         except SQLAlchemyError as e:
             raise UserServiceError(f"创建用户失败: {str(e)}")
