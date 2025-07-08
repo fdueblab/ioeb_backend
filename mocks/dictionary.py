@@ -62,6 +62,24 @@ MOCK_IO_TYPE_DICTIONARIES = [
 ]
 
 MOCK_SERVICE_TYPE_DICTIONARIES = [
+        {
+        "category": "service_type",
+        "code": "atomic",
+        "text": "原子微服务-REST",
+        "sort": 1
+    },
+    {
+        "category": "service_type",
+        "code": "meta",
+        "text": "元应用服务",
+        "sort": 2
+    },
+    {
+        "category": "service_type",
+        "code": "atomic_mcp",
+        "text": "原子微服务-MCP",
+        "sort": 3
+    },
     {"category": "service_type", "code": "atomic", "text": "原子微服务", "sort": 1},
     {"category": "service_type", "code": "meta", "text": "元应用服务", "sort": 2},
 ]

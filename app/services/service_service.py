@@ -57,6 +57,46 @@ class ServiceService:
                 raise
             raise ServiceServiceError(f"获取微服务失败: {str(e)}")
 
+    def get_services_by_ids(self, service_ids: List[str]) -> Tuple[List[Dict], List[str]]:
+        """
+        根据ID列表批量获取微服务
+
+        Args:
+            service_ids: 微服务ID列表
+
+        Returns:
+            Tuple[List[Dict], List[str]]: 
+                - 第一个元素：成功获取的微服务字典列表，按输入ID顺序返回
+                - 第二个元素：不存在的微服务ID列表
+
+        Raises:
+            ServiceServiceError: 获取过程中出错
+        """
+        if not service_ids:
+            return [], []
+        
+        # 去重并保持顺序
+        unique_ids = []
+        seen = set()
+        for service_id in service_ids:
+            if service_id not in seen:
+                unique_ids.append(service_id)
+                seen.add(service_id)
+        
+        try:
+            # 使用仓库层批量获取服务
+            services = self.service_repository.get_services_dict_by_ids(unique_ids)
+            
+            # 找出成功获取的服务ID
+            found_ids = {service['id'] for service in services}
+            
+            # 找出不存在的服务ID
+            not_found_ids = [service_id for service_id in unique_ids if service_id not in found_ids]
+            
+            return services, not_found_ids
+        except Exception as e:
+            raise ServiceServiceError(f"批量获取微服务失败: {str(e)}")
+
     def get_services_by_attribute(self, attribute: str) -> List[Dict]:
         """
         根据属性获取微服务列表
@@ -194,13 +234,13 @@ class ServiceService:
 
         Args:
             **filters: 筛选条件，可包括:
-                - attribute: 服务属性
-                - type: 服务类型
-                - domain: 领域
-                - industry: 行业
-                - scenario: 场景
-                - technology: 技术
-                - status: 服务状态
+                - attribute: 服务属性（支持单个值或多个值列表）
+                - type: 服务类型（支持单个值或多个值列表）
+                - domain: 领域（支持单个值或多个值列表）
+                - industry: 行业（支持单个值或多个值列表）
+                - scenario: 场景（支持单个值或多个值列表）
+                - technology: 技术（支持单个值或多个值列表）
+                - status: 服务状态（支持单个值或多个值列表）
 
         Returns:
             List[Dict]: 符合条件的微服务列表

@@ -114,8 +114,8 @@ def create_dataset_record(file, creator_id):
         "meta_data": {},
         "tags": [file_type],
         "status": "active",
-        "create_time": int(datetime.datetime.now().timestamp()),
-        "update_time": int(datetime.datetime.now().timestamp()),
+        "create_time": int(datetime.datetime.now().timestamp() * 1000), # 毫秒时间戳
+        "update_time": int(datetime.datetime.now().timestamp() * 1000), # 毫秒时间戳
         "creator_id": creator_id,
     }
 

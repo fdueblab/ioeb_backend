@@ -159,6 +159,10 @@ API层位于`app/api/namespaces`目录，主要负责：
 
 ## 快速开始
 
+### 环境要求
+
+- **python**: 3.10
+
 ### 安装依赖
 
 ```bash
@@ -241,15 +245,19 @@ http://localhost:5000/api/docs
 - `service_apis`: 存储微服务API信息
 - `service_api_parameters`: 存储API参数信息
 
-## 数据库操作
+## 更新数据库
 
-使用管理命令进行数据库操作：
-
+项目内包含数据库更新脚本，运行脚本会清空现有数据并写入mock内的数据：
 ```bash
-python manage.py create_db  # 创建数据库表
-python manage.py drop_db    # 删除数据库表
-python manage.py seed_db    # 添加示例数据
+# Windows
+refresh_dev_db.bat
+
+# Linux
+cd ioeb_backend
+./db.sh
 ```
+⚠️ 注意：此操作会删除当前数据库数据并且不可恢复
+
 
 ## 测试
 
@@ -278,5 +286,7 @@ pytest
 ```
 
 ## 部署
-
-待实现
+```bash
+cd ioeb_backend
+docker-compose up -d
+```

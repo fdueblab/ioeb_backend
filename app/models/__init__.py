@@ -8,6 +8,7 @@ from app.models.dictionary import Dictionary
 from app.models.service.service import Service
 from app.models.service.service_api import ServiceApi
 from app.models.service.service_api_parameter import ServiceApiParameter
+from app.models.service.service_api_tool import ServiceApiTool
 from app.models.service.service_norm import ServiceNorm
 from app.models.service.service_source import ServiceSource
 from app.models.user.role import Role
@@ -31,6 +32,7 @@ __all__ = [
     "ServiceSource",
     "ServiceApi",
     "ServiceApiParameter",
+    "ServiceApiTool",
     "Dictionary",
     "Dataset",
 ]

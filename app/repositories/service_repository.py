@@ -11,11 +11,41 @@ from typing import Dict, List, Optional, Union
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
-from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter
+from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
 
 
 class ServiceRepository:
     """微服务数据仓库"""
+
+    def _convert_services_list_to_string(self, services_list):
+        """
+        将服务ID列表转换为逗号分隔的字符串
+        
+        Args:
+            services_list: 服务ID列表，可以是list或None
+            
+        Returns:
+            str: 逗号分隔的服务ID字符串，如果输入为空返回None
+        """
+        try:
+            if not services_list or not isinstance(services_list, list):
+                return None
+            
+            # 过滤掉空值和非字符串值
+            valid_ids = []
+            for service_id in services_list:
+                if isinstance(service_id, str) and service_id.strip():
+                    valid_ids.append(service_id.strip())
+            
+            # 如果没有有效的ID，返回None
+            if not valid_ids:
+                return None
+                
+            return ','.join(valid_ids)
+            
+        except Exception:
+            # 如果处理过程中出现任何异常，返回None
+            return None
 
     def get_all_services(self) -> List[Service]:
         """
@@ -60,6 +90,49 @@ class ServiceRepository:
         """
         service = self.get_service_by_id(service_id)
         return service.to_dict() if service else None
+    
+    def get_services_by_ids(self, service_ids: List[str]) -> List[Service]:
+        """
+        根据ID列表批量获取微服务
+
+        Args:
+            service_ids: 微服务ID列表
+
+        Returns:
+            List[Service]: 微服务对象列表，按输入ID顺序返回，不存在的ID会被跳过
+        """
+        if not service_ids:
+            return []
+        
+        # 使用IN操作符一次性查询所有服务，性能优化
+        services = Service.query.filter(
+            Service.id.in_(service_ids),
+            Service.deleted == 0
+        ).all()
+        
+        # 创建ID到服务对象的映射以便按输入顺序返回
+        services_map = {service.id: service for service in services}
+        
+        # 按输入ID的顺序返回结果，跳过不存在的ID
+        result = []
+        for service_id in service_ids:
+            if service_id in services_map:
+                result.append(services_map[service_id])
+        
+        return result
+    
+    def get_services_dict_by_ids(self, service_ids: List[str]) -> List[Dict]:
+        """
+        根据ID列表批量获取微服务的字典表示
+
+        Args:
+            service_ids: 微服务ID列表
+
+        Returns:
+            List[Dict]: 微服务字典列表，按输入ID顺序返回，不存在的ID会被跳过
+        """
+        services = self.get_services_by_ids(service_ids)
+        return [service.to_dict() for service in services]
     
     def find_by_name(self, name: str) -> Optional[Service]:
         """
@@ -146,7 +219,7 @@ class ServiceRepository:
         try:
             # 开始数据库事务
             service_id = str(uuid.uuid4())
-            current_time = int(datetime.now().timestamp() * 1000)  # 毫秒时间戳
+            current_time = int(datetime.now().timestamp() * 1000) # 毫秒时间戳
 
             # 创建服务基本信息
             service = Service(
@@ -210,6 +283,14 @@ class ServiceRepository:
                         else:
                             response = api_data["response"]
                     
+                    # 处理可能的JSON字符串示例消息
+                    example_msg = None
+                    if api_data.get("example_msg"):
+                        if isinstance(api_data["example_msg"], (list, dict)):
+                            example_msg = json.dumps(api_data["example_msg"])
+                        else:
+                            example_msg = api_data["example_msg"]
+                    
                     api = ServiceApi(
                         id=api_id,
                         service_id=service_id,
@@ -222,6 +303,9 @@ class ServiceRepository:
                         is_fake=api_data.get("isFake", False),
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
+                        example_msg=example_msg,
+                        subtitle=api_data.get("subtitle"),
+                        services=self._convert_services_list_to_string(api_data.get("services")),
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
@@ -240,6 +324,17 @@ class ServiceRepository:
                                 des=param_data.get("des", "")
                             )
                             db.session.add(param)
+                    
+                    # 添加API工具
+                    if "tools" in api_data and isinstance(api_data["tools"], list):
+                        for tool_data in api_data["tools"]:
+                            tool = ServiceApiTool(
+                                id=str(uuid.uuid4()),
+                                api_id=api_id,
+                                name=tool_data.get("name", ""),
+                                description=tool_data.get("description", tool_data.get("des", ""))
+                            )
+                            db.session.add(tool)
             
             # 提交事务
             db.session.commit()
@@ -339,9 +434,10 @@ class ServiceRepository:
                 existing_apis = ServiceApi.query.filter_by(service_id=service_id).all()
                 existing_api_ids = [api.id for api in existing_apis]
                 
-                # 删除相关的参数
+                # 删除相关的参数和工具
                 for api_id in existing_api_ids:
                     ServiceApiParameter.query.filter_by(api_id=api_id).delete()
+                    ServiceApiTool.query.filter_by(api_id=api_id).delete()
                 
                 # 删除API
                 ServiceApi.query.filter_by(service_id=service_id).delete()
@@ -358,6 +454,14 @@ class ServiceRepository:
                         else:
                             response = api_data["response"]
                     
+                    # 处理可能的JSON字符串示例消息
+                    example_msg = None
+                    if api_data.get("example_msg"):
+                        if isinstance(api_data["example_msg"], (list, dict)):
+                            example_msg = json.dumps(api_data["example_msg"])
+                        else:
+                            example_msg = api_data["example_msg"]
+                    
                     api = ServiceApi(
                         id=api_id,
                         service_id=service_id,
@@ -370,6 +474,9 @@ class ServiceRepository:
                         is_fake=api_data.get("isFake", False),
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
+                        example_msg=example_msg,
+                        subtitle=api_data.get("subtitle"),
+                        services=self._convert_services_list_to_string(api_data.get("services")),
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
@@ -388,6 +495,17 @@ class ServiceRepository:
                                 des=param_data.get("des", "")
                             )
                             db.session.add(param)
+                    
+                    # 添加API工具
+                    if "tools" in api_data and isinstance(api_data["tools"], list):
+                        for tool_data in api_data["tools"]:
+                            tool = ServiceApiTool(
+                                id=str(uuid.uuid4()),
+                                api_id=api_id,
+                                name=tool_data.get("name", ""),
+                                description=tool_data.get("description", tool_data.get("des", ""))
+                            )
+                            db.session.add(tool)
             
             # 提交事务
             db.session.commit()
@@ -420,13 +538,13 @@ class ServiceRepository:
 
         Args:
             **filters: 筛选条件，可包括:
-                - attribute: 服务属性
-                - type: 服务类型
-                - domain: 领域
-                - industry: 行业
-                - scenario: 场景
-                - technology: 技术
-                - status: 服务状态
+                - attribute: 服务属性（支持多个值）
+                - type: 服务类型（支持多个值）
+                - domain: 领域（支持多个值）
+                - industry: 行业（支持多个值）
+                - scenario: 场景（支持多个值）
+                - technology: 技术（支持多个值）
+                - status: 服务状态（支持多个值）
 
         Returns:
             List[Service]: 符合条件的微服务对象列表
@@ -437,9 +555,10 @@ class ServiceRepository:
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
             if key in valid_filters and value is not None:
-                if key == "attribute":
+                # 支持所有条件都能使用多个值
+                if isinstance(value, list) and len(value) > 0:
                     query = query.filter(getattr(Service, key).in_(value))
-                else:
+                elif not isinstance(value, list) and value:
                     query = query.filter(getattr(Service, key) == value)
         
         return query.all()

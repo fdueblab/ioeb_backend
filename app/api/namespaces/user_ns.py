@@ -10,11 +10,19 @@ api = Namespace("users", description="用户管理API")
 user_model = api.model(
     "User",
     {
-        "id": fields.Integer(readonly=True, description="用户ID"),
+        "id": fields.String(readonly=True, description="用户ID"),
         "username": fields.String(required=True, description="用户名"),
-        "email": fields.String(required=True, description="电子邮箱"),
-        "created_at": fields.DateTime(readonly=True, description="创建时间"),
-        "updated_at": fields.DateTime(readonly=True, description="更新时间"),
+        "name": fields.String(required=True, description="用户姓名"),
+        "avatar": fields.String(description="头像路径"),
+        "telephone": fields.String(description="电话号码"),
+        "merchantCode": fields.String(description="商户代码"),
+        "roleId": fields.String(description="角色ID"),
+        "status": fields.Integer(description="用户状态"),
+        "deleted": fields.Integer(description="是否删除"),
+        "lastLoginIp": fields.String(description="最后登录IP"),
+        "lastLoginTime": fields.Integer(description="最后登录时间戳"),
+        "createTime": fields.Integer(description="创建时间戳"),
+        "creatorId": fields.String(description="创建者ID"),
     },
 )
 
@@ -22,7 +30,7 @@ user_post_model = api.model(
     "UserCreate",
     {
         "username": fields.String(required=True, description="用户名"),
-        "email": fields.String(required=True, description="电子邮箱"),
+        "name": fields.String(required=True, description="用户姓名"),
     },
 )
 
@@ -62,11 +70,11 @@ class UserList(Resource):
         """创建新用户"""
         data = request.get_json()
 
-        if not data or not data.get("username") or not data.get("email"):
+        if not data or not data.get("username") or not data.get("name"):
             api.abort(400, "缺少必要的用户信息")
 
         try:
-            user_data, is_new = user_service.create_user(data.get("username"), data.get("email"))
+            user_data, is_new = user_service.create_user(data.get("username"), data.get("name"))
 
             if not is_new:
                 return {"status": "warning", "message": "用户已存在", "user": user_data}, 200
@@ -76,7 +84,7 @@ class UserList(Resource):
             api.abort(400, str(e))
 
 
-@api.route("/<int:id>")
+@api.route("/<string:id>")
 @api.param("id", "用户ID")
 @api.response(404, "User not found")
 class UserResource(Resource):
