@@ -611,6 +611,29 @@ class ServiceRepository:
         """
         return ServiceApiParameter.query.filter_by(api_id=api_id).all()
 
+    def update_service_status(self, service_id: str, status: str) -> bool:
+        """
+        更新微服务状态
+
+        Args:
+            service_id: 微服务ID
+            status: 新的状态值
+
+        Returns:
+            bool: 是否更新成功
+        """
+        try:
+            service = self.get_service_by_id(service_id)
+            if not service:
+                return False
+            
+            service.status = status
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            return False
+
 
 # 创建单例实例，方便导入使用
 service_repository = ServiceRepository()

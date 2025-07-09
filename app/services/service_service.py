@@ -4,7 +4,10 @@
 """
 
 from typing import Dict, List, Optional, Tuple
+import threading
+import time
 
+from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.repositories.service_repository import ServiceRepository
@@ -250,6 +253,95 @@ class ServiceService:
             return [service.to_dict() for service in services]
         except Exception as e:
             raise ServiceServiceError(f"筛选微服务失败: {str(e)}")
+
+    def deploy_service(self, service_id: str) -> bool:
+        """
+        部署微服务
+
+        Args:
+            service_id: 微服务ID
+
+        Returns:
+            bool: 是否成功启动部署
+
+        Raises:
+            ServiceServiceError: 部署过程中出错
+        """
+        try:
+            # 检查服务是否存在
+            service = self.service_repository.get_service_by_id(service_id)
+            if not service:
+                raise ServiceServiceError(f"微服务ID {service_id} 不存在")
+            
+            # 检查服务状态是否允许部署
+            if service.status == "deploying":
+                raise ServiceServiceError("微服务正在部署中，请稍后再试")
+            
+            # 先设置状态为部署中
+            self.service_repository.update_service_status(service_id, "deploying")
+            
+            # 获取当前Flask应用实例
+            app = current_app._get_current_object()
+            
+            # 启动异步部署任务
+            def deploy_task():
+                with app.app_context():
+                    try:
+                        # 模拟部署过程，延时10秒
+                        time.sleep(10)
+                        
+                        # 部署完成后设置状态为预发布(未测评)
+                        self.service_repository.update_service_status(service_id, "pre_release_unrated")
+                        print(f"服务 {service_id} 部署成功")
+                    except Exception as e:
+                        # 如果部署失败，设置状态为错误
+                        self.service_repository.update_service_status(service_id, "error")
+                        print(f"服务 {service_id} 部署失败: {str(e)}")
+            
+            # 启动后台线程执行部署
+            deploy_thread = threading.Thread(target=deploy_task)
+            deploy_thread.daemon = True
+            deploy_thread.start()
+            
+            return True
+        except Exception as e:
+            if isinstance(e, ServiceServiceError):
+                raise
+            raise ServiceServiceError(f"部署微服务失败: {str(e)}")
+
+    def stop_service(self, service_id: str) -> bool:
+        """
+        停止微服务
+
+        Args:
+            service_id: 微服务ID
+
+        Returns:
+            bool: 是否停止成功
+
+        Raises:
+            ServiceServiceError: 停止过程中出错
+        """
+        try:
+            # 检查服务是否存在
+            service = self.service_repository.get_service_by_id(service_id)
+            if not service:
+                raise ServiceServiceError(f"微服务ID {service_id} 不存在")
+            
+            # 检查服务状态是否允许停止
+            if service.status == "not_deployed":
+                raise ServiceServiceError("微服务已经处于未部署状态")
+            
+            # 设置状态为未部署
+            success = self.service_repository.update_service_status(service_id, "not_deployed")
+            if not success:
+                raise ServiceServiceError("停止微服务失败")
+            
+            return True
+        except Exception as e:
+            if isinstance(e, ServiceServiceError):
+                raise
+            raise ServiceServiceError(f"停止微服务失败: {str(e)}")
 
 
 # 创建单例实例，方便导入使用

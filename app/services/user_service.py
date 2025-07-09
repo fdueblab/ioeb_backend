@@ -105,6 +105,80 @@ class UserService:
         except Exception as e:
             raise UserServiceError(f"创建用户过程中出错: {str(e)}")
 
+    def update_user(self, user_id: str, data: Dict) -> Dict:
+        """
+        更新用户信息
+
+        Args:
+            user_id: 用户ID
+            data: 更新数据
+
+        Returns:
+            Dict: 更新后的用户信息字典
+
+        Raises:
+            UserServiceError: 用户不存在或更新失败
+        """
+        try:
+            user = self.user_repository.update_user(user_id, data)
+            if not user:
+                raise UserServiceError(f"用户ID {user_id} 不存在")
+            return user.to_dict()
+        except Exception as e:
+            if isinstance(e, UserServiceError):
+                raise
+            raise UserServiceError(f"更新用户失败: {str(e)}")
+
+    def delete_user(self, user_id: str) -> bool:
+        """
+        删除用户（逻辑删除）
+
+        Args:
+            user_id: 用户ID
+
+        Returns:
+            bool: 删除是否成功
+
+        Raises:
+            UserServiceError: 用户不存在或删除失败
+        """
+        try:
+            success = self.user_repository.delete_user(user_id)
+            if not success:
+                raise UserServiceError(f"用户ID {user_id} 不存在")
+            return success
+        except Exception as e:
+            if isinstance(e, UserServiceError):
+                raise
+            raise UserServiceError(f"删除用户失败: {str(e)}")
+
+    def update_user_status(self, user_id: str, status: int) -> bool:
+        """
+        更新用户状态
+
+        Args:
+            user_id: 用户ID
+            status: 用户状态（1-正常，0-禁用）
+
+        Returns:
+            bool: 更新是否成功
+
+        Raises:
+            UserServiceError: 用户不存在或状态值无效
+        """
+        if status not in [0, 1]:
+            raise UserServiceError("用户状态值无效，只能是0（禁用）或1（正常）")
+
+        try:
+            user = self.user_repository.update_user_status(user_id, status)
+            if not user:
+                raise UserServiceError(f"用户ID {user_id} 不存在")
+            return True
+        except Exception as e:
+            if isinstance(e, UserServiceError):
+                raise
+            raise UserServiceError(f"更新用户状态失败: {str(e)}")
+
 
 # 创建单例实例，方便导入使用
 user_service = UserService()
