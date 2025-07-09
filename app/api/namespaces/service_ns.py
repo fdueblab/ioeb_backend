@@ -142,6 +142,15 @@ services_response = api.model(
     }
 )
 
+# 定义简单响应模型
+simple_response = api.model(
+    "SimpleResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+    },
+)
+
 # 定义错误响应模型
 error_response = api.model(
     "ErrorResponse",
@@ -257,22 +266,6 @@ class ServiceResource(Resource):
             if "不存在" in str(e):
                 return {"status": "error", "message": str(e)}, 404
             return {"status": "error", "message": str(e)}, 400
-
-    @api.doc("delete_service")
-    @api.response(200, "Service deleted")
-    @api.response(404, "Service not found", error_response)
-    def delete(self, id):
-        """删除指定ID的微服务"""
-        try:
-            result = service_service.delete_service(id)
-            if result:
-                return {
-                    "status": "success", 
-                    "message": "微服务删除成功"
-                }, 200
-            return {"status": "error", "message": "微服务删除失败"}, 500
-        except ServiceServiceError as e:
-            return {"status": "error", "message": str(e)}, 404
 
 
 @api.route("/search")
@@ -425,4 +418,67 @@ class ServiceBatch(Resource):
                 "notFound": not_found_ids
             }, 200
         except ServiceServiceError as e:
-            return {"status": "error", "message": str(e)}, 500 
+            return {"status": "error", "message": str(e)}, 500
+
+
+@api.route("/<string:id>/delete")
+@api.param("id", "微服务ID")
+@api.response(404, "Service not found", error_response)
+class ServiceDeleteResource(Resource):
+    @api.doc("delete_service")
+    @api.marshal_with(simple_response, code=200)
+    @api.response(404, "Service not found", error_response)
+    def get(self, id):
+        """删除指定ID的微服务"""
+        try:
+            result = service_service.delete_service(id)
+            if result:
+                return {
+                    "status": "success", 
+                    "message": "微服务删除成功"
+                }, 200
+            return {"status": "error", "message": "微服务删除失败"}, 500
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404
+
+
+@api.route("/<string:id>/deploy")
+@api.param("id", "微服务ID")
+@api.response(404, "Service not found", error_response)
+class ServiceDeployResource(Resource):
+    @api.doc("deploy_service")
+    @api.marshal_with(simple_response, code=200)
+    @api.response(404, "Service not found", error_response)
+    def get(self, id):
+        """部署指定ID的微服务"""
+        try:
+            result = service_service.deploy_service(id)
+            if result:
+                return {
+                    "status": "success", 
+                    "message": "微服务部署已启动，正在部署中..."
+                }, 200
+            return {"status": "error", "message": "微服务部署失败"}, 500
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404
+
+
+@api.route("/<string:id>/stop")
+@api.param("id", "微服务ID")
+@api.response(404, "Service not found", error_response)
+class ServiceStopResource(Resource):
+    @api.doc("stop_service")
+    @api.marshal_with(simple_response, code=200)
+    @api.response(404, "Service not found", error_response)
+    def get(self, id):
+        """停止指定ID的微服务"""
+        try:
+            result = service_service.stop_service(id)
+            if result:
+                return {
+                    "status": "success", 
+                    "message": "微服务停止成功"
+                }, 200
+            return {"status": "error", "message": "微服务停止失败"}, 500
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404 

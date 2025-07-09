@@ -77,3 +77,72 @@ class UserRepository(BaseRepository[User]):
         if user:
             return user.to_dict()
         return None
+
+    def update_user(self, user_id: str, data: Dict) -> Optional[User]:
+        """
+        更新用户信息
+
+        Args:
+            user_id: 用户ID
+            data: 更新数据
+
+        Returns:
+            User: 更新后的用户，如果不存在则返回None
+        """
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+        
+        # 过滤掉空值和不存在的字段
+        update_data = {}
+        allowed_fields = ['username', 'name', 'avatar', 'telephone', 'merchant_code', 'role_id']
+        field_mapping = {
+            'merchantCode': 'merchant_code',
+            'roleId': 'role_id'
+        }
+        
+        for key, value in data.items():
+            if value is not None and value != '':
+                # 处理字段名映射
+                db_field = field_mapping.get(key, key)
+                if db_field in allowed_fields:
+                    update_data[db_field] = value
+        
+        if update_data:
+            return self.update(user, **update_data)
+        return user
+
+    def delete_user(self, user_id: str) -> bool:
+        """
+        删除用户（逻辑删除）
+
+        Args:
+            user_id: 用户ID
+
+        Returns:
+            bool: 删除是否成功
+        """
+        user = self.get_by_id(user_id)
+        if not user:
+            return False
+        
+        # 逻辑删除：设置deleted字段为1
+        self.update(user, deleted=1)
+        return True
+
+    def update_user_status(self, user_id: str, status: int) -> Optional[User]:
+        """
+        更新用户状态
+
+        Args:
+            user_id: 用户ID
+            status: 用户状态（1-正常，0-禁用）
+
+        Returns:
+            User: 更新后的用户，如果不存在则返回None
+        """
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+        
+        return self.update(user, status=status)
