@@ -87,7 +87,7 @@ MOCK_USERS = [
         "avatar": "/avatar2.svg",
         "telephone": "152****1333",
         "merchant_code": "TLif2btpzg079h15bk",
-        "role_id": "AppDev",
+        "role_id": "MPAdm",
         "status": 1,
         "deleted": 0,
         "last_login_ip": "27.154.74.117",
@@ -139,12 +139,18 @@ MOCK_ROLES = [
         "name": "应用开发者",
         "describe": "拥有发布者和用户权限",
         "status": 1,
+        "creator_id": "system",
+        "create_time": 1497160610259,
+        "deleted": 0,
     },
     {
         "id": "MPAdm",
         "name": "中台运维者",
         "describe": "拥有用户和管理员权限",
         "status": 1,
+        "creator_id": "system",
+        "create_time": 1497160610259,
+        "deleted": 0,
     },
 ]
 
