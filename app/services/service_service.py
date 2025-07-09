@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 import threading
 import time
 
+from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.repositories.service_repository import ServiceRepository
@@ -279,18 +280,23 @@ class ServiceService:
             # 先设置状态为部署中
             self.service_repository.update_service_status(service_id, "deploying")
             
+            # 获取当前Flask应用实例
+            app = current_app._get_current_object()
+            
             # 启动异步部署任务
             def deploy_task():
-                try:
-                    # 模拟部署过程，延时5秒
-                    time.sleep(5)
-                    
-                    # 部署完成后设置状态为已发布
-                    self.service_repository.update_service_status(service_id, "released")
-                except Exception as e:
-                    # 如果部署失败，设置状态为错误
-                    self.service_repository.update_service_status(service_id, "error")
-                    print(f"部署失败: {str(e)}")
+                with app.app_context():
+                    try:
+                        # 模拟部署过程，延时10秒
+                        time.sleep(10)
+                        
+                        # 部署完成后设置状态为预发布(未测评)
+                        self.service_repository.update_service_status(service_id, "pre_release_unrated")
+                        print(f"服务 {service_id} 部署成功")
+                    except Exception as e:
+                        # 如果部署失败，设置状态为错误
+                        self.service_repository.update_service_status(service_id, "error")
+                        print(f"服务 {service_id} 部署失败: {str(e)}")
             
             # 启动后台线程执行部署
             deploy_thread = threading.Thread(target=deploy_task)
