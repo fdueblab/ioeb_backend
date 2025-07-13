@@ -66,7 +66,7 @@ MOCK_USERS = [
     {
         "id": "4291d7da9005377ec9aec4a71ea837b",
         "username": "AppDev",
-        "name": "银联-应用开发者",
+        "name": "银联-模型开发用户",
         "password": "e10adc3949ba59abbe56e057f20f883e",
         "avatar": "/avatar2.svg",
         "telephone": "152****1333",
@@ -82,7 +82,7 @@ MOCK_USERS = [
     {
         "id": "4291d7da9005377ec9aec4a71ea837a",
         "username": "MPAdm",
-        "name": "银联-中台运维者",
+        "name": "银联-中台运维用户",
         "password": "e10adc3949ba59abbe56e057f20f883e",
         "avatar": "/avatar2.svg",
         "telephone": "152****1333",
