@@ -31,6 +31,7 @@ user_post_model = api.model(
     {
         "username": fields.String(required=True, description="用户名"),
         "name": fields.String(required=True, description="用户姓名"),
+        "password": fields.String(required=True, description="用户密码"),
     },
 )
 
@@ -42,7 +43,20 @@ user_update_model = api.model(
         "avatar": fields.String(description="头像路径"),
         "telephone": fields.String(description="电话号码"),
         "merchantCode": fields.String(description="商户代码"),
-        "roleId": fields.String(description="角色ID"),
+    },
+)
+
+user_password_model = api.model(
+    "UserPasswordUpdate",
+    {
+        "password": fields.String(required=True, description="新密码"),
+    },
+)
+
+user_role_model = api.model(
+    "UserRoleUpdate",
+    {
+        "roleId": fields.String(required=True, description="角色ID"),
     },
 )
 
@@ -84,7 +98,7 @@ class UserList(Resource):
     @api.doc("list_users")
     @api.marshal_with(users_response, code=200)
     def get(self):
-        """获取所有用户"""
+        """获取所有用户（不包含已删除的用户）"""
         users = user_service.get_all_users()
         return {"status": "success", "users": users}, 200
 
@@ -97,11 +111,15 @@ class UserList(Resource):
         """创建新用户"""
         data = request.get_json()
 
-        if not data or not data.get("username") or not data.get("name"):
+        if not data or not data.get("username") or not data.get("name") or not data.get("password"):
             api.abort(400, "缺少必要的用户信息")
 
         try:
-            user_data, is_new = user_service.create_user(data.get("username"), data.get("name"))
+            user_data, is_new = user_service.create_user(
+                data.get("username"), 
+                data.get("name"), 
+                data.get("password")
+            )
 
             if not is_new:
                 return {"status": "warning", "message": "用户已存在", "user": user_data}, 200
@@ -118,7 +136,7 @@ class UserResource(Resource):
     @api.doc("get_user")
     @api.marshal_with(user_response)
     def get(self, id):
-        """获取指定ID的用户"""
+        """获取指定ID的用户（已删除的用户会返回"用户已删除"错误）"""
         try:
             user = user_service.get_user_by_id(id)
             return {"status": "success", "message": "获取用户成功", "user": user}
@@ -136,7 +154,7 @@ class UserUpdateResource(Resource):
     @api.response(400, "Invalid input")
     @api.response(404, "User not found")
     def post(self, id):
-        """更新用户信息"""
+        """更新用户信息（已删除的用户会返回"用户已删除"错误）"""
         data = request.get_json()
 
         if not data:
@@ -157,7 +175,7 @@ class UserDeleteResource(Resource):
     @api.marshal_with(simple_response, code=200)
     @api.response(404, "User not found")
     def get(self, id):
-        """删除用户"""
+        """删除用户（已删除的用户会返回"用户已删除"错误）"""
         try:
             user_service.delete_user(id)
             return {"status": "success", "message": "用户删除成功"}
@@ -175,7 +193,7 @@ class UserStatusResource(Resource):
     @api.response(400, "Invalid input")
     @api.response(404, "User not found")
     def get(self, id):
-        """更新用户状态"""
+        """更新用户状态（已删除的用户会返回"用户已删除"错误）"""
         status = request.args.get("status")
         
         if not status:
@@ -190,5 +208,51 @@ class UserStatusResource(Resource):
             return {"status": "success", "message": "用户状态更新成功"}
         except ValueError:
             api.abort(400, "状态参数必须是数字")
+        except UserServiceError as e:
+            api.abort(404, str(e))
+
+
+@api.route("/<string:id>/password")
+@api.param("id", "用户ID")
+@api.response(404, "User not found")
+class UserPasswordResource(Resource):
+    @api.doc("update_user_password")
+    @api.expect(user_password_model)
+    @api.marshal_with(simple_response, code=200)
+    @api.response(400, "Invalid input")
+    @api.response(404, "User not found")
+    def post(self, id):
+        """更新用户密码（已删除的用户会返回"用户已删除"错误）"""
+        data = request.get_json()
+
+        if not data or not data.get("password"):
+            api.abort(400, "缺少必要的密码信息")
+
+        try:
+            user_service.update_user_password(id, data.get("password"))
+            return {"status": "success", "message": "用户密码更新成功"}
+        except UserServiceError as e:
+            api.abort(404, str(e))
+
+
+@api.route("/<string:id>/role")
+@api.param("id", "用户ID")
+@api.response(404, "User not found")
+class UserRoleResource(Resource):
+    @api.doc("update_user_role")
+    @api.expect(user_role_model)
+    @api.marshal_with(simple_response, code=200)
+    @api.response(400, "Invalid input")
+    @api.response(404, "User not found")
+    def post(self, id):
+        """更新用户角色（已删除的用户会返回"用户已删除"错误）"""
+        data = request.get_json()
+
+        if not data or not data.get("roleId"):
+            api.abort(400, "缺少必要的角色信息")
+
+        try:
+            user_service.update_user_role(id, data.get("roleId"))
+            return {"status": "success", "message": "用户角色更新成功"}
         except UserServiceError as e:
             api.abort(404, str(e))
