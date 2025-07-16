@@ -99,6 +99,15 @@ error_response = api.model(
     },
 )
 
+# 角色列表响应模型
+roles_response = api.model(
+    "RolesResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "roles": fields.List(fields.Nested(role_model), description="角色列表"),
+    },
+)
+
 
 @api.route("/login")
 class Login(Resource):
@@ -283,3 +292,25 @@ class Logout(Resource):
                 db.session.commit()
 
         return {"message": "登出成功"}, 200
+
+
+@api.route("/roles")
+class Roles(Resource):
+    @api.doc(
+        "get_all_roles",
+        responses={
+            200: ("获取角色列表成功", roles_response),
+            500: ("服务器错误", error_response),
+        },
+    )
+    @api.marshal_with(roles_response, code=200)
+    def get(self):
+        """获取所有角色（不包含已删除的角色）"""
+        try:
+            # 查询所有未删除的角色
+            roles = Role.query.filter_by(deleted=0).all()
+            roles_data = [role.to_dict() for role in roles]
+            
+            return {"status": "success", "roles": roles_data}, 200
+        except Exception as e:
+            return {"status": "error", "message": f"获取角色列表失败: {str(e)}"}, 500
