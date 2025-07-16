@@ -74,22 +74,26 @@ class UserService:
         except Exception as e:
             raise UserServiceError(f"查询用户失败: {str(e)}")
 
-    def create_user(self, username: str, name: str) -> Tuple[Dict, bool]:
+    def create_user(self, username: str, name: str, password: str) -> Tuple[Dict, bool]:
         """
         创建新用户
 
         Args:
             username: 用户名
             name: 用户姓名
+            password: 用户密码
 
         Returns:
             Tuple[Dict, bool]: 用户信息字典和是否为新创建的用户
 
+        Note:
+            新创建的用户默认角色为"user"
+
         Raises:
             UserServiceError: 创建过程中出错
         """
-        if not username or not name:
-            raise UserServiceError("用户名和姓名不能为空")
+        if not username or not name or not password:
+            raise UserServiceError("用户名、姓名和密码不能为空")
 
         try:
             # 检查用户是否已存在（通过用户名检查）
@@ -98,7 +102,7 @@ class UserService:
                 return existing_user.to_dict(), False
 
             # 创建新用户
-            new_user = self.user_repository.create_user(username, name)
+            new_user = self.user_repository.create_user(username, name, password)
             return new_user.to_dict(), True
         except SQLAlchemyError as e:
             raise UserServiceError(f"创建用户失败: {str(e)}")
@@ -178,6 +182,60 @@ class UserService:
             if isinstance(e, UserServiceError):
                 raise
             raise UserServiceError(f"更新用户状态失败: {str(e)}")
+
+    def update_user_password(self, user_id: str, password: str) -> bool:
+        """
+        更新用户密码
+
+        Args:
+            user_id: 用户ID
+            password: 新密码
+
+        Returns:
+            bool: 更新是否成功
+
+        Raises:
+            UserServiceError: 用户不存在或密码为空
+        """
+        if not password:
+            raise UserServiceError("密码不能为空")
+
+        try:
+            user = self.user_repository.update_user_password(user_id, password)
+            if not user:
+                raise UserServiceError(f"用户ID {user_id} 不存在")
+            return True
+        except Exception as e:
+            if isinstance(e, UserServiceError):
+                raise
+            raise UserServiceError(f"更新用户密码失败: {str(e)}")
+
+    def update_user_role(self, user_id: str, role_id: str) -> bool:
+        """
+        更新用户角色
+
+        Args:
+            user_id: 用户ID
+            role_id: 角色ID
+
+        Returns:
+            bool: 更新是否成功
+
+        Raises:
+            UserServiceError: 用户不存在或角色ID为空
+        """
+        if not role_id:
+            raise UserServiceError("角色ID不能为空")
+
+        try:
+            user = self.user_repository.update_user_role(user_id, role_id)
+            if not user:
+                raise UserServiceError(f"用户ID {user_id} 不存在")
+            return True
+        except Exception as e:
+            if isinstance(e, UserServiceError):
+                raise
+            raise UserServiceError(f"更新用户角色失败: {str(e)}")
 
 
 # 创建单例实例，方便导入使用

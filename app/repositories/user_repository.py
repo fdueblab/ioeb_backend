@@ -40,18 +40,22 @@ class UserRepository(BaseRepository[User]):
         """
         return self.find_one_by(username=username)
 
-    def create_user(self, username: str, name: str) -> User:
+    def create_user(self, username: str, name: str, password: str) -> User:
         """
         创建新用户
 
         Args:
             username: 用户名
             name: 用户姓名
+            password: 用户密码
 
         Returns:
             User: 创建的用户
+
+        Note:
+            新创建的用户默认角色为"user"
         """
-        return self.create(username=username, name=name)
+        return self.create(username=username, name=name, password=password, role_id="user")
 
     def get_all_users_with_dict(self) -> List[Dict]:
         """
@@ -95,10 +99,9 @@ class UserRepository(BaseRepository[User]):
         
         # 过滤掉空值和不存在的字段
         update_data = {}
-        allowed_fields = ['username', 'name', 'avatar', 'telephone', 'merchant_code', 'role_id']
+        allowed_fields = ['username', 'name', 'avatar', 'telephone', 'merchant_code']
         field_mapping = {
-            'merchantCode': 'merchant_code',
-            'roleId': 'role_id'
+            'merchantCode': 'merchant_code'
         }
         
         for key, value in data.items():
@@ -146,3 +149,37 @@ class UserRepository(BaseRepository[User]):
             return None
         
         return self.update(user, status=status)
+
+    def update_user_password(self, user_id: str, password: str) -> Optional[User]:
+        """
+        更新用户密码
+
+        Args:
+            user_id: 用户ID
+            password: 新密码
+
+        Returns:
+            User: 更新后的用户，如果不存在则返回None
+        """
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+        
+        return self.update(user, password=password)
+
+    def update_user_role(self, user_id: str, role_id: str) -> Optional[User]:
+        """
+        更新用户角色
+
+        Args:
+            user_id: 用户ID
+            role_id: 角色ID
+
+        Returns:
+            User: 更新后的用户，如果不存在则返回None
+        """
+        user = self.get_by_id(user_id)
+        if not user:
+            return None
+        
+        return self.update(user, role_id=role_id)

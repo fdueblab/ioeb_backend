@@ -23,7 +23,7 @@ class User(db.Model):
     avatar = db.Column(db.String(255), nullable=True, comment="头像路径")
     telephone = db.Column(db.String(20), nullable=True, comment="电话号码")
     merchant_code = db.Column(db.String(50), nullable=True, comment="商户代码")
-    role_id = db.Column(db.String(36), nullable=False, comment="角色ID，关联roles表")
+    role_id = db.Column(db.String(36), nullable=False, default="user", comment="角色ID，关联roles表")
 
     # 状态信息
     status = db.Column(db.Integer, nullable=False, default=1, comment="用户状态：1-正常，0-禁用")
