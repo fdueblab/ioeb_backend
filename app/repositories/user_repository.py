@@ -24,9 +24,9 @@ class UserRepository(BaseRepository[User]):
             email: 用户邮箱
 
         Returns:
-            User: 找到的用户，如果不存在则返回None
+            User: 找到的用户，如果不存在或已删除则返回None
         """
-        return self.find_one_by(email=email)
+        return self.find_one_by(email=email, deleted=0)
 
     def find_by_username(self, username: str) -> Optional[User]:
         """
@@ -36,9 +36,9 @@ class UserRepository(BaseRepository[User]):
             username: 用户名
 
         Returns:
-            User: 找到的用户，如果不存在则返回None
+            User: 找到的用户，如果不存在或已删除则返回None
         """
-        return self.find_one_by(username=username)
+        return self.find_one_by(username=username, deleted=0)
 
     def create_user(self, username: str, name: str, password: str) -> User:
         """
@@ -62,12 +62,12 @@ class UserRepository(BaseRepository[User]):
         获取所有用户（字典格式）
 
         Returns:
-            List[Dict]: 用户字典列表
+            List[Dict]: 用户字典列表（不包含已删除的用户）
         """
-        users = self.get_all()
+        users = self.find_by(deleted=0)
         return [user.to_dict() for user in users]
 
-    def get_user_dict_by_id(self, user_id: str) -> Optional[Dict]:
+    def get_user_dict_by_id(self, user_id: str) -> tuple[Optional[Dict], str]:
         """
         根据ID获取用户字典
 
@@ -75,12 +75,15 @@ class UserRepository(BaseRepository[User]):
             user_id: 用户ID（UUID字符串）
 
         Returns:
-            Dict: 用户字典，如果不存在则返回None
+            tuple[Optional[Dict], str]: 用户字典和状态("exists", "deleted", "not_found")
         """
         user = self.get_by_id(user_id)
-        if user:
-            return user.to_dict()
-        return None
+        if not user:
+            return None, "not_found"
+        elif user.deleted == 1:
+            return None, "deleted"
+        else:
+            return user.to_dict(), "exists"
 
     def update_user(self, user_id: str, data: Dict) -> Optional[User]:
         """
@@ -94,7 +97,7 @@ class UserRepository(BaseRepository[User]):
             User: 更新后的用户，如果不存在则返回None
         """
         user = self.get_by_id(user_id)
-        if not user:
+        if not user or user.deleted == 1:
             return None
         
         # 过滤掉空值和不存在的字段
@@ -123,10 +126,10 @@ class UserRepository(BaseRepository[User]):
             user_id: 用户ID
 
         Returns:
-            bool: 删除是否成功
+            bool: 删除是否成功（如果用户不存在或已删除返回False）
         """
         user = self.get_by_id(user_id)
-        if not user:
+        if not user or user.deleted == 1:
             return False
         
         # 逻辑删除：设置deleted字段为1
@@ -145,7 +148,7 @@ class UserRepository(BaseRepository[User]):
             User: 更新后的用户，如果不存在则返回None
         """
         user = self.get_by_id(user_id)
-        if not user:
+        if not user or user.deleted == 1:
             return None
         
         return self.update(user, status=status)
@@ -162,7 +165,7 @@ class UserRepository(BaseRepository[User]):
             User: 更新后的用户，如果不存在则返回None
         """
         user = self.get_by_id(user_id)
-        if not user:
+        if not user or user.deleted == 1:
             return None
         
         return self.update(user, password=password)
@@ -179,7 +182,7 @@ class UserRepository(BaseRepository[User]):
             User: 更新后的用户，如果不存在则返回None
         """
         user = self.get_by_id(user_id)
-        if not user:
+        if not user or user.deleted == 1:
             return None
         
         return self.update(user, role_id=role_id)
