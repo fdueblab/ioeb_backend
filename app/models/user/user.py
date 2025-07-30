@@ -15,7 +15,7 @@ class User(db.Model):
 
     # 主键和基本信息
     id = db.Column(db.String(36), primary_key=True)  # 使用字符串类型的UUID
-    username = db.Column(db.String(100), unique=True, nullable=False, comment="用户登录名")
+    username = db.Column(db.String(100), nullable=False, comment="用户登录名（应用层确保未删除用户中唯一）")
     name = db.Column(db.String(100), nullable=False, comment="用户姓名")
     password = db.Column(db.String(255), nullable=False, comment="加密后的密码")
 

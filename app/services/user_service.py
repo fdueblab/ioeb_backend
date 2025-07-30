@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.repositories.user_repository import UserRepository
+from app.utils.password_utils import hash_password
 
 
 class UserServiceError(Exception):
@@ -98,13 +99,15 @@ class UserService:
             raise UserServiceError("用户名、姓名和密码不能为空")
 
         try:
-            # 检查用户是否已存在（通过用户名检查）
+            # 检查用户是否已存在（通过用户名检查，只检查未删除的用户）
             existing_user = self.user_repository.find_by_username(username)
             if existing_user:
                 return existing_user.to_dict(), False
 
+            # 对密码进行加密
+            hashed_password = hash_password(password)
             # 创建新用户
-            new_user = self.user_repository.create_user(username, name, password)
+            new_user = self.user_repository.create_user(username, name, hashed_password)
             return new_user.to_dict(), True
         except SQLAlchemyError as e:
             raise UserServiceError(f"创建用户失败: {str(e)}")
@@ -126,6 +129,13 @@ class UserService:
             UserServiceError: 用户不存在或已删除时抛出
         """
         try:
+            # 如果要更新用户名，检查新用户名是否已被其他未删除用户使用
+            if 'username' in data and data['username']:
+                new_username = data['username']
+                existing_user = self.user_repository.find_by_username(new_username)
+                if existing_user and existing_user.id != user_id:
+                    raise UserServiceError(f"用户名 '{new_username}' 已被使用")
+            
             user = self.user_repository.update_user(user_id, data)
             if not user:
                 # 检查用户是否存在但已删除
@@ -218,7 +228,9 @@ class UserService:
             raise UserServiceError("密码不能为空")
 
         try:
-            user = self.user_repository.update_user_password(user_id, password)
+            # 对密码进行加密
+            hashed_password = hash_password(password)
+            user = self.user_repository.update_user_password(user_id, hashed_password)
             if not user:
                 # 检查用户是否存在但已删除
                 user_dict, status = self.user_repository.get_user_dict_by_id(user_id)
