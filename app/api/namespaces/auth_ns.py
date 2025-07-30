@@ -14,6 +14,7 @@ from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
 from app.models.user.user import User
 from app.models.user.user_tokens import UserToken
+from app.utils.password_utils import verify_password
 
 # 创建命名空间
 api = Namespace("auth", description="认证相关API")
@@ -135,7 +136,7 @@ class Login(Resource):
         user = User.query.filter_by(username=username, deleted=0).first()
 
         # 验证用户存在并检查密码
-        if not user or user.password != password:  # 实际应用中应该使用安全的密码比对方法
+        if not user or not verify_password(password, user.password):
             return {"code": 401, "message": "用户名或密码错误"}, 401
 
         # 检查用户状态
