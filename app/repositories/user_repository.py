@@ -40,7 +40,8 @@ class UserRepository(BaseRepository[User]):
         """
         return self.find_one_by(username=username, deleted=0)
 
-    def create_user(self, username: str, name: str, password: str) -> User:
+    def create_user(self, username: str, name: str, password: str, 
+                   telephone: str = None, merchant_code: str = None, creator_id: str = None) -> User:
         """
         创建新用户
 
@@ -48,14 +49,34 @@ class UserRepository(BaseRepository[User]):
             username: 用户名
             name: 用户姓名
             password: 用户密码
+            telephone: 电话号码（可选）
+            merchant_code: 商户代码（可选）
+            creator_id: 创建者ID（可选）
 
         Returns:
             User: 创建的用户
 
         Note:
             新创建的用户默认角色为"user"
+            create_time会自动生成
         """
-        return self.create(username=username, name=name, password=password, role_id="user")
+        # 构建创建参数
+        create_params = {
+            'username': username,
+            'name': name,
+            'password': password,
+            'role_id': "user"
+        }
+        
+        # 添加可选参数
+        if telephone is not None:
+            create_params['telephone'] = telephone
+        if merchant_code is not None:
+            create_params['merchant_code'] = merchant_code
+        if creator_id is not None:
+            create_params['creator_id'] = creator_id
+            
+        return self.create(**create_params)
 
     def get_all_users_with_dict(self) -> List[Dict]:
         """

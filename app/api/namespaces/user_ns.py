@@ -32,6 +32,9 @@ user_post_model = api.model(
         "username": fields.String(required=True, description="用户名"),
         "name": fields.String(required=True, description="用户姓名"),
         "password": fields.String(required=True, description="用户密码"),
+        "telephone": fields.String(description="电话号码"),
+        "merchantCode": fields.String(description="商户代码"),
+        "creatorId": fields.String(description="创建者ID"),
     },
 )
 
@@ -115,10 +118,18 @@ class UserList(Resource):
             api.abort(400, "缺少必要的用户信息")
 
         try:
+            # 提取可选参数
+            telephone = data.get("telephone")
+            merchant_code = data.get("merchantCode")
+            creator_id = data.get("creatorId")
+            
             user_data, is_new = user_service.create_user(
-                data.get("username"), 
-                data.get("name"), 
-                data.get("password")
+                username=data.get("username"), 
+                name=data.get("name"), 
+                password=data.get("password"),
+                telephone=telephone,
+                merchant_code=merchant_code,
+                creator_id=creator_id
             )
 
             if not is_new:
