@@ -77,7 +77,8 @@ class UserService:
         except Exception as e:
             raise UserServiceError(f"查询用户失败: {str(e)}")
 
-    def create_user(self, username: str, name: str, password: str) -> Tuple[Dict, bool]:
+    def create_user(self, username: str, name: str, password: str, 
+                   telephone: str = None, merchant_code: str = None, creator_id: str = None) -> Tuple[Dict, bool]:
         """
         创建新用户
 
@@ -85,12 +86,16 @@ class UserService:
             username: 用户名
             name: 用户姓名
             password: 用户密码
+            telephone: 电话号码（可选）
+            merchant_code: 商户代码（可选）
+            creator_id: 创建者ID（可选）
 
         Returns:
             Tuple[Dict, bool]: 用户信息字典和是否为新创建的用户
 
         Note:
             新创建的用户默认角色为"user"
+            create_time会自动生成
 
         Raises:
             UserServiceError: 创建过程中出错
@@ -107,7 +112,14 @@ class UserService:
             # 对密码进行加密
             hashed_password = hash_password(password)
             # 创建新用户
-            new_user = self.user_repository.create_user(username, name, hashed_password)
+            new_user = self.user_repository.create_user(
+                username=username, 
+                name=name, 
+                password=hashed_password,
+                telephone=telephone,
+                merchant_code=merchant_code,
+                creator_id=creator_id
+            )
             return new_user.to_dict(), True
         except SQLAlchemyError as e:
             raise UserServiceError(f"创建用户失败: {str(e)}")
