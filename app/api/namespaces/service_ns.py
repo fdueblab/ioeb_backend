@@ -224,6 +224,43 @@ class ServiceList(Resource):
             return {"status": "error", "message": str(e)}, 400
 
 
+@api.route("/prepublish")
+class ServicePublish(Resource):
+    @api.doc("prepublish_service")
+    @api.expect(service_create_model)
+    @api.marshal_with(service_response, code=201)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self):
+        """发布新微服务：先创建后部署"""
+        data = request.get_json()
+
+        if not data:
+            return {"status": "error", "message": "缺少请求数据"}, 400
+
+        if not data.get("name"):
+            return {"status": "error", "message": "服务名称不能为空"}, 400
+
+        try:
+            service = service_service.create_service(data)
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
+
+        try:
+            deployed = service_service.deploy_service(service["id"])
+        except ServiceServiceError as e:
+            return {"status": "error", "message": f"微服务创建成功，但部署失败：{str(e)}"}, 500
+
+        if not deployed:
+            return {"status": "error", "message": "微服务创建成功，但部署任务启动失败"}, 500
+
+        return {
+            "status": "success",
+            "message": "微服务创建成功，部署已启动，正在部署中...",
+            "service": service
+        }, 201
+
+
 @api.route("/<string:id>")
 @api.param("id", "微服务ID")
 @api.response(404, "Service not found", error_response)
