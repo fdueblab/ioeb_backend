@@ -2580,7 +2580,7 @@ MOCK_SERVICE_APIS = [
         "output_name": "技术评测报告",
         "output_visualization": 0,
         "submit_button_text": "开始评测",
-        "response": '{"code": 200, "message": "\\u8bc4\\u6d4b\\u5b8c\\u6bd5\\uff01", "data": {"finalScore": {"privacy": "5.0", "safety-fingerprint": "5.0", "safety-watermark": "5.0", "fairness": "5.0", "robustness": "4.0", "explainability": "4.0"}}}',
+        "response": '{"code": 200, "message": "评测完毕！", "final_results": {"text_result": "技术评测评分总结：\\n\\n- 隐私: 5.0\\n- 安全性指纹: 5.0\\n- 安全水印: 5.0\\n- 公平性: 5.0\\n- 鲁棒性: 4.0\\n- 可解释性: 4.0\\n\\n总体：该服务在隐私与安全指标表现优秀，鲁棒性与可解释性良好。", "visualization_data": {"finalScore": {"privacy": "5.0", "safety-fingerprint": "5.0", "safety-watermark": "5.0", "fairness": "5.0", "robustness": "4.0", "explainability": "4.0"}}, "file_result": null}}',
     },
     {
         "id": "94395fbc-7349-4a06-80db-04c417f4bd04",
@@ -2718,7 +2718,7 @@ MOCK_SERVICE_APIS = [
         "output_name": "诊断结果报告",
         "output_visualization": 1,
         "submit_button_text": "开始诊断",
-        "response": '{"code": 200, "message": "\\u8bca\\u65ad\\u5b8c\\u6210\\uff01", "data": {"patientInfo": {"age": 65, "gender": "\\u7537", "symptoms": ["\\u80f8\\u95f7", "\\u54b3\\u55fd", "\\u53d1\\u70ed"], "medicalHistory": "\\u9ad8\\u8840\\u538b\\uff0c2\\u578b\\u7cd6\\u5c3f\\u75c5"}, "diagnosisResult": {"primaryDiagnosis": "\\u80ba\\u90e8\\u611f\\u67d3", "confidence": 0.92, "alternativeDiagnosis": ["\\u6162\\u6027\\u652f\\u6c14\\u7ba1\\u708e", "\\u80ba\\u6c14\\u80bf"], "riskLevel": "\\u4e2d\\u9ad8\\u98ce\\u9669"}, "recommendations": ["\\u5efa\\u8bae\\u8fdb\\u884c\\u6297\\u751f\\u7d20\\u6cbb\\u7597", "\\u5bc6\\u5207\\u76d1\\u6d4b\\u8840\\u6c27\\u6c34\\u5e73", "\\u4e00\\u5468\\u540e\\u590d\\u67e5"], "referralNeeded": true, "referToSpecialist": "\\u547c\\u5438\\u79d1\\u4e13\\u5bb6"}}',
+        "response": '{"code": 200, "message": "诊断完成！", "final_results": {"text_result": "患者信息：65岁，男。\\n\\n症状：胸闷、咳嗽、发热；既往史：高血压、2型糖尿病。\\n\\n诊断结论：肺部感染（置信度 0.92），风险等级：中高风险。\\n\\n备选诊断：慢性支气管炎、肺气肿。\\n\\n建议：\\n- 建议进行抗生素治疗\\n- 密切监测血氧水平\\n- 一周后复查\\n\\n是否需要转诊：是（呼吸科专家）", "visualization_data": {"patientInfo": {"age": 65, "gender": "男", "symptoms": ["胸闷", "咳嗽", "发热"], "medicalHistory": "高血压，2型糖尿病"}, "diagnosisResult": {"primaryDiagnosis": "肺部感染", "confidence": 0.92, "alternativeDiagnosis": ["慢性支气管炎", "肺气肿"], "riskLevel": "中高风险"}, "recommendations": ["建议进行抗生素治疗", "密切监测血氧水平", "一周后复查"], "referralNeeded": true, "referToSpecialist": "呼吸科专家"}, "file_result": null}}',
     },
     {
         "id": "b278a7e5-d0f6-400f-a565-99f4d68cd1b2",
@@ -2832,7 +2832,7 @@ MOCK_SERVICE_APIS = [
         "output_name": "农业智能分析报告",
         "output_visualization": 1,
         "submit_button_text": "开始分析",
-        "response": '{"code": 200, "message": "\\u5206\\u6790\\u5b8c\\u6210", "data": {"predictedYield": 550, "unit": "\\u516c\\u65a4/\\u4ea9", "confidenceInterval": [520, 580], "harvestDate": "2023-10-05\\u81f32023-10-15", "comparisonWithLastYear": "+5.2%", "factors": [{"name": "\\u6c14\\u5019\\u6761\\u4ef6", "impact": "\\u6b63\\u9762", "description": "\\u4eca\\u5e74\\u964d\\u6c34\\u91cf\\u9002\\u5b9c"}, {"name": "\\u571f\\u58e4\\u72b6\\u51b5", "impact": "\\u4e2d\\u6027", "description": "\\u571f\\u58e4\\u80a5\\u529b\\u9002\\u4e2d"}, {"name": "\\u75c5\\u866b\\u5bb3\\u98ce\\u9669", "impact": "\\u8d1f\\u9762", "description": "\\u7a3b\\u98de\\u8671\\u98ce\\u9669\\u589e\\u52a0"}], "recommendations": ["\\u4f18\\u5316\\u65bd\\u80a5\\u65b9\\u6848\\u53ef\\u80fd\\u8fdb\\u4e00\\u6b65\\u63d0\\u9ad8\\u4ea7\\u91cf", "\\u6ce8\\u610f\\u9632\\u6cbb\\u7a3b\\u98de\\u8671", "\\u9002\\u5f53\\u5ef6\\u957f\\u704c\\u6e89\\u5468\\u671f"]}}',
+        "response": '{"code": 200, "message": "分析完成", "final_results": {"text_result": "产量预测：550 公斤/亩（置信区间 520–580）。\\n\\n收获期：2023-10-05 至 2023-10-15。\\n\\n同比去年：+5.2%。\\n\\n关键因素：\\n- 气候条件：正面（今年降水量适宜）\\n- 土壤状况：中性（土壤肥力适中）\\n- 病虫害风险：负面（稻飞虱风险增加）\\n\\n建议：\\n- 优化施肥方案以进一步提升产量\\n- 注意防治稻飞虱\\n- 适当延长灌溉周期", "visualization_data": {"predictedYield": 550, "unit": "公斤/亩", "confidenceInterval": [520, 580], "harvestDate": "2023-10-05至2023-10-15", "comparisonWithLastYear": "+5.2%", "factors": [{"name": "气候条件", "impact": "正面", "description": "今年降水量适宜"}, {"name": "土壤状况", "impact": "中性", "description": "土壤肥力适中"}, {"name": "病虫害风险", "impact": "负面", "description": "稻飞虱风险增加"}], "recommendations": ["优化施肥方案可能进一步提高产量", "注意防治稻飞虱", "适当延长灌溉周期"]}, "file_result": null}}',
     },
     {
         "id": "43b7bde3-167b-46b6-96cb-24fc889b1130",
@@ -2934,7 +2934,7 @@ MOCK_SERVICE_APIS = [
           "output_name": "飞行控制结果",
           "output_visualization": 1,
           "submit_button_text": "开始任务",
-          "response": '{"code": 200, "message": "\\u4efb\\u52a1\\u6267\\u884c\\u5b8c\\u6210\\uff01", "data": {"missionStatus": "\\u5b8c\\u6210", "flightPath": [{"lat": 31.2304, "lng": 121.4737, "alt": 120, "time": "14:30:00"}, {"lat": 31.2324, "lng": 121.4757, "alt": 150, "time": "14:35:00"}, {"lat": 31.2354, "lng": 121.4787, "alt": 150, "time": "14:40:00"}, {"lat": 31.2384, "lng": 121.4817, "alt": 120, "time": "14:45:00"}], "batteryUsed": "28%", "obstaclesAvoided": 5, "weatherConditions": "\\u826f\\u597d", "totalFlightTime": "15\\u5206\\u949f", "safetyIncidents": 0, "recommendations": ["\\u5b9a\\u671f\\u68c0\\u67e5\\u5de6\\u4fa7\\u87ba\\u65cb\\u6868", "\\u66f4\\u65b0\\u57ce\\u533a\\u9ad8\\u5c42\\u5efa\\u7b51\\u6570\\u636e"]}}',
+          "response": '{"code": 200, "message": "任务执行完成！", "final_results": {"text_result": "飞行任务：完成。\n\n时长：15 分钟；电量消耗：28%；避障：5 次；天气：良好；安全事件：0。\n\n航线包含 4 个航点（起讫点海拔 120 米，中段 150 米）。\n\n建议：\n- 定期检查左侧螺旋桨\n- 更新城区高层建筑数据", "visualization_data": {"missionStatus": "完成", "flightPath": [{"lat": 31.2304, "lng": 121.4737, "alt": 120, "time": "14:30:00"}, {"lat": 31.2324, "lng": 121.4757, "alt": 150, "time": "14:35:00"}, {"lat": 31.2354, "lng": 121.4787, "alt": 150, "time": "14:40:00"}, {"lat": 31.2384, "lng": 121.4817, "alt": 120, "time": "14:45:00"}], "batteryUsed": "28%", "obstaclesAvoided": 5, "weatherConditions": "良好", "totalFlightTime": "15分钟", "safetyIncidents": 0, "recommendations": ["定期检查左侧螺旋桨", "更新城区高层建筑数据"]}, "file_result": null}}',
       },
     {
         "id": "5f5a8758-f2f2-4efa-a54b-585177f3a3b6",
@@ -3000,7 +3000,7 @@ MOCK_SERVICE_APIS = [
         "output_name": "营销计划",
         "output_visualization": 1,
         "submit_button_text": "开始任务",
-        "response": '{"code": 200, "message": "\\u8425\\u9500\\u8ba1\\u5212\\u751f\\u6210\\u6210\\u529f\\uff01", "data": {"marketingPlan": {"channels": ["social", "email", "search"], "schedule": {"startDate": "2023-07-01", "endDate": "2023-07-31"}, "budget": {"total": 5000, "allocation": {"social": 2500, "email": 1000, "search": 1500}}}}}',
+        "response": '{"code": 200, "message": "营销计划生成成功！", "final_results": {"text_result": "营销计划概要：\\n\\n- 渠道：social / email / search\\n- 时间：2023-07-01 至 2023-07-31\\n- 预算：总额 5000（social: 2500，email: 1000，search: 1500）", "visualization_data": {"marketingPlan": {"channels": ["social", "email", "search"], "schedule": {"startDate": "2023-07-01", "endDate": "2023-07-31"}, "budget": {"total": 5000, "allocation": {"social": 2500, "email": 1000, "search": 1500}}}}, "file_result": null}}',
     },
     {
         "id": "01a6a1bf-4a6d-4bfd-85c1-e00dde8ddc80",
@@ -3114,7 +3114,7 @@ MOCK_SERVICE_APIS = [
         "output_name": "助手执行结果",
         "output_visualization": 1,
         "submit_button_text": "开始任务",
-        "response": '{"name": "assistantResponse", "description": "\\u52a9\\u624b\\u6267\\u884c\\u7ed3\\u679c", "type": "object"}',
+        "response": '{"code": 200, "message": "执行完成", "final_results": {"text_result": "助手已返回执行结果对象：assistantResponse。\\n\\n类型：object。", "visualization_data": {"name": "assistantResponse", "description": "助手执行结果", "type": "object"}, "file_result": null}}',
     },
     # 基于多智能体协作的金融欺诈检测推理服务的接口
     {
@@ -3354,7 +3354,7 @@ MOCK_SERVICE_APIS = [
         "url": "/api/agent/meta_app/run",
         "method": "sse",
         "des": "基于大模型智能体的元应用，专门用于金融欺诈检测和风险评估",
-        "parameter_type": 3,
+        "parameter_type": 1,
         "response_type": 1,
         "is_fake": 0,
         "subtitle": "基于大模型智能体的智能反欺诈应用实例",
@@ -3381,7 +3381,7 @@ MOCK_SERVICE_APIS = [
         "output_name": "飞行执行报告",
         "output_visualization": 1,
         "submit_button_text": "执行任务",
-        "response": '{"code": 200, "message": "\\u98de\\u884c\\u4efb\\u52a1\\u6267\\u884c\\u6210\\u529f\\uff01", "data": {"missionInfo": {"missionId": "FLT20240115001", "missionType": "\\u76ee\\u6807\\u641c\\u7d22\\u4e0e\\u76d1\\u63a7", "startTime": "2024-01-15T14:00:00Z", "duration": "45\\u5206\\u949f", "status": "\\u5b8c\\u6210"}, "flightPerformance": {"totalDistance": "12.5\\u516c\\u91cc", "maxAltitude": "150\\u7c73", "averageSpeed": "18m/s", "energyConsumption": "32%", "weatherConditions": "\\u826f\\u597d"}, "detectionResults": {"targetsIdentified": 5, "suspiciousTargets": 1, "highConfidenceDetections": 4, "falsePositives": 0}, "saftyMetrics": {"obstaclesAvoided": 7, "emergencyActions": 0, "communicationStatus": "\\u7a33\\u5b9a", "systemHealth": "\\u6b63\\u5e38"}, "missionSummary": {"objectivesCompleted": "100%", "dataCollected": "2.3GB", "photosTaken": 127, "videoRecorded": "38\\u5206\\u949f"}, "recommendations": ["\\u5bf9\\u53ef\\u7591\\u76ee\\u6807\\u8fdb\\u884c\\u8fdb\\u4e00\\u6b65\\u8ddf\\u8e2a", "\\u66f4\\u65b0\\u98de\\u884c\\u8def\\u5f84\\u6570\\u636e\\u5e93", "\\u5b9a\\u671f\\u68c0\\u67e5\\u76f8\\u673a\\u6821\\u51c6"]}}',
+        "response": '{"code": 200, "message": "飞行任务执行成功！", "final_results": {"text_result": "任务信息：ID FLT20240115001，类型：目标搜索与监控，时长 45 分钟，状态：完成。\\n\\n飞行表现：总里程 12.5 公里，最大高度 150 米，平均速度 18 m/s，能耗 32%，天气：良好。\\n\\n识别结果：共识别 5 个目标，其中可疑 1 个，高置信 4 个，误报 0。\\n\\n安全指标：避障 7 次，紧急动作 0 次，通信：稳定，系统健康：正常。\\n\\n任务总结：目标完成度 100%，数据采集 2.3GB，照片 127 张，视频 38 分钟。\\n\\n建议：\\n- 对可疑目标进一步跟踪\\n- 更新飞行路径数据库\\n- 定期检查相机校准", "visualization_data": {"missionInfo": {"missionId": "FLT20240115001", "missionType": "目标搜索与监控", "startTime": "2024-01-15T14:00:00Z", "duration": "45分钟", "status": "完成"}, "flightPerformance": {"totalDistance": "12.5公里", "maxAltitude": "150米", "averageSpeed": "18m/s", "energyConsumption": "32%", "weatherConditions": "良好"}, "detectionResults": {"targetsIdentified": 5, "suspiciousTargets": 1, "highConfidenceDetections": 4, "falsePositives": 0}, "saftyMetrics": {"obstaclesAvoided": 7, "emergencyActions": 0, "communicationStatus": "稳定", "systemHealth": "正常"}, "missionSummary": {"objectivesCompleted": "100%", "dataCollected": "2.3GB", "photosTaken": 127, "videoRecorded": "38分钟"}, "recommendations": ["对可疑目标进行进一步跟踪", "更新飞行路径数据库", "定期检查相机校准"]}, "file_result": null}}',
     }
 ]
 

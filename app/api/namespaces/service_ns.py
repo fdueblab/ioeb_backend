@@ -232,7 +232,7 @@ class ServicePublish(Resource):
     @api.response(400, "Invalid input", error_response)
     @api.response(500, "Server error", error_response)
     def post(self):
-        """发布新微服务：先创建后部署"""
+        """预发布新服务"""
         data = request.get_json()
 
         if not data:
