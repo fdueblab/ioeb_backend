@@ -421,16 +421,23 @@ class ServiceService:
             port_mappings = modify_compose_ports(compose_file, allocated_ports)
             print(f"服务 {service_id} 端口映射: {port_mappings}")
             
-            # 9. 更新服务的端口、路径等信息
+            # 9. 更新服务的端口和路径信息
             port_str = ','.join(port_mappings)
-            network_name = f"service_{service_id}_default"
             volume_path = os.path.relpath(project_root, base_path)
             
-            self.service_repository.update_service(service_id, {
+            update_data = {
                 'port': port_str,
-                'network': network_name,
                 'volume': volume_path
-            })
+            }
+            
+            # 如果用户没有指定network，则使用生成的网络标识
+            # 如果用户指定了network（如bridge），则保留用户的值
+            if not service_data.get('network'):
+                # 生成缩短的网络标识以适应数据库字段长度限制(50字符)
+                network_name = f"svc_{service_id[:8]}"  # 例如: svc_af753698
+                update_data['network'] = network_name
+            
+            self.service_repository.update_service(service_id, update_data)
             
             # 10. 启动异步部署任务
             app = current_app._get_current_object()

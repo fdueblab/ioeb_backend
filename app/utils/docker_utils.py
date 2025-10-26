@@ -157,7 +157,8 @@ def deploy_service(project_root: str, service_id: str, timeout: int = 600) -> Tu
         Tuple[bool, str]: (是否成功, 错误信息或成功信息)
     """
     compose_file = os.path.join(project_root, 'docker-compose.yml')
-    project_name = f"service_{service_id}"
+    # 使用缩短的project name，避免网络名称过长
+    project_name = f"svc_{service_id[:8]}"
     
     if not os.path.exists(compose_file):
         return False, f"docker-compose.yml不存在: {compose_file}"
@@ -215,7 +216,8 @@ def stop_and_remove_service(project_root: str, service_id: str) -> bool:
         bool: 是否成功
     """
     compose_file = os.path.join(project_root, 'docker-compose.yml')
-    project_name = f"service_{service_id}"
+    # 使用缩短的project name，与部署时保持一致
+    project_name = f"svc_{service_id[:8]}"
     
     if not os.path.exists(compose_file):
         print(f"docker-compose.yml不存在: {compose_file}")
