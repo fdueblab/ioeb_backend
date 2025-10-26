@@ -6,12 +6,24 @@
 from typing import Dict, List, Optional, Tuple
 import threading
 import time
+import os
+import tempfile
 
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.datastructures import FileStorage
 
 from app.repositories.service_repository import ServiceRepository
 from app.extensions import db
+from app.utils.port_utils import allocate_ports, PortAllocationError
+from app.utils.zip_utils import extract_and_find_root, cleanup_directory, ZipProcessError
+from app.utils.docker_utils import (
+    parse_ports_from_compose,
+    modify_compose_ports,
+    deploy_service as docker_deploy,
+    stop_and_remove_service,
+    DockerDeployError
+)
 
 
 class ServiceServiceError(Exception):
@@ -342,6 +354,158 @@ class ServiceService:
             if isinstance(e, ServiceServiceError):
                 raise
             raise ServiceServiceError(f"停止微服务失败: {str(e)}")
+
+    def upload_and_deploy_service(self, zip_file: FileStorage, service_data: Dict) -> Dict:
+        """
+        上传ZIP文件并部署微服务
+        
+        这个方法会：
+        1. 创建服务记录（状态：deploying）
+        2. 保存并解压ZIP文件
+        3. 分配可用端口
+        4. 修改docker-compose.yml
+        5. 异步部署容器
+        
+        Args:
+            zip_file: 上传的ZIP文件
+            service_data: 包含微服务信息的字典（与create_service相同）
+            
+        Returns:
+            Dict: 创建的微服务信息
+            
+        Raises:
+            ServiceServiceError: 上传或部署过程中出错
+        """
+        service_id = None
+        service_dir = None
+        project_root = None
+        
+        try:
+            # 1. 设置初始状态为"部署中"
+            service_data['status'] = 'deploying'
+            
+            # 2. 创建服务记录
+            service = self.service_repository.create_service_with_relations(service_data)
+            service_id = service.id
+            
+            # 3. 获取服务存储基础路径（从环境变量）
+            base_path = os.environ.get('SERVICES_BASE_PATH', '/app/data/services')
+            service_dir = os.path.join(base_path, service_id)
+            os.makedirs(service_dir, exist_ok=True)
+            
+            # 4. 保存ZIP文件
+            zip_path = os.path.join(service_dir, 'uploaded.zip')
+            zip_file.save(zip_path)
+            
+            # 5. 解压ZIP并找到项目根目录
+            project_root = extract_and_find_root(zip_path, service_dir)
+            print(f"服务 {service_id} 项目根目录: {project_root}")
+            
+            # 6. 解析docker-compose.yml获取需要的端口数量
+            compose_file = os.path.join(project_root, 'docker-compose.yml')
+            container_ports = parse_ports_from_compose(compose_file)
+            port_count = len(container_ports)
+            
+            if port_count == 0:
+                raise ServiceServiceError("docker-compose.yml中没有定义端口映射")
+            
+            print(f"服务 {service_id} 需要分配 {port_count} 个端口")
+            
+            # 7. 分配端口
+            port_start = int(os.environ.get('PORT_RANGE_START', '27000'))
+            port_end = int(os.environ.get('PORT_RANGE_END', '28000'))
+            allocated_ports = allocate_ports(port_count, port_start, port_end)
+            print(f"服务 {service_id} 分配端口: {allocated_ports}")
+            
+            # 8. 修改docker-compose.yml的端口映射
+            port_mappings = modify_compose_ports(compose_file, allocated_ports)
+            print(f"服务 {service_id} 端口映射: {port_mappings}")
+            
+            # 9. 更新服务的端口、路径等信息
+            port_str = ','.join(port_mappings)
+            network_name = f"service_{service_id}_default"
+            volume_path = os.path.relpath(project_root, base_path)
+            
+            self.service_repository.update_service(service_id, {
+                'port': port_str,
+                'network': network_name,
+                'volume': volume_path
+            })
+            
+            # 10. 启动异步部署任务
+            app = current_app._get_current_object()
+            
+            def deploy_task():
+                """异步部署任务"""
+                with app.app_context():
+                    try:
+                        print(f"开始部署服务 {service_id}")
+                        
+                        # 执行docker-compose部署
+                        success, message = docker_deploy(project_root, service_id, timeout=600)
+                        
+                        if success:
+                            # 部署成功，更新状态为预发布(未测评)
+                            self.service_repository.update_service_status(
+                                service_id, 
+                                "pre_release_unrated"
+                            )
+                            print(f"服务 {service_id} 部署成功: {message}")
+                        else:
+                            # 部署失败，清理资源
+                            print(f"服务 {service_id} 部署失败: {message}")
+                            self._cleanup_failed_deployment(service_id, project_root, service_dir)
+                            
+                    except Exception as e:
+                        print(f"服务 {service_id} 部署异常: {str(e)}")
+                        self._cleanup_failed_deployment(service_id, project_root, service_dir)
+            
+            # 启动后台线程执行部署
+            deploy_thread = threading.Thread(target=deploy_task)
+            deploy_thread.daemon = True
+            deploy_thread.start()
+            
+            return service.to_dict()
+            
+        except (PortAllocationError, ZipProcessError, DockerDeployError) as e:
+            # 如果在同步阶段失败，立即清理并抛出异常
+            if service_id:
+                self._cleanup_failed_deployment(service_id, project_root, service_dir)
+            raise ServiceServiceError(str(e))
+            
+        except SQLAlchemyError as e:
+            raise ServiceServiceError(f"创建微服务失败: {str(e)}")
+            
+        except Exception as e:
+            if service_id:
+                self._cleanup_failed_deployment(service_id, project_root, service_dir)
+            raise ServiceServiceError(f"上传部署微服务过程中出错: {str(e)}")
+    
+    def _cleanup_failed_deployment(self, service_id: str, project_root: str, service_dir: str):
+        """
+        清理失败的部署资源
+        
+        Args:
+            service_id: 服务ID
+            project_root: 项目根目录
+            service_dir: 服务存储目录
+        """
+        try:
+            # 更新服务状态为error
+            self.service_repository.update_service_status(service_id, "error")
+            
+            # 停止并删除容器
+            if project_root and os.path.exists(project_root):
+                stop_and_remove_service(project_root, service_id)
+            
+            # 删除解压的文件
+            if service_dir and os.path.exists(service_dir):
+                cleanup_directory(service_dir)
+                
+            print(f"服务 {service_id} 资源清理完成")
+            
+        except Exception as e:
+            print(f"清理服务 {service_id} 资源失败: {str(e)}")
 
 
 # 创建单例实例，方便导入使用

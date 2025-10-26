@@ -3,8 +3,10 @@
 提供微服务的增删改查功能
 """
 
+import json
 from flask import request
 from flask_restx import Namespace, Resource, fields
+from werkzeug.datastructures import FileStorage
 
 from app.services.service_service import ServiceServiceError, service_service
 
@@ -518,4 +520,117 @@ class ServiceStopResource(Resource):
                 }, 200
             return {"status": "error", "message": "微服务停止失败"}, 500
         except ServiceServiceError as e:
-            return {"status": "error", "message": str(e)}, 404 
+            return {"status": "error", "message": str(e)}, 404
+
+
+# 定义文件上传参数
+upload_parser = api.parser()
+upload_parser.add_argument('file', location='files', type=FileStorage, required=True, help='ZIP压缩文件')
+upload_parser.add_argument('name', location='form', type=str, required=True, help='服务名称')
+upload_parser.add_argument('attribute', location='form', type=str, required=False, help='服务属性')
+upload_parser.add_argument('type', location='form', type=str, required=False, help='服务类型')
+upload_parser.add_argument('domain', location='form', type=str, required=False, help='领域')
+upload_parser.add_argument('industry', location='form', type=str, required=False, help='行业')
+upload_parser.add_argument('scenario', location='form', type=str, required=False, help='场景')
+upload_parser.add_argument('technology', location='form', type=str, required=False, help='技术')
+upload_parser.add_argument('network', location='form', type=str, required=False, help='网络类型')
+upload_parser.add_argument('port', location='form', type=str, required=False, help='端口映射')
+upload_parser.add_argument('volume', location='form', type=str, required=False, help='数据卷映射')
+upload_parser.add_argument('number', location='form', type=int, required=False, help='服务调用次数')
+upload_parser.add_argument('norm', location='form', type=str, required=False, help='规范评分JSON字符串')
+upload_parser.add_argument('source', location='form', type=str, required=False, help='来源信息JSON字符串')
+upload_parser.add_argument('apiList', location='form', type=str, required=False, help='API列表JSON字符串')
+
+
+@api.route("/upload")
+class ServiceUpload(Resource):
+    @api.doc("upload_and_deploy_service", description="""
+        上传ZIP文件并部署微服务
+        
+        该接口接收一个ZIP压缩文件和服务元数据，完成以下操作：
+        1. 创建服务记录（初始状态：deploying）
+        2. 解压ZIP文件并找到项目根目录（包含docker-compose.yml）
+        3. 自动分配可用端口（27000-28000范围）
+        4. 修改docker-compose.yml中的端口映射
+        5. 使用docker-compose部署服务
+        6. 根据部署结果更新服务状态（pre_release_unrated/error）
+        
+        ZIP文件要求：
+        - 必须包含docker-compose.yml文件
+        - 必须包含Dockerfile文件
+        - 结构类似从GitHub下载的代码仓库
+        
+        表单参数：
+        - file: ZIP文件（必需）
+        - name: 服务名称（必需）
+        - attribute: 服务属性（可选，默认：non_intelligent）
+        - type: 服务类型（可选，默认：atomic）
+        - domain: 领域（可选，默认：aml）
+        - norm: 规范评分（可选，JSON字符串）
+        - source: 来源信息（可选，JSON字符串）
+        - apiList: API列表（可选，JSON字符串）
+        
+        注意：
+        - 部署是异步进行的，接口会立即返回
+        - 可通过查询服务接口获取最新状态
+        - 端口会自动分配，无需手动指定
+    """)
+    @api.expect(upload_parser)
+    @api.marshal_with(service_response, code=201)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self):
+        """上传ZIP文件并部署微服务"""
+        args = upload_parser.parse_args()
+        
+        # 获取ZIP文件
+        zip_file = args['file']
+        if not zip_file:
+            return {"status": "error", "message": "缺少ZIP文件"}, 400
+        
+        # 验证文件类型
+        if not zip_file.filename.endswith('.zip'):
+            return {"status": "error", "message": "只支持ZIP格式的压缩文件"}, 400
+        
+        # 验证文件大小（100MB限制）
+        zip_file.seek(0, 2)  # 移到文件末尾
+        file_size = zip_file.tell()
+        zip_file.seek(0)  # 重置到开头
+        
+        max_size = 100 * 1024 * 1024  # 100MB
+        if file_size > max_size:
+            return {"status": "error", "message": f"文件大小超过限制（最大100MB）"}, 400
+        
+        # 构建服务数据
+        service_data = {
+            'name': args['name']
+        }
+        
+        # 添加可选字段
+        optional_fields = ['attribute', 'type', 'domain', 'industry', 'scenario', 
+                          'technology', 'network', 'port', 'volume', 'number']
+        for field in optional_fields:
+            if args.get(field):
+                service_data[field] = args[field]
+        
+        # 解析JSON字符串字段
+        try:
+            if args.get('norm'):
+                service_data['norm'] = json.loads(args['norm'])
+            if args.get('source'):
+                service_data['source'] = json.loads(args['source'])
+            if args.get('apiList'):
+                service_data['apiList'] = json.loads(args['apiList'])
+        except json.JSONDecodeError as e:
+            return {"status": "error", "message": f"JSON格式错误: {str(e)}"}, 400
+        
+        # 调用服务层处理
+        try:
+            service = service_service.upload_and_deploy_service(zip_file, service_data)
+            return {
+                "status": "success",
+                "message": "微服务上传成功，正在部署中...",
+                "service": service
+            }, 201
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400 
