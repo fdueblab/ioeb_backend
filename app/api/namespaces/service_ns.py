@@ -633,4 +633,90 @@ class ServiceUpload(Resource):
                 "service": service
             }, 201
         except ServiceServiceError as e:
-            return {"status": "error", "message": str(e)}, 400 
+            return {"status": "error", "message": str(e)}, 400
+
+
+# 定义清理响应模型
+cleanup_response = api.model(
+    "CleanupResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+        "summary": fields.Raw(description="清理统计信息"),
+        "details": fields.Raw(description="详细清理结果")
+    }
+)
+
+
+@api.route("/cleanup/all")
+class ServiceCleanupAll(Resource):
+    @api.doc("cleanup_all_services", description="""
+        清理所有通过上传功能部署的服务
+        
+        ⚠️ **危险操作！** 此接口会：
+        1. 停止并删除所有以 svc_ 开头的Docker容器
+        2. 删除所有以 svc_ 开头的Docker网络
+        3. 删除所有服务文件（/data/ioeb_services）
+        4. **清空数据库中的所有服务记录**
+        5. 可选：删除服务使用的Docker镜像
+        
+        此操作**不可逆**，请谨慎使用！
+        
+        建议使用场景：
+        - 测试环境清理
+        - 开发环境重置
+        - 批量删除所有上传的服务
+        
+        Query参数：
+        - delete_images: 是否删除Docker镜像（默认false）
+        - confirm: 必须传入"yes"才能执行（安全确认）
+        
+        示例：
+        DELETE /api/services/cleanup/all?confirm=yes&delete_images=false
+    """)
+    @api.param("confirm", "确认删除（必须为'yes'）", required=True, type=str)
+    @api.param("delete_images", "是否删除Docker镜像（默认false）", required=False, type=bool, default=False)
+    @api.marshal_with(cleanup_response, code=200)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(403, "Confirmation required", error_response)
+    @api.response(500, "Server error", error_response)
+    def delete(self):
+        """清理所有上传的服务（危险操作）"""
+        # 安全确认
+        confirm = request.args.get('confirm', '').lower()
+        if confirm != 'yes':
+            return {
+                "status": "error",
+                "message": "请通过 confirm=yes 参数确认此危险操作"
+            }, 403
+        
+        # 是否删除镜像
+        delete_images = request.args.get('delete_images', 'false').lower() == 'true'
+        
+        try:
+            # 执行清理
+            result = service_service.cleanup_all_uploaded_services(delete_images=delete_images)
+            
+            summary = result.get('summary', {})
+            
+            message = (
+                f"清理完成！"
+                f"容器: {summary.get('containers_removed', 0)}, "
+                f"网络: {summary.get('networks_removed', 0)}, "
+                f"镜像: {summary.get('images_removed', 0)}, "
+                f"目录: {summary.get('directories_removed', 0)}, "
+                f"数据库记录: {summary.get('database_records_deleted', 0)}"
+            )
+            
+            if summary.get('total_errors', 0) > 0:
+                message += f" (有 {summary['total_errors']} 个错误)"
+            
+            return {
+                "status": "success",
+                "message": message,
+                "summary": summary,
+                "details": result
+            }, 200
+            
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 500 

@@ -24,6 +24,10 @@ from app.utils.docker_utils import (
     stop_and_remove_service,
     DockerDeployError
 )
+from app.utils.cleanup_utils import (
+    cleanup_docker_resources,
+    cleanup_service_files
+)
 
 
 class ServiceServiceError(Exception):
@@ -545,6 +549,118 @@ class ServiceService:
             
         except Exception as e:
             print(f"清理服务 {service_id} 资源失败: {str(e)}")
+
+    def cleanup_all_uploaded_services(self, delete_images: bool = False) -> Dict:
+        """
+        清理所有通过上传功能部署的服务
+        
+        此操作会：
+        1. 停止并删除所有以 svc_ 开头的Docker容器
+        2. 删除所有以 svc_ 开头的Docker网络
+        3. 删除服务镜像（如果 delete_images=True）
+        4. 删除所有服务文件
+        5. 清空数据库中的服务记录
+        
+        Args:
+            delete_images: 是否删除Docker镜像（默认False）
+            
+        Returns:
+            Dict: 清理结果统计
+            
+        Raises:
+            ServiceServiceError: 清理过程中出错
+        """
+        try:
+            print("=" * 60)
+            print("🚨 开始清理所有上传的服务")
+            print("=" * 60)
+            
+            result = {
+                'docker': {},
+                'files': {},
+                'database': {},
+                'summary': {}
+            }
+            
+            # 1. 清理Docker资源
+            print("\n📦 步骤 1/3: 清理Docker资源...")
+            docker_result = cleanup_docker_resources(delete_images=delete_images)
+            result['docker'] = docker_result
+            
+            # 2. 清理服务文件
+            print("\n📁 步骤 2/3: 清理服务文件...")
+            base_path = os.environ.get('SERVICES_BASE_PATH', '/app/data/services')
+            files_result = cleanup_service_files(base_path)
+            result['files'] = files_result
+            
+            # 3. 清理数据库记录
+            print("\n🗄️  步骤 3/3: 清理数据库记录...")
+            try:
+                # 获取所有服务
+                all_services = self.service_repository.get_all_services()
+                deleted_count = 0
+                failed_count = 0
+                
+                for service in all_services:
+                    try:
+                        # 硬删除（直接从数据库删除）
+                        db.session.delete(service)
+                        deleted_count += 1
+                    except Exception as e:
+                        failed_count += 1
+                        print(f"❌ 删除服务记录失败 {service.id}: {str(e)}")
+                
+                db.session.commit()
+                
+                result['database'] = {
+                    'services_deleted': deleted_count,
+                    'services_failed': failed_count
+                }
+                
+                print(f"✅ 删除了 {deleted_count} 条服务记录")
+                
+            except Exception as e:
+                db.session.rollback()
+                error_msg = f"清理数据库失败: {str(e)}"
+                result['database'] = {
+                    'error': error_msg
+                }
+                print(f"❌ {error_msg}")
+            
+            # 4. 生成总结
+            print("\n" + "=" * 60)
+            print("📊 清理完成！统计信息：")
+            print("=" * 60)
+            
+            summary = {
+                'containers_removed': docker_result.get('containers_removed', 0),
+                'networks_removed': docker_result.get('networks_removed', 0),
+                'images_removed': docker_result.get('images_removed', 0),
+                'directories_removed': files_result.get('directories_removed', 0),
+                'database_records_deleted': result['database'].get('services_deleted', 0),
+                'total_errors': (
+                    docker_result.get('containers_failed', 0) +
+                    docker_result.get('networks_failed', 0) +
+                    docker_result.get('images_failed', 0) +
+                    files_result.get('directories_failed', 0) +
+                    result['database'].get('services_failed', 0)
+                )
+            }
+            
+            result['summary'] = summary
+            
+            print(f"  容器删除: {summary['containers_removed']}")
+            print(f"  网络删除: {summary['networks_removed']}")
+            print(f"  镜像删除: {summary['images_removed']}")
+            print(f"  目录删除: {summary['directories_removed']}")
+            print(f"  数据库记录删除: {summary['database_records_deleted']}")
+            print(f"  错误数量: {summary['total_errors']}")
+            print("=" * 60)
+            
+            return result
+            
+        except Exception as e:
+            raise ServiceServiceError(f"清理所有服务失败: {str(e)}")
 
 
 # 创建单例实例，方便导入使用
