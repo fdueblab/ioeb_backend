@@ -439,7 +439,39 @@ class ServiceService:
             
             self.service_repository.update_service(service_id, update_data)
             
-            # 10. 启动异步部署任务
+            # 10. 如果用户没有提供apiList，自动生成默认的MCP API
+            if not service_data.get('apiList'):
+                # 从port_mappings中提取宿主机端口（第一个端口）
+                # port_mappings格式: ["27000:8000"]
+                host_port = port_mappings[0].split(':')[0]
+                
+                # 从环境变量获取部署服务的宿主机URL
+                service_host_url = os.environ.get('SERVICE_HOST_URL', 'http://fdueblab.cn')
+                
+                # 生成默认API
+                default_api = {
+                    'name': f'{service_data.get("name", "MCP")} Server',
+                    'url': f'{service_host_url}:{host_port}/sse',
+                    'method': 'sse',
+                    'des': f'MCP服务接口',
+                    'parameterType': 1,
+                    'responseType': 1,
+                    'isFake': False,
+                    'exampleMsg': [
+                        {
+                            'title': 'MCP服务测试示例',
+                            'content': '这是一个自动生成的测试消息'
+                        }
+                    ]
+                }
+                
+                # 更新服务，添加API
+                self.service_repository.update_service_with_relations(service_id, {
+                    'apiList': [default_api]
+                })
+                print(f"服务 {service_id} 已自动添加默认API: {default_api['url']}")
+            
+            # 11. 启动异步部署任务
             app = current_app._get_current_object()
             
             def deploy_task():

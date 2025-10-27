@@ -16,6 +16,7 @@ services:
       - SERVICES_BASE_PATH=/app/data/services
       - PORT_RANGE_START=27000
       - PORT_RANGE_END=28000
+      - SERVICE_HOST_URL=http://fdueblab.cn
     env_file:
       - ./.env
 
