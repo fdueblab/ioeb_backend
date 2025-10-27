@@ -4,6 +4,7 @@
 """
 
 import datetime
+import json
 
 from app.extensions import db
 
@@ -80,15 +81,24 @@ class Service(db.Model):
         
         # 对于MCP类型的服务，使用扁平化的格式
         if self.type == 'atomic_mcp':
-            # 从第一个API中提取url、des、method、tools和isFake
+            # 从第一个API中提取url、des、method、tools、isFake和exampleMsg
             if self.apis and len(self.apis) > 0:
                 first_api = self.apis[0]
                 base_dict["url"] = first_api.url
                 base_dict["des"] = first_api.des or ""
                 base_dict["method"] = first_api.method
-                base_dict["isFake"] = 1 if first_api.is_fake else 0  # 添加isFake字段
+                base_dict["isFake"] = 1 if first_api.is_fake else 0
                 # 提取tools列表
                 base_dict["tools"] = [tool.to_dict() for tool in first_api.tools]
+                # 提取示例消息
+                if first_api.example_msg:
+                    try:
+                        base_dict["exampleMsg"] = json.loads(first_api.example_msg)
+                    except json.JSONDecodeError:
+                        # 如果不是有效JSON，则返回原始字符串
+                        base_dict["exampleMsg"] = first_api.example_msg
+                else:
+                    base_dict["exampleMsg"] = []
             else:
                 # 如果没有API，提供默认值
                 base_dict["url"] = ""
@@ -96,6 +106,7 @@ class Service(db.Model):
                 base_dict["method"] = "sse"
                 base_dict["isFake"] = 0
                 base_dict["tools"] = []
+                base_dict["exampleMsg"] = []
         else:
             # 对于REST类型的服务，保持原有的apiList格式
             base_dict["apiList"] = [api.to_dict() for api in self.apis]

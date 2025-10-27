@@ -114,7 +114,8 @@ service_model = api.model(
         "method": fields.String(description="MCP通信方法(MCP服务使用)"),
         "des": fields.String(description="MCP服务描述(MCP服务使用)"),
         "isFake": fields.Integer(description="是否使用假数据(MCP服务使用)"),
-        "tools": fields.List(fields.Nested(tool_model), description="MCP工具列表(MCP服务使用)")
+        "tools": fields.List(fields.Nested(tool_model), description="MCP工具列表(MCP服务使用)"),
+        "exampleMsg": fields.Raw(description="示例消息(MCP服务使用)")
     }
 )
 
