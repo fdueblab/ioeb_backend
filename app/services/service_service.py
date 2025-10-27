@@ -457,7 +457,7 @@ class ServiceService:
                     'name': f'{service_data.get("name", "MCP")} Server',
                     'url': f'{service_host_url}:{host_port}/sse',
                     'method': 'sse',
-                    'des': f'MCP服务接口',
+                    'des': f'提供{service_data.get("name", "MCP")}功能的MCP服务',
                     'parameterType': 1,
                     'responseType': 1,
                     'isFake': False,
@@ -465,6 +465,17 @@ class ServiceService:
                         {
                             'title': 'MCP服务测试示例',
                             'content': '这是一个自动生成的测试消息'
+                        }
+                    ],
+                    # 为MCP服务添加默认的tools
+                    'tools': [
+                        {
+                            'name': 'healthCheck',
+                            'description': '判断微服务状态是否正常可用'
+                        },
+                        {
+                            'name': 'getServiceInfo',
+                            'description': '获取服务信息和能力描述'
                         }
                     ]
                 }

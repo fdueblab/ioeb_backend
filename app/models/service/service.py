@@ -57,7 +57,7 @@ class Service(db.Model):
 
     def to_dict(self):
         """将模型转换为字典"""
-        return {
+        base_dict = {
             "id": self.id,
             "name": self.name,
             "attribute": self.attribute,
@@ -76,5 +76,26 @@ class Service(db.Model):
             "creatorId": self.creator_id,
             "norm": [norm.to_dict() for norm in self.norms],
             "source": self.source.to_dict() if self.source else None,
-            "apiList": [api.to_dict() for api in self.apis],
         }
+        
+        # 对于MCP类型的服务，使用扁平化的格式
+        if self.type == 'atomic_mcp':
+            # 从第一个API中提取url、des、method和tools
+            if self.apis and len(self.apis) > 0:
+                first_api = self.apis[0]
+                base_dict["url"] = first_api.url
+                base_dict["des"] = first_api.des or ""
+                base_dict["method"] = first_api.method  # 添加method字段
+                # 提取tools列表
+                base_dict["tools"] = [tool.to_dict() for tool in first_api.tools]
+            else:
+                # 如果没有API，提供默认值
+                base_dict["url"] = ""
+                base_dict["des"] = ""
+                base_dict["method"] = "sse"
+                base_dict["tools"] = []
+        else:
+            # 对于REST类型的服务，保持原有的apiList格式
+            base_dict["apiList"] = [api.to_dict() for api in self.apis]
+        
+        return base_dict
