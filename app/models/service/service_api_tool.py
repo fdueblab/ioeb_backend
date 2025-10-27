@@ -19,12 +19,12 @@ class ServiceApiTool(db.Model):
     def to_dict(self):
         """将模型转换为字典"""
         result = {
+            "id": self.id,  # 添加id字段
             "name": self.name,
         }
         
-        # 兼容两种描述字段名
+        # 添加description字段
         if self.description:
             result["description"] = self.description
-            result["des"] = self.description
             
         return result 
