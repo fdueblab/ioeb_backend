@@ -3286,7 +3286,7 @@ MOCK_SERVICE_APIS = [
         "response_type": 1,
         "is_fake": 0,
         "response": None,
-        "example_msg": "[{\"title\":\"3D语义分割可视化示例\",\"content\":\"请返回一张椅子类(chair_3)的随机可视化结果\"}]"
+        "example_msg": "[{\"title\":\"3D语义分割可视化示例\",\"content\":\"请返回一张椅子类(chair_3)的可视化结果，直接将图片以Markdown格式进行渲染\"}]"
     },
     {
         "id": "8f7e6d5c-4b3a-2918-7e6f-5d4c3b2a1908",

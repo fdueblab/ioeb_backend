@@ -3,8 +3,10 @@
 提供微服务的增删改查功能
 """
 
+import json
 from flask import request
 from flask_restx import Namespace, Resource, fields
+from werkzeug.datastructures import FileStorage
 
 from app.services.service_service import ServiceServiceError, service_service
 
@@ -43,6 +45,16 @@ api_parameter_model = api.model(
         "name": fields.String(description="参数名称"),
         "type": fields.String(description="参数类型"),
         "des": fields.String(description="参数描述")
+    }
+)
+
+# 定义MCP工具模型
+tool_model = api.model(
+    "Tool",
+    {
+        "id": fields.String(description="工具ID"),
+        "name": fields.String(description="工具名称"),
+        "description": fields.String(description="工具描述")
     }
 )
 
@@ -95,7 +107,15 @@ service_model = api.model(
         "creatorId": fields.String(description="创建者ID"),
         "norm": fields.List(fields.Nested(norm_model), description="规范评分"),
         "source": fields.Nested(source_model, description="来源信息"),
-        "apiList": fields.List(fields.Nested(api_model), description="API列表")
+        # REST服务字段
+        "apiList": fields.List(fields.Nested(api_model), description="API列表(REST服务使用)"),
+        # MCP服务专用字段
+        "url": fields.String(description="MCP服务地址(MCP服务使用)"),
+        "method": fields.String(description="MCP通信方法(MCP服务使用)"),
+        "des": fields.String(description="MCP服务描述(MCP服务使用)"),
+        "isFake": fields.Integer(description="是否使用假数据(MCP服务使用)"),
+        "tools": fields.List(fields.Nested(tool_model), description="MCP工具列表(MCP服务使用)"),
+        "exampleMsg": fields.Raw(description="示例消息(MCP服务使用)")
     }
 )
 
@@ -518,4 +538,203 @@ class ServiceStopResource(Resource):
                 }, 200
             return {"status": "error", "message": "微服务停止失败"}, 500
         except ServiceServiceError as e:
-            return {"status": "error", "message": str(e)}, 404 
+            return {"status": "error", "message": str(e)}, 404
+
+
+# 定义文件上传参数
+upload_parser = api.parser()
+upload_parser.add_argument('file', location='files', type=FileStorage, required=True, help='ZIP压缩文件')
+upload_parser.add_argument('name', location='form', type=str, required=True, help='服务名称')
+upload_parser.add_argument('attribute', location='form', type=str, required=False, help='服务属性')
+upload_parser.add_argument('type', location='form', type=str, required=False, help='服务类型')
+upload_parser.add_argument('domain', location='form', type=str, required=False, help='领域')
+upload_parser.add_argument('industry', location='form', type=str, required=False, help='行业')
+upload_parser.add_argument('scenario', location='form', type=str, required=False, help='场景')
+upload_parser.add_argument('technology', location='form', type=str, required=False, help='技术')
+upload_parser.add_argument('network', location='form', type=str, required=False, help='网络类型')
+upload_parser.add_argument('port', location='form', type=str, required=False, help='端口映射')
+upload_parser.add_argument('volume', location='form', type=str, required=False, help='数据卷映射')
+upload_parser.add_argument('number', location='form', type=int, required=False, help='服务调用次数')
+upload_parser.add_argument('norm', location='form', type=str, required=False, help='规范评分JSON字符串')
+upload_parser.add_argument('source', location='form', type=str, required=False, help='来源信息JSON字符串')
+upload_parser.add_argument('apiList', location='form', type=str, required=False, help='API列表JSON字符串')
+
+
+@api.route("/upload")
+class ServiceUpload(Resource):
+    @api.doc("upload_and_deploy_service", description="""
+        上传ZIP文件并部署微服务
+        
+        该接口接收一个ZIP压缩文件和服务元数据，完成以下操作：
+        1. 创建服务记录（初始状态：deploying）
+        2. 解压ZIP文件并找到项目根目录（包含docker-compose.yml）
+        3. 自动分配可用端口（27000-28000范围）
+        4. 修改docker-compose.yml中的端口映射
+        5. 使用docker-compose部署服务
+        6. 根据部署结果更新服务状态（pre_release_unrated/error）
+        
+        ZIP文件要求：
+        - 必须包含docker-compose.yml文件
+        - 必须包含Dockerfile文件
+        - 结构类似从GitHub下载的代码仓库
+        
+        表单参数：
+        - file: ZIP文件（必需）
+        - name: 服务名称（必需）
+        - attribute: 服务属性（可选，默认：non_intelligent）
+        - type: 服务类型（可选，默认：atomic）
+        - domain: 领域（可选，默认：aml）
+        - norm: 规范评分（可选，JSON字符串）
+        - source: 来源信息（可选，JSON字符串）
+        - apiList: API列表（可选，JSON字符串）
+        
+        注意：
+        - 部署是异步进行的，接口会立即返回
+        - 可通过查询服务接口获取最新状态
+        - 端口会自动分配，无需手动指定
+    """)
+    @api.expect(upload_parser)
+    @api.marshal_with(service_response, code=201)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self):
+        """上传ZIP文件并部署微服务"""
+        args = upload_parser.parse_args()
+        
+        # 获取ZIP文件
+        zip_file = args['file']
+        if not zip_file:
+            return {"status": "error", "message": "缺少ZIP文件"}, 400
+        
+        # 验证文件类型
+        if not zip_file.filename.endswith('.zip'):
+            return {"status": "error", "message": "只支持ZIP格式的压缩文件"}, 400
+        
+        # 验证文件大小（100MB限制）
+        zip_file.seek(0, 2)  # 移到文件末尾
+        file_size = zip_file.tell()
+        zip_file.seek(0)  # 重置到开头
+        
+        max_size = 100 * 1024 * 1024  # 100MB
+        if file_size > max_size:
+            return {"status": "error", "message": f"文件大小超过限制（最大100MB）"}, 400
+        
+        # 构建服务数据
+        service_data = {
+            'name': args['name']
+        }
+        
+        # 添加可选字段
+        optional_fields = ['attribute', 'type', 'domain', 'industry', 'scenario', 
+                          'technology', 'network', 'port', 'volume', 'number']
+        for field in optional_fields:
+            if args.get(field):
+                service_data[field] = args[field]
+        
+        # 解析JSON字符串字段
+        try:
+            if args.get('norm'):
+                service_data['norm'] = json.loads(args['norm'])
+            if args.get('source'):
+                service_data['source'] = json.loads(args['source'])
+            if args.get('apiList'):
+                service_data['apiList'] = json.loads(args['apiList'])
+        except json.JSONDecodeError as e:
+            return {"status": "error", "message": f"JSON格式错误: {str(e)}"}, 400
+        
+        # 调用服务层处理
+        try:
+            service = service_service.upload_and_deploy_service(zip_file, service_data)
+            return {
+                "status": "success",
+                "message": "微服务上传成功，正在部署中...",
+                "service": service
+            }, 201
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
+
+
+# 定义清理响应模型
+cleanup_response = api.model(
+    "CleanupResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+        "summary": fields.Raw(description="清理统计信息"),
+        "details": fields.Raw(description="详细清理结果")
+    }
+)
+
+
+@api.route("/cleanup/all")
+class ServiceCleanupAll(Resource):
+    @api.doc("cleanup_all_services", description="""
+        清理所有通过上传功能部署的服务
+        
+        ⚠️ **危险操作！** 此接口会：
+        1. 停止并删除所有以 svc_ 开头的Docker容器
+        2. 删除所有以 svc_ 开头的Docker网络
+        3. 删除所有服务文件（/data/ioeb_services）
+        4. **清空数据库中的所有服务记录**
+        5. 可选：删除服务使用的Docker镜像
+        
+        此操作**不可逆**，请谨慎使用！
+        
+        建议使用场景：
+        - 测试环境清理
+        - 开发环境重置
+        - 批量删除所有上传的服务
+        
+        Query参数：
+        - delete_images: 是否删除Docker镜像（默认false）
+        - confirm: 必须传入"yes"才能执行（安全确认）
+        
+        示例：
+        DELETE /api/services/cleanup/all?confirm=yes&delete_images=false
+    """)
+    @api.param("confirm", "确认删除（必须为'yes'）", required=True, type=str)
+    @api.param("delete_images", "是否删除Docker镜像（默认false）", required=False, type=bool, default=False)
+    @api.marshal_with(cleanup_response, code=200)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(403, "Confirmation required", error_response)
+    @api.response(500, "Server error", error_response)
+    def delete(self):
+        """清理所有上传的服务（危险操作）"""
+        # 安全确认
+        confirm = request.args.get('confirm', '').lower()
+        if confirm != 'yes':
+            return {
+                "status": "error",
+                "message": "请通过 confirm=yes 参数确认此危险操作"
+            }, 403
+        
+        # 是否删除镜像
+        delete_images = request.args.get('delete_images', 'false').lower() == 'true'
+        
+        try:
+            # 执行清理
+            result = service_service.cleanup_all_uploaded_services(delete_images=delete_images)
+            
+            summary = result.get('summary', {})
+            
+            message = (
+                f"清理完成！"
+                f"容器: {summary.get('containers_removed', 0)}, "
+                f"网络: {summary.get('networks_removed', 0)}, "
+                f"镜像: {summary.get('images_removed', 0)}, "
+                f"目录: {summary.get('directories_removed', 0)}, "
+                f"数据库记录: {summary.get('database_records_deleted', 0)}"
+            )
+            
+            if summary.get('total_errors', 0) > 0:
+                message += f" (有 {summary['total_errors']} 个错误)"
+            
+            return {
+                "status": "success",
+                "message": message,
+                "summary": summary,
+                "details": result
+            }, 200
+            
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 500 
