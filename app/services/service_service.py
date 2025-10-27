@@ -656,30 +656,64 @@ class ServiceService:
             # 3. 清理数据库记录
             print("\n🗄️  步骤 3/3: 清理数据库记录...")
             try:
+                from app.models.service.service_norm import ServiceNorm
+                from app.models.service.service_source import ServiceSource
+                from app.models.service.service_api import ServiceApi
+                from app.models.service.service_api_parameter import ServiceApiParameter
+                from app.models.service.service_api_tool import ServiceApiTool
+                
                 # 获取所有服务
                 all_services = self.service_repository.get_all_services()
                 deleted_count = 0
                 failed_count = 0
                 skipped_count = 0
                 
+                # 收集需要删除的服务ID
+                services_to_delete = []
                 for service in all_services:
-                    # 判断是否为上传部署的服务
-                    is_uploaded_service = self._is_uploaded_service(service)
-                    
-                    if is_uploaded_service:
-                        try:
-                            # 硬删除（直接从数据库删除）
-                            db.session.delete(service)
-                            deleted_count += 1
-                            print(f"✅ 删除上传服务: {service.name} ({service.id})")
-                        except Exception as e:
-                            failed_count += 1
-                            print(f"❌ 删除服务记录失败 {service.id}: {str(e)}")
+                    if self._is_uploaded_service(service):
+                        services_to_delete.append(service)
                     else:
                         skipped_count += 1
                         print(f"⏭️  跳过非上传服务: {service.name} ({service.id})")
                 
-                db.session.commit()
+                # 批量删除服务及其关联记录
+                for service in services_to_delete:
+                    try:
+                        service_id = service.id
+                        service_name = service.name
+                        
+                        # 手动级联删除关联记录（因为模型中没有配置cascade）
+                        # 1. 获取所有API的ID
+                        api_ids = [api.id for api in service.apis]
+                        
+                        # 2. 删除API的参数和工具
+                        for api_id in api_ids:
+                            ServiceApiParameter.query.filter_by(api_id=api_id).delete()
+                            ServiceApiTool.query.filter_by(api_id=api_id).delete()
+                        
+                        # 3. 删除API
+                        ServiceApi.query.filter_by(service_id=service_id).delete()
+                        
+                        # 4. 删除规范评分
+                        ServiceNorm.query.filter_by(service_id=service_id).delete()
+                        
+                        # 5. 删除来源信息
+                        ServiceSource.query.filter_by(service_id=service_id).delete()
+                        
+                        # 6. 最后删除服务本身
+                        db.session.delete(service)
+                        
+                        # 提交这个服务的删除
+                        db.session.commit()
+                        
+                        deleted_count += 1
+                        print(f"✅ 删除上传服务: {service_name} ({service_id})")
+                        
+                    except Exception as e:
+                        db.session.rollback()  # 回滚当前服务的删除
+                        failed_count += 1
+                        print(f"❌ 删除服务记录失败 {service_id}: {str(e)}")
                 
                 result['database'] = {
                     'services_deleted': deleted_count,

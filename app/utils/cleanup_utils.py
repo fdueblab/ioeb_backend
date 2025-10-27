@@ -92,9 +92,9 @@ def get_service_images() -> List[str]:
     image_ids = []
     
     try:
-        # 先获取所有 svc_ 开头的容器使用的镜像
+        # 使用分隔符避免镜像名称中的冒号干扰
         result = subprocess.run(
-            ['docker', 'ps', '-a', '--format', '{{.Image}}:{{.Label "com.docker.compose.project"}}'],
+            ['docker', 'ps', '-a', '--format', '{{.Image}}|||{{.Label "com.docker.compose.project"}}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -103,33 +103,41 @@ def get_service_images() -> List[str]:
         if result.returncode == 0:
             service_images = set()
             for line in result.stdout.strip().split('\n'):
-                if not line:
+                if not line or '|||' not in line:
                     continue
                 
-                parts = line.split(':')
-                if len(parts) >= 2:
-                    image_name = parts[0]
-                    project_name = parts[1]
+                parts = line.split('|||')
+                if len(parts) == 2:
+                    image_name = parts[0].strip()
+                    project_name = parts[1].strip()
                     
-                    if project_name.startswith('svc_'):
+                    # 只收集 svc_ 开头的项目使用的镜像
+                    if project_name.startswith('svc_') and image_name:
                         service_images.add(image_name)
+                        print(f"🔍 发现服务镜像: {image_name} (项目: {project_name})")
             
-            # 获取这些镜像的ID
+            # 获取这些镜像的完整ID
             for image_name in service_images:
+                # 使用 docker images 获取镜像ID（支持镜像名称和镜像ID）
                 img_result = subprocess.run(
-                    ['docker', 'images', '-q', image_name],
+                    ['docker', 'images', '--no-trunc', '-q', image_name],
                     capture_output=True,
                     text=True,
                     timeout=10
                 )
                 
-                if img_result.returncode == 0 and img_result.stdout.strip():
-                    image_ids.append(img_result.stdout.strip())
+                if img_result.returncode == 0:
+                    img_ids = img_result.stdout.strip().split('\n')
+                    for img_id in img_ids:
+                        if img_id:
+                            image_ids.append(img_id)
+                            print(f"📦 添加镜像ID到清理列表: {img_id[:12]}...")
         
+        print(f"📊 共找到 {len(image_ids)} 个服务镜像待清理")
         return image_ids
         
     except Exception as e:
-        print(f"获取服务镜像失败: {str(e)}")
+        print(f"❌ 获取服务镜像失败: {str(e)}")
         return []
 
 
