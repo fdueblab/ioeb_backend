@@ -48,6 +48,16 @@ api_parameter_model = api.model(
     }
 )
 
+# 定义MCP工具模型
+tool_model = api.model(
+    "Tool",
+    {
+        "id": fields.String(description="工具ID"),
+        "name": fields.String(description="工具名称"),
+        "description": fields.String(description="工具描述")
+    }
+)
+
 # 定义API模型
 api_model = api.model(
     "Api",
@@ -97,7 +107,14 @@ service_model = api.model(
         "creatorId": fields.String(description="创建者ID"),
         "norm": fields.List(fields.Nested(norm_model), description="规范评分"),
         "source": fields.Nested(source_model, description="来源信息"),
-        "apiList": fields.List(fields.Nested(api_model), description="API列表")
+        # REST服务字段
+        "apiList": fields.List(fields.Nested(api_model), description="API列表(REST服务使用)"),
+        # MCP服务专用字段
+        "url": fields.String(description="MCP服务地址(MCP服务使用)"),
+        "method": fields.String(description="MCP通信方法(MCP服务使用)"),
+        "des": fields.String(description="MCP服务描述(MCP服务使用)"),
+        "isFake": fields.Integer(description="是否使用假数据(MCP服务使用)"),
+        "tools": fields.List(fields.Nested(tool_model), description="MCP工具列表(MCP服务使用)")
     }
 )
 
