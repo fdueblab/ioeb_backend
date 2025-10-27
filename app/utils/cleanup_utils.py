@@ -153,8 +153,15 @@ def cleanup_docker_resources(delete_images: bool = False) -> Dict[str, any]:
         'errors': []
     }
     
+    # 0. 如果需要删除镜像，先获取镜像ID列表（在删除容器之前）
+    image_ids = []
+    if delete_images:
+        print("🔍 获取服务使用的镜像...")
+        image_ids = get_service_images()
+        print(f"找到 {len(image_ids)} 个服务镜像")
+    
     # 1. 停止并删除容器
-    print("🔄 开始清理服务容器...")
+    print("\n🔄 开始清理服务容器...")
     container_ids = get_service_containers()
     print(f"找到 {len(container_ids)} 个服务容器")
     
@@ -219,11 +226,9 @@ def cleanup_docker_resources(delete_images: bool = False) -> Dict[str, any]:
             result['errors'].append(error_msg)
             print(f"❌ {error_msg}")
     
-    # 3. 删除镜像（可选）
-    if delete_images:
+    # 3. 删除镜像（可选，使用之前获取的镜像ID列表）
+    if delete_images and image_ids:
         print("\n🔄 开始清理服务镜像...")
-        image_ids = get_service_images()
-        print(f"找到 {len(image_ids)} 个服务镜像")
         
         for image_id in image_ids:
             try:
