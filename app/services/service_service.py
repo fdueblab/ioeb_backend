@@ -550,6 +550,55 @@ class ServiceService:
         except Exception as e:
             print(f"清理服务 {service_id} 资源失败: {str(e)}")
 
+    def _is_uploaded_service(self, service) -> bool:
+        """
+        判断服务是否为通过上传功能部署的服务
+        
+        判断依据（必须同时满足所有条件）：
+        1. network字段以 svc_ 开头
+        2. volume字段非空（上传服务会有项目路径）
+        3. port字段在27000-28000范围内
+        
+        Args:
+            service: Service对象
+            
+        Returns:
+            bool: 是否为上传部署的服务
+        """
+        # 条件1: network以svc_开头
+        has_svc_network = service.network and service.network.startswith('svc_')
+        if not has_svc_network:
+            return False
+        
+        # 条件2: volume非空（上传服务会记录项目路径）
+        has_volume = service.volume and service.volume.strip()
+        if not has_volume:
+            return False
+        
+        # 条件3: port在27000-28000范围内
+        has_valid_port = False
+        if service.port:
+            try:
+                # 解析端口映射，格式如 "27001:8000,27002:3306"
+                port_start = int(os.environ.get('PORT_RANGE_START', '27000'))
+                port_end = int(os.environ.get('PORT_RANGE_END', '28000'))
+                
+                for port_mapping in service.port.split(','):
+                    if ':' in port_mapping:
+                        host_port = int(port_mapping.split(':')[0].strip())
+                        # 检查是否在27000-28000范围内
+                        if port_start <= host_port < port_end:
+                            has_valid_port = True
+                            break
+            except (ValueError, IndexError):
+                pass
+        
+        if not has_valid_port:
+            return False
+        
+        # 所有条件都满足，确认是上传的服务
+        return True
+
     def cleanup_all_uploaded_services(self, delete_images: bool = False) -> Dict:
         """
         清理所有通过上传功能部署的服务
@@ -600,24 +649,34 @@ class ServiceService:
                 all_services = self.service_repository.get_all_services()
                 deleted_count = 0
                 failed_count = 0
+                skipped_count = 0
                 
                 for service in all_services:
-                    try:
-                        # 硬删除（直接从数据库删除）
-                        db.session.delete(service)
-                        deleted_count += 1
-                    except Exception as e:
-                        failed_count += 1
-                        print(f"❌ 删除服务记录失败 {service.id}: {str(e)}")
+                    # 判断是否为上传部署的服务
+                    is_uploaded_service = self._is_uploaded_service(service)
+                    
+                    if is_uploaded_service:
+                        try:
+                            # 硬删除（直接从数据库删除）
+                            db.session.delete(service)
+                            deleted_count += 1
+                            print(f"✅ 删除上传服务: {service.name} ({service.id})")
+                        except Exception as e:
+                            failed_count += 1
+                            print(f"❌ 删除服务记录失败 {service.id}: {str(e)}")
+                    else:
+                        skipped_count += 1
+                        print(f"⏭️  跳过非上传服务: {service.name} ({service.id})")
                 
                 db.session.commit()
                 
                 result['database'] = {
                     'services_deleted': deleted_count,
-                    'services_failed': failed_count
+                    'services_failed': failed_count,
+                    'services_skipped': skipped_count
                 }
                 
-                print(f"✅ 删除了 {deleted_count} 条服务记录")
+                print(f"✅ 删除了 {deleted_count} 条上传服务记录，跳过 {skipped_count} 条其他服务")
                 
             except Exception as e:
                 db.session.rollback()
