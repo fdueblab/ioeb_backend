@@ -132,6 +132,13 @@ def modify_compose_ports(compose_file_path: str, allocated_ports: List[int]) -> 
         
         service_config['ports'] = new_ports
         
+        # 移除 container_name 字段，让 Docker Compose 自动生成容器名称
+        # 这样可以避免不同用户上传相同容器名称时的冲突
+        # 容器名称会自动变成: {project_name}_{service_name}_{index}
+        if 'container_name' in service_config:
+            del service_config['container_name']
+            print(f"已移除 container_name 字段，容器名称将自动生成为: svc_{service_name}_*")
+        
         # 写回文件
         with open(compose_file_path, 'w', encoding='utf-8') as f:
             yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
