@@ -79,7 +79,7 @@ class Service(db.Model):
             "source": self.source.to_dict() if self.source else None,
         }
         
-        # 对于MCP类型的服务，使用扁平化的格式
+        # 对于MCP类型的服务，使用扁平化的格式 + apiList（兼容旧版）
         if self.type == 'atomic_mcp':
             # 从第一个API中提取url、des、method、tools、isFake和exampleMsg
             if self.apis and len(self.apis) > 0:
@@ -99,6 +99,8 @@ class Service(db.Model):
                         base_dict["exampleMsg"] = first_api.example_msg
                 else:
                     base_dict["exampleMsg"] = []
+                # 同时保留apiList格式以兼容旧版前端
+                base_dict["apiList"] = [api.to_dict() for api in self.apis]
             else:
                 # 如果没有API，提供默认值
                 base_dict["url"] = ""
@@ -107,6 +109,7 @@ class Service(db.Model):
                 base_dict["isFake"] = 0
                 base_dict["tools"] = []
                 base_dict["exampleMsg"] = []
+                base_dict["apiList"] = []
         else:
             # 对于REST类型的服务，保持原有的apiList格式
             base_dict["apiList"] = [api.to_dict() for api in self.apis]
