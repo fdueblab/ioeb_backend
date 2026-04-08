@@ -79,6 +79,14 @@ class Service(db.Model):
             "source": self.source.to_dict() if self.source else None,
         }
         
+        # 想定式生成算法：仅 apiList，附上下载路径提示（前端拼接 API 根地址）
+        if self.type == 'generated_algorithm':
+            base_dict["apiList"] = [api.to_dict() for api in self.apis]
+            base_dict["scenarioGeneratedCodePath"] = (
+                f"/services/{self.id}/scenario-generated-code"
+            )
+            return base_dict
+
         # 对于MCP类型的服务，使用扁平化的格式 + apiList（兼容旧版）
         if self.type == 'atomic_mcp':
             # 从第一个API中提取url、des、method、tools、isFake和exampleMsg

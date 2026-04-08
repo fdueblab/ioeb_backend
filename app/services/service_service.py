@@ -9,6 +9,8 @@ import time
 import os
 import tempfile
 
+from werkzeug.utils import secure_filename
+
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.datastructures import FileStorage
@@ -765,6 +767,108 @@ class ServiceService:
             
         except Exception as e:
             raise ServiceServiceError(f"清理所有服务失败: {str(e)}")
+
+    def upload_scenario_generated_algorithm(
+        self, py_file: FileStorage, meta: Dict
+    ) -> Dict:
+        """
+        想定式开发：上传生成的 .py 源码并登记为可检索的 Service（type=generated_algorithm）。
+        """
+        if not py_file or not py_file.filename:
+            raise ServiceServiceError("缺少 Python 源码文件")
+
+        raw_name = secure_filename(py_file.filename)
+        if not raw_name.lower().endswith(".py"):
+            raise ServiceServiceError("仅支持 .py 格式的源码文件")
+
+        py_file.seek(0, 2)
+        py_size = py_file.tell()
+        py_file.seek(0)
+        max_py = 16 * 1024 * 1024
+        if py_size > max_py:
+            raise ServiceServiceError(f"源码文件过大（最大 {max_py // (1024 * 1024)}MB）")
+
+        name = (meta.get("name") or raw_name.replace(".py", "")).strip()
+        if not name:
+            raise ServiceServiceError("服务名称不能为空")
+
+        domain = (meta.get("domain") or "aml").strip()
+        industry = (meta.get("industry") or "").strip()
+        scenario = (meta.get("scenario") or "").strip()
+        technology = (meta.get("technology") or "").strip()
+
+        service_data: Dict = {
+            "name": name[:100],
+            "attribute": (meta.get("attribute") or "custom").strip(),
+            "type": "generated_algorithm",
+            "domain": domain,
+            "industry": industry,
+            "scenario": scenario,
+            "technology": technology,
+            "network": "n/a",
+            "port": "n/a",
+            "volume": "n/a",
+            "status": "not_deployed",
+            "number": 0,
+            "apiList": [
+                {
+                    "name": "算法源码",
+                    "url": "",
+                    "method": "GET",
+                    "des": "想定式开发生成的算法源码，通过平台下载接口获取",
+                    "parameterType": 0,
+                    "responseType": 0,
+                    "isFake": False,
+                    "responseFileName": raw_name,
+                }
+            ],
+        }
+        if meta.get("source") and isinstance(meta["source"], dict):
+            service_data["source"] = meta["source"]
+
+        service_id = None
+        try:
+            service = self.service_repository.create_service_with_relations(
+                service_data
+            )
+            service_id = service.id
+            base = current_app.config["UPLOAD_FOLDER"]
+            subdir = os.path.join(base, "generated_algorithm", service_id)
+            os.makedirs(subdir, exist_ok=True)
+            dest_path = os.path.join(subdir, raw_name)
+            py_file.seek(0)
+            py_file.save(dest_path)
+            return service.to_dict()
+        except Exception as e:
+            if service_id:
+                try:
+                    self.delete_service(service_id)
+                except Exception:
+                    pass
+            raise ServiceServiceError(f"登记生成算法资源失败: {str(e)}")
+
+    def get_scenario_generated_code_path(self, service_id: str) -> Tuple[str, str]:
+        """返回磁盘绝对路径与建议下载文件名（仅 type=generated_algorithm）。"""
+        service = self.service_repository.get_service_by_id(service_id)
+        if not service or service.deleted:
+            raise ServiceServiceError(f"微服务ID {service_id} 不存在")
+        if service.type != "generated_algorithm":
+            raise ServiceServiceError("该服务不是想定式生成的算法资源")
+
+        apis = self.service_repository.get_service_apis(service_id)
+        if not apis:
+            raise ServiceServiceError("未找到算法源码记录")
+
+        fn = apis[0].response_file_name
+        if not fn:
+            raise ServiceServiceError("未配置源码文件名")
+
+        base = current_app.config["UPLOAD_FOLDER"]
+        path = os.path.join(base, "generated_algorithm", service_id, secure_filename(fn))
+        if not os.path.isfile(path):
+            raise ServiceServiceError("源码文件不存在或已被清理")
+
+        return path, fn
 
 
 # 创建单例实例，方便导入使用
