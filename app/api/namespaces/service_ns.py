@@ -4,7 +4,7 @@
 """
 
 import json
-from flask import request
+from flask import request, send_file
 from flask_restx import Namespace, Resource, fields
 from werkzeug.datastructures import FileStorage
 
@@ -325,6 +325,25 @@ class ServiceResource(Resource):
             return {"status": "error", "message": str(e)}, 400
 
 
+@api.route("/<string:id>/scenario-generated-code")
+@api.param("id", "微服务ID")
+class ServiceScenarioGeneratedCode(Resource):
+    @api.doc("download_scenario_generated_code")
+    @api.response(404, "Not found", error_response)
+    def get(self, id):
+        """下载想定式开发生成的算法源码（仅 type=generated_algorithm）"""
+        try:
+            path, download_name = service_service.get_scenario_generated_code_path(id)
+            return send_file(
+                path,
+                as_attachment=True,
+                download_name=download_name,
+                mimetype="text/x-python",
+            )
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404
+
+
 @api.route("/search")
 class ServiceSearch(Resource):
     @api.doc("search_services")
@@ -354,7 +373,7 @@ class ServiceFilter(Resource):
         
         可用筛选参数及其含义：
         - attribute: 服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)
-        - type: 服务类型 (atomic-原子微服务-REST, atomic_mcp-原子微服务-MCP, meta-元应用服务)
+        - type: 服务类型 (atomic-原子微服务-REST, atomic_mcp-原子微服务-MCP, meta-元应用服务, generated_algorithm-想定式生成算法)
         - domain: 领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, 
                       evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)
         - industry: 行业 (取决于domain，查看对应domain的industry字典)
@@ -368,7 +387,7 @@ class ServiceFilter(Resource):
         GET /api/services/filter?status=released,error&domain=aml
     """)
     @api.param("attribute", "服务属性 (non_intelligent-非智能体服务, open_source-开源模型, paid-付费模型, custom-定制模型)，多个值用逗号分隔")
-    @api.param("type", "服务类型 (atomic-原子微服务-REST, atomic_mcp-原子微服务-MCP, meta-元应用服务)，多个值用逗号分隔")
+    @api.param("type", "服务类型 (atomic, atomic_mcp, meta, generated_algorithm)，多个值用逗号分隔")
     @api.param("domain", "领域 (aml-跨境支付AI监测, aircraft-无人飞机AI监控, health-乡村医疗AI服务, agriculture-数字农业AI服务, evtol-低空飞行AI应用, ecommerce-跨境电商AI应用, homeAI-家庭陪伴AI应用)，多个值用逗号分隔")
     @api.param("industry", "行业 (取决于domain，查看对应domain的industry字典)，多个值用逗号分隔")
     @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)，多个值用逗号分隔")
@@ -400,6 +419,72 @@ class ServiceFilter(Resource):
             }, 200
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 500
+
+
+scenario_generated_upload_parser = api.parser()
+scenario_generated_upload_parser.add_argument(
+    "file", location="files", type=FileStorage, required=True, help=".py 源码文件"
+)
+scenario_generated_upload_parser.add_argument(
+    "name", location="form", type=str, required=True, help="服务/算法展示名称"
+)
+scenario_generated_upload_parser.add_argument(
+    "domain", location="form", type=str, required=True, help="垂直领域 code"
+)
+scenario_generated_upload_parser.add_argument(
+    "industry", location="form", type=str, required=False, help="行业 code"
+)
+scenario_generated_upload_parser.add_argument(
+    "scenario", location="form", type=str, required=False, help="场景 code"
+)
+scenario_generated_upload_parser.add_argument(
+    "technology", location="form", type=str, required=False, help="技术 code"
+)
+scenario_generated_upload_parser.add_argument(
+    "attribute", location="form", type=str, required=False, help="服务属性，默认 custom"
+)
+scenario_generated_upload_parser.add_argument(
+    "source", location="form", type=str, required=False, help="来源信息 JSON 字符串"
+)
+
+
+@api.route("/scenario-generated/upload")
+class ScenarioGeneratedUpload(Resource):
+    @api.doc("upload_scenario_generated_algorithm")
+    @api.expect(scenario_generated_upload_parser)
+    @api.marshal_with(service_response, code=201)
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self):
+        """想定式开发：上传生成的 Python 源码并登记为可检索资源（type=generated_algorithm）"""
+        args = scenario_generated_upload_parser.parse_args()
+        py_file = args["file"]
+        if not py_file or not py_file.filename:
+            return {"status": "error", "message": "缺少源码文件"}, 400
+
+        meta = {
+            "name": args.get("name"),
+            "domain": args.get("domain"),
+            "industry": args.get("industry"),
+            "scenario": args.get("scenario"),
+            "technology": args.get("technology"),
+            "attribute": args.get("attribute"),
+        }
+        if args.get("source"):
+            try:
+                meta["source"] = json.loads(args["source"])
+            except json.JSONDecodeError as e:
+                return {"status": "error", "message": f"source JSON 格式错误: {str(e)}"}, 400
+
+        try:
+            service = service_service.upload_scenario_generated_algorithm(py_file, meta)
+            return {
+                "status": "success",
+                "message": "想定式生成算法已登记到资源库",
+                "service": service,
+            }, 201
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
 
 
 @api.route("/batch")

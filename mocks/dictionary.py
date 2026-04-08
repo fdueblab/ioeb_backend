@@ -260,6 +260,12 @@ MOCK_SERVICE_TYPE_DICTIONARIES = [
         "text": "原子微服务-MCP",
         "sort": 3
     },
+    {
+        "category": "service_type",
+        "code": "generated_algorithm",
+        "text": "想定式生成算法",
+        "sort": 4
+    },
 ]
 
 MOCK_PERFORMANCE_METRIC_DICTIONARIES = [
