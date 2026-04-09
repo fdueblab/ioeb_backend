@@ -1,198 +1,83 @@
-name: Flask Backend CI/CD
+name: CI
 
-# 触发条件
 on:
   push:
-    branches:
-      - main
-      - zfy
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-# 环境变量
 env:
   PYTHON_VERSION: "3.10"
-  FLASK_DEBUG: 0 # 添加此行
-  FLASK_TESTING: 1 # 可选：如果需要明确指定测试环境
+  FLASK_DEBUG: 0
+  FLASK_TESTING: 1
 
 jobs:
-  # 代码质量检查
   lint:
-    name: Code Quality Check
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install dependencies
+      - name: Install and lint
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8==7.1.2 black==25.1.0 isort==6.0.1
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-      - name: Lint with flake8
-        run: |
-          # 停止构建过程如果存在语法错误或未定义名称
+          pip install flake8==7.1.2
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # 退出，但不停止构建过程
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=9999 --statistics
 
-  # 测试阶段
   test:
-    name: Run Tests
-    runs-on: ubuntu-latest
+    name: Test
     needs: lint
-
-    # services:
-    # 添加数据库服务（如果需要）
-    # postgres:
-    #   image: postgres:13
-    #   env:
-    #     POSTGRES_PASSWORD: postgres
-    #     POSTGRES_USER: postgres
-    #     POSTGRES_DB: test_db
-    #   ports:
-    #     - 5432:5432
-    #   options: >-
-    #     --health-cmd pg_isready
-    #     --health-interval 10s
-    #     --health-timeout 5s
-    #     --health-retries 5
-
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install pytest pytest-cov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Test with pytest
+      - name: Run tests
         run: |
           pytest tests/unit --cov=app --cov-report=xml
-
-      - name: Integration tests
-        run: |
           pytest tests/integration
 
-      # - name: Functional tests
-      #   run: |
-      #     pytest tests/functional
-
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: false
-
   build:
-    runs-on: ubuntu-latest
+    name: Build & Push Image
     needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Build and push ioeb-backend Docker image
+      - name: Build and push
         run: |
-          docker build -t polarsnowleopard/ioeb-backend:latest .
-          docker push polarsnowleopard/ioeb-backend:latest
+          SHORT_SHA=${GITHUB_SHA::7}
+          docker build \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:latest \
+            -t ${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:${SHORT_SHA} .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend --all-tags
 
-  # # 构建并发布镜像
-  # build:
-  #   name: Build and Push Docker Image
-  #   runs-on: ubuntu-latest
-  #   needs: test
-  #   if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-
-  #   steps:
-  #     - uses: actions/checkout@v3
-
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v2
-
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v2
-  #       with:
-  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-  #     - name: Build and push
-  #       uses: docker/build-push-action@v4
-  #       with:
-  #         context: .
-  #         push: true
-  #         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:latest
-
-  #   # 部署到生产环境
-  #   deploy-staging:
-  #     name: Deploy to Staging
-  #     runs-on: ubuntu-latest
-  #     needs: build
-  #     if: github.event_name == 'push' && (github.ref == 'refs/heads/develop')
-
-  #     steps:
-  #       - name: Deploy to staging server
-  #         uses: appleboy/ssh-action@master
-  #         with:
-  #           host: ${{ secrets.STAGING_HOST }}
-  #           username: ${{ secrets.STAGING_USERNAME }}
-  #           key: ${{ secrets.STAGING_SSH_KEY }}
-  #           script: |
-  #             cd /path/to/application
-  #             docker-compose pull
-  #             docker-compose up -d
-
-  # 部署到线上开发测试环境
-  deploy-production:
-    name: Deploy to Online Development Test Environment
-    runs-on: ubuntu-latest
+  deploy:
+    name: Deploy
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Create directory on production server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USERNAME }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          script: |
-            mkdir -p ~/ioeb-backend
-
-      - name: Copy files to production server
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USERNAME }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          source: "docker-compose.yml, .env_dev"
-          target: "~/ioeb-backend"
-          strip_components: 0
-
-      - name: Deploy to production server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USERNAME }}
-          key: ${{ secrets.PRODUCTION_SSH_KEY }}
-          script: |
-            cd ~/ioeb
-            sudo docker pull polarsnowleopard/ioeb-backend:latest
-            sudo docker-compose down || true
-            sudo docker-compose up -d
+      - name: Trigger deploy webhook
+        run: |
+          curl -sf -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
+            -H "X-Deploy-Token: ${{ secrets.DEPLOY_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"service":"backend","image":"${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:latest"}'
