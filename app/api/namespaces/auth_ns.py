@@ -1,12 +1,14 @@
 """
 认证相关API
-提供登录、登出等认证功能
+提供登录、登出、微信小程序登录等认证功能
 """
 
 import datetime
 import secrets
+import uuid
 
-from flask import request
+import requests as http_requests
+from flask import request, current_app
 from flask_restx import Namespace, Resource, fields
 
 from app.extensions import db
@@ -14,7 +16,7 @@ from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
 from app.models.user.user import User
 from app.models.user.user_tokens import UserToken
-from app.utils.password_utils import verify_password
+from app.utils.password_utils import verify_password, hash_password
 
 # 创建命名空间
 api = Namespace("auth", description="认证相关API")
@@ -106,6 +108,17 @@ roles_response = api.model(
     {
         "status": fields.String(description="响应状态"),
         "roles": fields.List(fields.Nested(role_model), description="角色列表"),
+    },
+)
+
+
+# 微信登录请求模型
+wx_login_model = api.model(
+    "WxLogin",
+    {
+        "code": fields.String(required=True, description="wx.login 返回的 code"),
+        "nickName": fields.String(description="微信昵称（可选）"),
+        "avatarUrl": fields.String(description="微信头像 URL（可选）"),
     },
 )
 
@@ -315,3 +328,122 @@ class Roles(Resource):
             return {"status": "success", "roles": roles_data}, 200
         except Exception as e:
             return {"status": "error", "message": f"获取角色列表失败: {str(e)}"}, 500
+
+
+@api.route("/wx_login")
+class WxLogin(Resource):
+    @api.doc(
+        "wx_login",
+        responses={
+            200: ("微信登录成功", user_response),
+            400: ("参数错误", error_response),
+            401: ("微信认证失败", error_response),
+            500: ("服务器错误", error_response),
+        },
+    )
+    @api.expect(wx_login_model)
+    def post(self):
+        """微信小程序登录（code 换 openid，自动注册/登录）"""
+        data = request.json
+        code = data.get("code")
+        nick_name = data.get("nickName", "")
+        avatar_url = data.get("avatarUrl", "")
+
+        if not code:
+            return {"code": 400, "message": "缺少 code 参数"}, 400
+
+        # 用 code 向微信服务器换取 openid
+        app_id = current_app.config.get("WX_APP_ID", "")
+        app_secret = current_app.config.get("WX_APP_SECRET", "")
+
+        if not app_secret:
+            current_app.logger.warning("WX_APP_SECRET 未配置，跳过微信验证，使用 code 作为 openid（仅开发环境）")
+            openid = f"dev_{code}"
+        else:
+            try:
+                wx_url = (
+                    "https://api.weixin.qq.com/sns/jscode2session"
+                    f"?appid={app_id}&secret={app_secret}&js_code={code}&grant_type=authorization_code"
+                )
+                wx_resp = http_requests.get(wx_url, timeout=10)
+                wx_data = wx_resp.json()
+
+                if "openid" not in wx_data:
+                    err_msg = wx_data.get("errmsg", "微信接口返回异常")
+                    current_app.logger.error(f"微信 jscode2session 失败: {wx_data}")
+                    return {"code": 401, "message": f"微信认证失败: {err_msg}"}, 401
+
+                openid = wx_data["openid"]
+            except Exception as e:
+                current_app.logger.error(f"请求微信接口异常: {e}")
+                return {"code": 500, "message": "请求微信服务器失败"}, 500
+
+        # 按 openid 查找已有用户
+        user = User.query.filter_by(wx_openid=openid, deleted=0).first()
+
+        if not user:
+            # 自动创建新用户
+            user_id = str(uuid.uuid4())
+            now_ms = int(datetime.datetime.now().timestamp() * 1000)
+            user = User(
+                id=user_id,
+                username=f"wx_{openid[:16]}",
+                name=nick_name or f"微信用户",
+                password=hash_password(secrets.token_hex(16)),
+                avatar=avatar_url or "",
+                wx_openid=openid,
+                role_id="user",
+                status=1,
+                deleted=0,
+                create_time=now_ms,
+            )
+            db.session.add(user)
+            current_app.logger.info(f"微信登录自动创建用户: {user.username} (openid={openid[:8]}...)")
+        else:
+            # 更新昵称和头像（如果用户传了新的）
+            if nick_name:
+                user.name = nick_name
+            if avatar_url:
+                user.avatar = avatar_url
+
+        # 更新登录信息
+        user.last_login_ip = request.remote_addr
+        user.last_login_time = int(datetime.datetime.now().timestamp() * 1000)
+
+        # 生成 token
+        token = secrets.token_hex(16)
+        expires_at = int(datetime.datetime.now().timestamp() * 1000) + 7 * 24 * 60 * 60 * 1000
+
+        user_token = UserToken.query.filter_by(user_id=user.id).first()
+        if user_token:
+            user_token.token = token
+            user_token.expires_at = expires_at
+        else:
+            user_token = UserToken(user_id=user.id, token=token, expires_at=expires_at)
+            db.session.add(user_token)
+
+        db.session.commit()
+
+        # 查询角色
+        role = Role.query.filter_by(id=user.role_id, deleted=0).first()
+
+        response = {
+            "id": user.id,
+            "name": user.name,
+            "username": user.username,
+            "password": "",
+            "token": token,
+            "avatar": user.avatar or "",
+            "status": user.status,
+            "telephone": user.telephone or "",
+            "lastLoginIp": user.last_login_ip or "",
+            "lastLoginTime": user.last_login_time or 0,
+            "creatorId": user.creator_id or "",
+            "createTime": user.create_time,
+            "merchantCode": user.merchant_code or "",
+            "deleted": user.deleted,
+            "roleId": user.role_id or "",
+            "role": role.to_dict() if role else None,
+        }
+
+        return response, 200

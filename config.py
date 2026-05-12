@@ -28,6 +28,10 @@ class Config:
     COS_REGION = os.getenv("COS_REGION", "ap-beijing")
     COS_BUCKET = os.getenv("COS_BUCKET", None)
 
+    # 微信小程序配置（用于 wx.login code 换 openid）
+    WX_APP_ID = os.getenv("WX_APP_ID", "wx7c397441311585b2")
+    WX_APP_SECRET = os.getenv("WX_APP_SECRET", "")
+
 
 class DevelopmentConfig(Config):
     """开发环境配置"""
