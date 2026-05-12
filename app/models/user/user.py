@@ -25,6 +25,9 @@ class User(db.Model):
     merchant_code = db.Column(db.String(50), nullable=True, comment="商户代码")
     role_id = db.Column(db.String(36), nullable=False, default="user", comment="角色ID，关联roles表")
 
+    # 微信小程序登录
+    wx_openid = db.Column(db.String(128), nullable=True, unique=True, comment="微信小程序 openid")
+
     # 状态信息
     status = db.Column(db.Integer, nullable=False, default=1, comment="用户状态：1-正常，0-禁用")
     deleted = db.Column(
@@ -68,4 +71,5 @@ class User(db.Model):
             "lastLoginTime": self.last_login_time,
             "createTime": self.create_time,
             "creatorId": self.creator_id,
+            "wxOpenid": self.wx_openid,
         }
