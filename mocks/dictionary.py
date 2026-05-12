@@ -998,6 +998,120 @@ MOCK_HOMEAI_TECHNOLOGY_DICTIONARIES = [
     }
 ]
 
+# ==================== 算法类别与特定参数字典 ====================
+
+MOCK_ALGORITHM_CATEGORY_DICTIONARIES = [
+    {"category": "algorithm_category", "code": "classification", "text": "分类算法", "sort": 1},
+    {"category": "algorithm_category", "code": "detection", "text": "检测算法", "sort": 2},
+    {"category": "algorithm_category", "code": "regression", "text": "回归/预测算法", "sort": 3},
+    {"category": "algorithm_category", "code": "clustering", "text": "聚类算法", "sort": 4},
+    {"category": "algorithm_category", "code": "generation", "text": "生成算法", "sort": 5},
+    {"category": "algorithm_category", "code": "recommendation", "text": "推荐算法", "sort": 6},
+]
+
+MOCK_ALGO_INPUT_TYPE_DICTIONARIES = [
+    {"category": "algo_input_type", "code": "video_url", "text": "视频 URL", "sort": 1},
+    {"category": "algo_input_type", "code": "image_url", "text": "图像 URL", "sort": 2},
+    {"category": "algo_input_type", "code": "text", "text": "文本", "sort": 3},
+    {"category": "algo_input_type", "code": "file_path", "text": "文件路径", "sort": 4},
+    {"category": "algo_input_type", "code": "api_response", "text": "API 响应", "sort": 5},
+    {"category": "algo_input_type", "code": "binary_data", "text": "二进制数据", "sort": 6},
+    {"category": "algo_input_type", "code": "structured_data", "text": "结构化数据", "sort": 7},
+    {"category": "algo_input_type", "code": "time_series", "text": "时序数据", "sort": 8},
+    {"category": "algo_input_type", "code": "custom", "text": "自定义", "sort": 9},
+]
+
+MOCK_ALGO_CONSTRAINT_DICTIONARIES = [
+    {"category": "algo_constraint", "code": "no_llm", "text": "不使用 LLM / 大语言模型", "sort": 1},
+    {"category": "algo_constraint", "code": "no_training", "text": "不需要训练或微调", "sort": 2},
+    {"category": "algo_constraint", "code": "no_gpu", "text": "不需要 GPU", "sort": 3},
+    {"category": "algo_constraint", "code": "pretrained_only", "text": "仅使用预训练模型（推理模式）", "sort": 4},
+    {"category": "algo_constraint", "code": "rule_based", "text": "纯规则 / 启发式方法", "sort": 5},
+    {"category": "algo_constraint", "code": "single_file", "text": "单文件实现", "sort": 6},
+]
+
+# --- 分类算法特定参数 ---
+MOCK_ALGO_CLASSIFICATION_OUTPUT_TYPE_DICTIONARIES = [
+    {"category": "algo_classification_output_type", "code": "classification_label", "text": "分类标签", "sort": 1},
+    {"category": "algo_classification_output_type", "code": "confidence_list", "text": "置信度列表", "sort": 2},
+    {"category": "algo_classification_output_type", "code": "json_structure", "text": "JSON 结构", "sort": 3},
+    {"category": "algo_classification_output_type", "code": "text_report", "text": "文本报告", "sort": 4},
+]
+
+# --- 检测算法特定参数 ---
+MOCK_ALGO_DETECTION_TARGET_TYPE_DICTIONARIES = [
+    {"category": "algo_detection_target_type", "code": "object", "text": "物体检测", "sort": 1},
+    {"category": "algo_detection_target_type", "code": "anomaly", "text": "异常值检测", "sort": 2},
+    {"category": "algo_detection_target_type", "code": "event", "text": "事件检测", "sort": 3},
+    {"category": "algo_detection_target_type", "code": "defect", "text": "缺陷检测", "sort": 4},
+    {"category": "algo_detection_target_type", "code": "face", "text": "人脸检测", "sort": 5},
+    {"category": "algo_detection_target_type", "code": "text_region", "text": "文本区域检测", "sort": 6},
+]
+
+MOCK_ALGO_DETECTION_OUTPUT_FORMAT_DICTIONARIES = [
+    {"category": "algo_detection_output_format", "code": "bounding_box", "text": "边界框坐标", "sort": 1},
+    {"category": "algo_detection_output_format", "code": "confidence_score", "text": "置信度分数", "sort": 2},
+    {"category": "algo_detection_output_format", "code": "anomaly_score", "text": "异常分数", "sort": 3},
+    {"category": "algo_detection_output_format", "code": "detection_report", "text": "检测报告", "sort": 4},
+]
+
+# --- 回归/预测算法特定参数 ---
+MOCK_ALGO_REGRESSION_TIME_GRANULARITY_DICTIONARIES = [
+    {"category": "algo_regression_time_granularity", "code": "second", "text": "秒级", "sort": 1},
+    {"category": "algo_regression_time_granularity", "code": "minute", "text": "分钟级", "sort": 2},
+    {"category": "algo_regression_time_granularity", "code": "hour", "text": "小时级", "sort": 3},
+    {"category": "algo_regression_time_granularity", "code": "day", "text": "天级", "sort": 4},
+    {"category": "algo_regression_time_granularity", "code": "week", "text": "周级", "sort": 5},
+    {"category": "algo_regression_time_granularity", "code": "month", "text": "月级", "sort": 6},
+    {"category": "algo_regression_time_granularity", "code": "none", "text": "不涉及时序", "sort": 7},
+]
+
+MOCK_ALGO_REGRESSION_METRIC_DICTIONARIES = [
+    {"category": "algo_regression_metric", "code": "mae", "text": "MAE", "sort": 1},
+    {"category": "algo_regression_metric", "code": "rmse", "text": "RMSE", "sort": 2},
+    {"category": "algo_regression_metric", "code": "r2", "text": "R²", "sort": 3},
+    {"category": "algo_regression_metric", "code": "mape", "text": "MAPE", "sort": 4},
+]
+
+# --- 聚类算法特定参数 ---
+MOCK_ALGO_CLUSTERING_METHOD_DICTIONARIES = [
+    {"category": "algo_clustering_method", "code": "distance_based", "text": "基于距离", "sort": 1},
+    {"category": "algo_clustering_method", "code": "density_based", "text": "基于密度", "sort": 2},
+    {"category": "algo_clustering_method", "code": "hierarchical", "text": "基于层次", "sort": 3},
+    {"category": "algo_clustering_method", "code": "model_based", "text": "基于模型", "sort": 4},
+]
+
+MOCK_ALGO_CLUSTERING_OUTPUT_FORMAT_DICTIONARIES = [
+    {"category": "algo_clustering_output_format", "code": "cluster_labels", "text": "簇标签", "sort": 1},
+    {"category": "algo_clustering_output_format", "code": "cluster_centers", "text": "聚类中心", "sort": 2},
+    {"category": "algo_clustering_output_format", "code": "visualization", "text": "可视化图表", "sort": 3},
+    {"category": "algo_clustering_output_format", "code": "cluster_report", "text": "聚类报告", "sort": 4},
+]
+
+# --- 生成算法特定参数 ---
+MOCK_ALGO_GENERATION_TARGET_TYPE_DICTIONARIES = [
+    {"category": "algo_generation_target_type", "code": "text", "text": "文本", "sort": 1},
+    {"category": "algo_generation_target_type", "code": "image", "text": "图像", "sort": 2},
+    {"category": "algo_generation_target_type", "code": "audio", "text": "音频", "sort": 3},
+    {"category": "algo_generation_target_type", "code": "structured_data", "text": "结构化数据", "sort": 4},
+    {"category": "algo_generation_target_type", "code": "code", "text": "代码", "sort": 5},
+]
+
+MOCK_ALGO_GENERATION_QUALITY_DICTIONARIES = [
+    {"category": "algo_generation_quality", "code": "diversity_first", "text": "多样性优先", "sort": 1},
+    {"category": "algo_generation_quality", "code": "quality_first", "text": "质量优先", "sort": 2},
+    {"category": "algo_generation_quality", "code": "speed_first", "text": "速度优先", "sort": 3},
+]
+
+# --- 推荐算法特定参数 ---
+MOCK_ALGO_RECOMMENDATION_STRATEGY_DICTIONARIES = [
+    {"category": "algo_recommendation_strategy", "code": "collaborative_filtering", "text": "协同过滤", "sort": 1},
+    {"category": "algo_recommendation_strategy", "code": "content_based", "text": "基于内容", "sort": 2},
+    {"category": "algo_recommendation_strategy", "code": "hybrid", "text": "混合推荐", "sort": 3},
+    {"category": "algo_recommendation_strategy", "code": "knowledge_graph", "text": "基于知识图谱", "sort": 4},
+]
+
+
 # 合并所有字典数据
 MOCK_DICTIONARIES = (
     MOCK_STATUS_DICTIONARIES
@@ -1031,4 +1145,17 @@ MOCK_DICTIONARIES = (
     + MOCK_HOMEAI_INDUSTRY_DICTIONARIES
     + MOCK_HOMEAI_SCENARIO_DICTIONARIES
     + MOCK_HOMEAI_TECHNOLOGY_DICTIONARIES
+    + MOCK_ALGORITHM_CATEGORY_DICTIONARIES
+    + MOCK_ALGO_INPUT_TYPE_DICTIONARIES
+    + MOCK_ALGO_CONSTRAINT_DICTIONARIES
+    + MOCK_ALGO_CLASSIFICATION_OUTPUT_TYPE_DICTIONARIES
+    + MOCK_ALGO_DETECTION_TARGET_TYPE_DICTIONARIES
+    + MOCK_ALGO_DETECTION_OUTPUT_FORMAT_DICTIONARIES
+    + MOCK_ALGO_REGRESSION_TIME_GRANULARITY_DICTIONARIES
+    + MOCK_ALGO_REGRESSION_METRIC_DICTIONARIES
+    + MOCK_ALGO_CLUSTERING_METHOD_DICTIONARIES
+    + MOCK_ALGO_CLUSTERING_OUTPUT_FORMAT_DICTIONARIES
+    + MOCK_ALGO_GENERATION_TARGET_TYPE_DICTIONARIES
+    + MOCK_ALGO_GENERATION_QUALITY_DICTIONARIES
+    + MOCK_ALGO_RECOMMENDATION_STRATEGY_DICTIONARIES
 )
