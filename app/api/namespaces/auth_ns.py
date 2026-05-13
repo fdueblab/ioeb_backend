@@ -357,8 +357,8 @@ class WxLogin(Resource):
         app_secret = current_app.config.get("WX_APP_SECRET", "")
 
         if not app_secret:
-            current_app.logger.warning("WX_APP_SECRET 未配置，跳过微信验证，使用 code 作为 openid（仅开发环境）")
-            openid = f"dev_{code}"
+            current_app.logger.warning("WX_APP_SECRET 未配置，使用固定开发 openid（仅开发环境）")
+            openid = f"dev_{app_id}"
         else:
             try:
                 wx_url = (
