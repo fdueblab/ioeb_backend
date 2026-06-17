@@ -16,6 +16,7 @@ from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
 from app.models.user.user import User
 from app.models.user.user_tokens import UserToken
+from app.services.audit_service import audit_service
 from app.utils.password_utils import verify_password, hash_password
 
 # 创建命名空间
@@ -178,6 +179,16 @@ class Login(Resource):
             db.session.add(user_token)
 
         db.session.commit()
+        audit_service.log_action(
+            user=user,
+            action_type="auth.login",
+            method=request.method,
+            path=request.path,
+            endpoint=request.endpoint,
+            status_code=200,
+            client_ip=audit_service.get_client_ip(),
+            user_agent=request.headers.get("User-Agent", ""),
+        )
 
         # 构建响应
         response = {
@@ -372,6 +383,16 @@ class Register(Resource):
         db.session.add(user_token)
 
         db.session.commit()
+        audit_service.log_action(
+            user=user,
+            action_type="auth.register",
+            method=request.method,
+            path=request.path,
+            endpoint=request.endpoint,
+            status_code=200,
+            client_ip=audit_service.get_client_ip(),
+            user_agent=request.headers.get("User-Agent", ""),
+        )
 
         role = Role.query.filter_by(id=user.role_id, deleted=0).first()
 

@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask_cors import CORS
 from flask_restx import Api
 
+from app.api.namespaces.audit_ns import api as audit_ns
 from app.api.namespaces.auth_ns import api as auth_ns
 from app.api.namespaces.dataset_ns import api as dataset_ns
 from app.api.namespaces.dictionary_ns import api as dictionary_ns
@@ -37,3 +38,4 @@ api.add_namespace(service_ns)
 api.add_namespace(auth_ns, path="/auth")  # 添加认证命名空间
 api.add_namespace(dictionary_ns, path="/dictionaries")
 api.add_namespace(dataset_ns, path="/datasets")  # 添加数据集命名空间
+api.add_namespace(audit_ns, path="/audit")  # 添加审计命名空间
