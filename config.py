@@ -27,6 +27,8 @@ class Config:
     COS_SECRET_KEY = os.getenv("COS_SECRET_KEY", None)
     COS_REGION = os.getenv("COS_REGION", "ap-beijing")
     COS_BUCKET = os.getenv("COS_BUCKET", None)
+    COS_KEY_PREFIX = os.getenv("COS_KEY_PREFIX", "")
+    COS_DELETE_ALLOWED_PREFIXES = os.getenv("COS_DELETE_ALLOWED_PREFIXES", "")
 
     # 微信小程序配置（用于 wx.login code 换 openid）
     WX_APP_ID = os.getenv("WX_APP_ID", "wx7c397441311585b2")
