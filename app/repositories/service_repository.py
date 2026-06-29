@@ -309,7 +309,15 @@ class ServiceRepository:
                         input_name=api_data.get("inputName"),
                         output_name=api_data.get("outputName"),
                         output_visualization=api_data.get("outputVisualization", False),
-                        submit_button_text=api_data.get("submitButtonText")
+                        submit_button_text=api_data.get("submitButtonText"),
+                        simulation_build_id=api_data.get("simulationBuildId"),
+                        meta_app_artifact_id=api_data.get("metaAppArtifactId"),
+                        meta_app_artifact_hash=api_data.get("metaAppArtifactHash"),
+                        meta_app_artifact=api_data.get("metaAppArtifact"),
+                        run_mode=api_data.get("runMode"),
+                        runtime_spec=self._materialize_runtime_spec(
+                            api_data.get("runtimeSpec"), service_id
+                        )
                     )
                     db.session.add(api)
                     
@@ -342,6 +350,16 @@ class ServiceRepository:
         except Exception as e:
             db.session.rollback()
             raise e
+
+    @staticmethod
+    def _materialize_runtime_spec(runtime_spec: Optional[Dict], service_id: str) -> Optional[Dict]:
+        if not isinstance(runtime_spec, dict):
+            return runtime_spec
+        value = json.loads(json.dumps(runtime_spec, ensure_ascii=False))
+        docker = value.get("docker")
+        if isinstance(docker, dict) and isinstance(docker.get("containerName"), str):
+            docker["containerName"] = docker["containerName"].replace("{serviceId}", service_id)
+        return value
     
     def update_service(self, service_id: str, service_data: Dict) -> Optional[Service]:
         """

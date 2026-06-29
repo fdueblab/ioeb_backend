@@ -30,6 +30,7 @@ from app.utils.cleanup_utils import (
     cleanup_docker_resources,
     cleanup_service_files
 )
+from app.services.meta_app_config import ARTIFACT_SCHEMA, stable_hash
 
 
 class ServiceServiceError(Exception):
@@ -174,6 +175,25 @@ class ServiceService:
         except Exception as e:
             raise ServiceServiceError(f"创建微服务过程中出错: {str(e)}")
 
+    def validate_meta_app_prepublish(self, service_data: Dict) -> None:
+        apis = service_data.get("apiList")
+        if not isinstance(apis, list) or len(apis) != 1 or not isinstance(apis[0], dict):
+            raise ServiceServiceError("元应用必须包含且仅包含一个API配置")
+        api = apis[0]
+        artifact = api.get("metaAppArtifact")
+        if not isinstance(artifact, dict):
+            raise ServiceServiceError("元应用缺少Artifact")
+        if artifact.get("schemaVersion") != ARTIFACT_SCHEMA:
+            raise ServiceServiceError("Artifact Schema必须为meta_app_artifact.v1")
+        if api.get("metaAppArtifactId") != artifact.get("artifactId"):
+            raise ServiceServiceError("Artifact ID不一致")
+        if not api.get("simulationBuildId"):
+            raise ServiceServiceError("元应用缺少simulationBuildId")
+        if api.get("metaAppArtifactHash") != stable_hash(artifact):
+            raise ServiceServiceError("Artifact哈希校验失败")
+        if not isinstance(api.get("runtimeSpec"), dict):
+            raise ServiceServiceError("元应用缺少runtimeSpec")
+
     def update_service(self, service_id: str, service_data: Dict) -> Dict:
         """
         更新微服务信息
@@ -297,6 +317,7 @@ class ServiceService:
             
             # 先设置状态为部署中
             self.service_repository.update_service_status(service_id, "deploying")
+            service_type = service.type
             
             # 获取当前Flask应用实例
             app = current_app._get_current_object()
@@ -305,11 +326,15 @@ class ServiceService:
             def deploy_task():
                 with app.app_context():
                     try:
-                        # 模拟部署过程，延时10秒
-                        time.sleep(10)
+                        # 原型阶段仅模拟部署状态推进
+                        time.sleep(current_app.config.get("META_APP_DEPLOY_DELAY_SECONDS", 10))
                         
-                        # 部署完成后设置状态为预发布(未测评)
-                        self.service_repository.update_service_status(service_id, "pre_release_unrated")
+                        target_status = (
+                            "pre_release_pending"
+                            if service_type == "meta"
+                            else "pre_release_unrated"
+                        )
+                        self.service_repository.update_service_status(service_id, target_status)
                         print(f"服务 {service_id} 部署成功")
                     except Exception as e:
                         # 如果部署失败，设置状态为错误

@@ -50,6 +50,7 @@ jobs:
         run: |
           pytest tests/unit --cov=app --cov-report=xml
           pytest tests/integration
+          pytest tests/functional
 
   build:
     name: Build & Push Image

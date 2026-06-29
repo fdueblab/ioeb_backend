@@ -32,6 +32,12 @@ class ServiceApi(db.Model):
     output_name = db.Column(db.String(100), nullable=True, comment="输出名称")
     output_visualization = db.Column(db.Boolean, default=False, comment="是否可视化输出")
     submit_button_text = db.Column(db.String(50), nullable=True, comment="提交按钮文本")
+    simulation_build_id = db.Column(db.String(64), nullable=True, comment="仿真构建ID")
+    meta_app_artifact_id = db.Column(db.String(64), nullable=True, comment="元应用Artifact ID")
+    meta_app_artifact_hash = db.Column(db.String(128), nullable=True, comment="元应用Artifact哈希")
+    meta_app_artifact = db.Column(db.JSON, nullable=True, comment="元应用Artifact正文")
+    run_mode = db.Column(db.String(32), nullable=True, comment="元应用运行模式")
+    runtime_spec = db.Column(db.JSON, nullable=True, comment="元应用运行环境预留配置")
     # 关联关系
     parameters = db.relationship("ServiceApiParameter", backref="api", lazy=True)
     tools = db.relationship("ServiceApiTool", backref="api", lazy=True)
@@ -94,6 +100,18 @@ class ServiceApi(db.Model):
             result["outputVisualization"] = self.output_visualization
         if self.submit_button_text:
             result["submitButtonText"] = self.submit_button_text
+        if self.simulation_build_id:
+            result["simulationBuildId"] = self.simulation_build_id
+        if self.meta_app_artifact_id:
+            result["metaAppArtifactId"] = self.meta_app_artifact_id
+        if self.meta_app_artifact_hash:
+            result["metaAppArtifactHash"] = self.meta_app_artifact_hash
+        if self.meta_app_artifact is not None:
+            result["metaAppArtifact"] = self.meta_app_artifact
+        if self.run_mode:
+            result["runMode"] = self.run_mode
+        if self.runtime_spec is not None:
+            result["runtimeSpec"] = self.runtime_spec
 
         # 添加MCP相关字段
         if self.tools:
