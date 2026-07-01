@@ -452,12 +452,12 @@ class ServiceService:
                 host_port = port_mappings[0].split(':')[0]
                 
                 # 从环境变量获取部署服务的宿主机URL
-                service_host_url = os.environ.get('SERVICE_HOST_URL', 'http://fdueblab.cn')
+                service_host_url = os.environ.get('SERVICE_HOST_URL', 'https://fdueblab.cn')
                 
                 # 生成默认API
                 default_api = {
                     'name': f'{service_data.get("name", "MCP")} Server',
-                    'url': f'{service_host_url}:{host_port}/sse',
+                    'url': f'{service_host_url}/mcp-proxy/{host_port}/sse',
                     'method': 'sse',
                     'des': f'提供{service_data.get("name", "MCP")}功能的MCP服务',
                     'parameterType': 1,

@@ -35,6 +35,8 @@ class COSUtils:
         self._client = None
         self._bucket = None
         self._region = None
+        self._key_prefix = ""
+        self._delete_allowed_prefixes = []
         self._initialized = True
 
     def init_app(self, app):
@@ -45,6 +47,10 @@ class COSUtils:
         """
         self._region = app.config.get("COS_REGION")
         self._bucket = app.config.get("COS_BUCKET")
+        self._key_prefix = self._normalize_prefix(app.config.get("COS_KEY_PREFIX", ""))
+        self._delete_allowed_prefixes = self._parse_prefixes(
+            app.config.get("COS_DELETE_ALLOWED_PREFIXES", "")
+        )
 
         # 获取密钥
         secret_id = app.config.get("COS_SECRET_ID") or os.environ.get("COS_SECRET_ID")
@@ -68,6 +74,26 @@ class COSUtils:
         app.logger.info(
             f"COS client initialized with region: {self._region}, bucket: {self._bucket}"
         )
+
+    @staticmethod
+    def _normalize_prefix(prefix: str) -> str:
+        """Normalize a COS key prefix to either empty string or trailing slash form."""
+        normalized = (prefix or "").strip().strip("/")
+        return f"{normalized}/" if normalized else ""
+
+    @classmethod
+    def _parse_prefixes(cls, prefixes: str) -> List[str]:
+        """Parse comma-separated prefixes used to guard destructive COS operations."""
+        return [
+            normalized
+            for normalized in (cls._normalize_prefix(item) for item in (prefixes or "").split(","))
+            if normalized
+        ]
+
+    def _can_delete_key(self, cos_path: str) -> bool:
+        if not self._delete_allowed_prefixes:
+            return True
+        return any(cos_path.startswith(prefix) for prefix in self._delete_allowed_prefixes)
 
     @property
     def client(self) -> CosS3Client:
@@ -250,6 +276,10 @@ class COSUtils:
             COSError: 删除失败时抛出
         """
         try:
+            if not self._can_delete_key(cos_path):
+                logging.warning("Skip COS delete outside allowed prefixes: %s", cos_path)
+                return True
+
             # 删除文件
             self.client.delete_object(Bucket=self.bucket, Key=cos_path)
 
@@ -271,17 +301,29 @@ class COSUtils:
             COSError: 删除失败时抛出
         """
         try:
+            guarded_paths = []
+            skipped_paths = []
+            for path in cos_paths:
+                if self._can_delete_key(path):
+                    guarded_paths.append(path)
+                else:
+                    skipped_paths.append(path)
+                    logging.warning("Skip COS delete outside allowed prefixes: %s", path)
+
+            if not guarded_paths:
+                return [], skipped_paths
+
             # 批量删除文件
             response = self.client.delete_objects(
                 Bucket=self.bucket,
-                Delete={"Object": [{"Key": path} for path in cos_paths], "Quiet": "false"},
+                Delete={"Object": [{"Key": path} for path in guarded_paths], "Quiet": "false"},
             )
 
             # 处理结果
             deleted = [item.get("Key") for item in response.get("Deleted", [])]
             errors = [item.get("Key") for item in response.get("Error", [])]
 
-            return deleted, errors
+            return deleted, errors + skipped_paths
         except Exception as e:
             logging.error(f"Failed to batch delete files from COS: {str(e)}")
             raise COSError(f"Failed to batch delete files from COS: {str(e)}")
@@ -341,6 +383,7 @@ class COSUtils:
         unique_filename = f"{uuid.uuid4().hex}_{filename}"
 
         # 构建路径
+        prefix = f"{self._key_prefix}{prefix}" if self._key_prefix else prefix
         if prefix:
             # 确保前缀以/结尾
             if not prefix.endswith("/"):

@@ -16,6 +16,7 @@ from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
 from app.models.user.user import User
 from app.models.user.user_tokens import UserToken
+from app.services.audit_service import audit_service
 from app.utils.password_utils import verify_password, hash_password
 
 # 创建命名空间
@@ -178,6 +179,16 @@ class Login(Resource):
             db.session.add(user_token)
 
         db.session.commit()
+        audit_service.log_action(
+            user=user,
+            action_type="auth.login",
+            method=request.method,
+            path=request.path,
+            endpoint=request.endpoint,
+            status_code=200,
+            client_ip=audit_service.get_client_ip(),
+            user_agent=request.headers.get("User-Agent", ""),
+        )
 
         # 构建响应
         response = {
@@ -306,6 +317,103 @@ class Logout(Resource):
                 db.session.commit()
 
         return {"message": "登出成功"}, 200
+
+
+# 注册请求模型
+register_model = api.model(
+    "Register",
+    {
+        "username": fields.String(required=True, description="用户名"),
+        "password": fields.String(required=True, description="密码"),
+        "name": fields.String(description="用户姓名"),
+    },
+)
+
+
+@api.route("/register")
+class Register(Resource):
+    @api.doc(
+        "user_register",
+        responses={
+            200: ("注册成功", user_response),
+            400: ("参数错误", error_response),
+            409: ("用户名已存在", error_response),
+            500: ("服务器错误", error_response),
+        },
+    )
+    @api.expect(register_model)
+    def post(self):
+        """用户注册（默认角色：应用开发者，拥有 publisher + user 权限）"""
+        data = request.json
+        username = data.get("username", "").strip()
+        password = data.get("password", "")
+        name = data.get("name", "").strip() or username
+
+        if not username or not password:
+            return {"code": 400, "message": "用户名和密码不能为空"}, 400
+
+        if len(username) < 3 or len(username) > 50:
+            return {"code": 400, "message": "用户名长度需在 3-50 个字符之间"}, 400
+
+        if len(password) < 6:
+            return {"code": 400, "message": "密码长度不能少于 6 位"}, 400
+
+        existing = User.query.filter_by(username=username, deleted=0).first()
+        if existing:
+            return {"code": 409, "message": "用户名已存在"}, 409
+
+        now_ms = int(datetime.datetime.now().timestamp() * 1000)
+        user_id = str(uuid.uuid4())
+        user = User(
+            id=user_id,
+            username=username,
+            name=name,
+            password=hash_password(password),
+            role_id="AppDev",
+            status=1,
+            deleted=0,
+            create_time=now_ms,
+            creator_id="self-register",
+        )
+        db.session.add(user)
+
+        token = secrets.token_hex(16)
+        expires_at = now_ms + 7 * 24 * 60 * 60 * 1000
+        user_token = UserToken(user_id=user.id, token=token, expires_at=expires_at)
+        db.session.add(user_token)
+
+        db.session.commit()
+        audit_service.log_action(
+            user=user,
+            action_type="auth.register",
+            method=request.method,
+            path=request.path,
+            endpoint=request.endpoint,
+            status_code=200,
+            client_ip=audit_service.get_client_ip(),
+            user_agent=request.headers.get("User-Agent", ""),
+        )
+
+        role = Role.query.filter_by(id=user.role_id, deleted=0).first()
+
+        return {
+            "id": user.id,
+            "name": user.name,
+            "username": user.username,
+            "password": "",
+            "token": token,
+            "avatar": user.avatar or "",
+            "status": user.status,
+            "telephone": user.telephone or "",
+            "lastLoginIp": "",
+            "lastLoginTime": 0,
+            "creatorId": user.creator_id or "",
+            "createTime": user.create_time,
+            "merchantCode": user.merchant_code or "",
+            "deleted": user.deleted,
+            "roleId": user.role_id or "",
+            "role": role.to_dict() if role else None,
+        }, 200
 
 
 @api.route("/roles")

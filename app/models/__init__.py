@@ -14,6 +14,7 @@ from app.models.service.service_norm import ServiceNorm
 from app.models.service.service_source import ServiceSource
 from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
+from app.models.user_action_log import UserActionLog
 
 # 导入所有模型，使它们可以通过app.models直接访问
 from app.models.user.user import User
@@ -28,6 +29,7 @@ __all__ = [
     "Role",
     "RolePermission",
     "UserToken",
+    "UserActionLog",
     "Service",
     "ServiceNorm",
     "ServiceSource",

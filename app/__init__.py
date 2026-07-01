@@ -22,7 +22,9 @@ def create_app(config_name):
     console_handler.setLevel(logging.DEBUG)
 
     # 设置日志格式
-    formatter = logging.Formatter("[%(asctime)s] %(levelname)s in %(module)s: %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    )
     console_handler.setFormatter(formatter)
 
     # 添加处理器到应用日志器
@@ -44,6 +46,12 @@ def create_app(config_name):
 
     db.init_app(app)
     migrate.init_app(app, db)
+
+    # 注册审计钩子：仅记录已认证 API 请求的元数据
+    from app.services.audit_service import audit_service
+
+    app.before_request(audit_service.attach_request_user)
+    app.after_request(audit_service.log_request)
 
     # 初始化COS工具
     from app.utils.cos_utils import cos_utils
