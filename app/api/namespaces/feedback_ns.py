@@ -3,6 +3,8 @@
 提供用户反馈提交和管理员查看能力。
 """
 
+import datetime
+
 from flask import g, request
 from flask_restx import Namespace, Resource, fields
 from sqlalchemy import inspect, text
@@ -10,7 +12,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.models.feedback import Feedback
-from app.services.audit_service import audit_service
+from app.models.user.role_permission import RolePermission
+from app.models.user.user import User
+from app.models.user.user_tokens import UserToken
 
 
 api = Namespace("feedback", description="意见反馈API")
@@ -91,6 +95,40 @@ def ensure_feedback_table():
     db.session.commit()
 
 
+def get_request_user():
+    user = getattr(g, "audit_user", None)
+    if user:
+        return user
+
+    token = request.headers.get("Access-Token", "")
+    if not token:
+        return None
+
+    user_token = UserToken.query.filter_by(token=token).first()
+    if not user_token:
+        return None
+
+    now = int(datetime.datetime.now().timestamp() * 1000)
+    if user_token.expires_at < now:
+        return None
+
+    return User.query.filter_by(id=user_token.user_id, deleted=0).first()
+
+
+def has_admin_permission(user):
+    if not user:
+        return False
+    if user.role_id in ("admin", "root"):
+        return True
+    return (
+        RolePermission.query.filter_by(
+            role_id=user.role_id,
+            permission_id="admin",
+        ).first()
+        is not None
+    )
+
+
 @api.route("")
 class FeedbackList(Resource):
     @api.doc("create_feedback")
@@ -106,7 +144,7 @@ class FeedbackList(Resource):
         if not content:
             return {"status": "error", "message": "反馈内容不能为空"}, 400
 
-        user = getattr(g, "audit_user", None)
+        user = get_request_user()
         title = content[:30] or "用户意见反馈"
         feedback = Feedback(
             user_id=user.id if user else None,
@@ -135,8 +173,8 @@ class FeedbackList(Resource):
     @api.response(500, "Server error", error_response)
     def get(self):
         """管理员查看反馈列表"""
-        user = getattr(g, "audit_user", None)
-        if not audit_service.has_admin_permission(user):
+        user = get_request_user()
+        if not has_admin_permission(user):
             return {"status": "error", "message": "无权限查看反馈列表"}, 403
 
         try:
