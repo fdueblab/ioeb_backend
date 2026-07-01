@@ -5,6 +5,7 @@
 
 from app.models.dataset import Dataset
 from app.models.dictionary import Dictionary
+from app.models.feedback import Feedback
 from app.models.service.service import Service
 from app.models.service.service_api import ServiceApi
 from app.models.service.service_api_parameter import ServiceApiParameter
@@ -35,4 +36,5 @@ __all__ = [
     "ServiceApiTool",
     "Dictionary",
     "Dataset",
+    "Feedback",
 ]
