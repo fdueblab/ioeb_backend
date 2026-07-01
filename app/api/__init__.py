@@ -11,6 +11,7 @@ from app.api.namespaces.audit_ns import api as audit_ns
 from app.api.namespaces.auth_ns import api as auth_ns
 from app.api.namespaces.dataset_ns import api as dataset_ns
 from app.api.namespaces.dictionary_ns import api as dictionary_ns
+from app.api.namespaces.feedback_ns import api as feedback_ns
 from app.api.namespaces.health_ns import api as health_ns
 from app.api.namespaces.service_ns import api as service_ns
 from app.api.namespaces.user_ns import api as user_ns
@@ -38,4 +39,5 @@ api.add_namespace(service_ns)
 api.add_namespace(auth_ns, path="/auth")  # 添加认证命名空间
 api.add_namespace(dictionary_ns, path="/dictionaries")
 api.add_namespace(dataset_ns, path="/datasets")  # 添加数据集命名空间
+api.add_namespace(feedback_ns, path="/feedback")  # 添加意见反馈命名空间
 api.add_namespace(audit_ns, path="/audit")  # 添加审计命名空间
