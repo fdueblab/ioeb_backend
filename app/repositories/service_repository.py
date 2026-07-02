@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.extensions import db
 from app.models import MetaAppConfig, Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
@@ -519,8 +520,14 @@ class ServiceRepository:
         Returns:
             List[Service]: 符合条件的微服务对象列表
         """
-        query = Service.query.filter_by(deleted=0)
-        
+        query = Service.query.options(
+            selectinload(Service.norms),
+            joinedload(Service.source),
+            selectinload(Service.apis).selectinload(ServiceApi.parameters),
+            selectinload(Service.apis).selectinload(ServiceApi.tools),
+            joinedload(Service.meta_app_config),
+        ).filter_by(deleted=0)
+
         # 应用筛选条件
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
