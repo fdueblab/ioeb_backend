@@ -79,6 +79,12 @@ api_model = api.model(
         "outputName": fields.String(description="输出名称(元应用专用)"),
         "outputVisualization": fields.Boolean(description="是否可视化输出(元应用专用)"),
         "submitButtonText": fields.String(description="提交按钮文本(元应用专用)"),
+        "simulationBuildId": fields.String(description="仿真构建ID(元应用专用)"),
+        "metaAppArtifactId": fields.String(description="Artifact ID(元应用专用)"),
+        "metaAppArtifactHash": fields.String(description="Artifact哈希(元应用专用)"),
+        "metaAppArtifact": fields.Raw(description="Artifact正文(元应用专用)"),
+        "runMode": fields.String(description="运行模式(元应用专用)"),
+        "runtimeSpec": fields.Raw(description="运行环境预留配置(元应用专用)"),
         # MCP专用字段
         "tools": fields.List(fields.Raw, description="MCP工具列表(MCP专用)"),
         "exampleMsg": fields.Raw(description="示例消息(MCP专用)")
@@ -233,6 +239,9 @@ class ServiceList(Resource):
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
 
+        if data.get("type") == "meta":
+            return {"status": "error", "message": "元应用请使用预发布接口"}, 400
+
         try:
             service = service_service.create_service(data)
             return {
@@ -261,22 +270,24 @@ class ServicePublish(Resource):
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
 
+        if data.get("type") != "meta":
+            return {"status": "error", "message": "预发布接口仅接受元应用"}, 400
+
+        try:
+            service_service.validate_meta_app_prepublish(data)
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
+
+        data["status"] = "pre_release_unrated"
+
         try:
             service = service_service.create_service(data)
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 400
 
-        try:
-            deployed = service_service.deploy_service(service["id"])
-        except ServiceServiceError as e:
-            return {"status": "error", "message": f"微服务创建成功，但部署失败：{str(e)}"}, 500
-
-        if not deployed:
-            return {"status": "error", "message": "微服务创建成功，但部署任务启动失败"}, 500
-
         return {
             "status": "success",
-            "message": "微服务创建成功，部署已启动，正在部署中...",
+            "message": "元应用预发布成功",
             "service": service
         }, 201
 

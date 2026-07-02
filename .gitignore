@@ -33,6 +33,7 @@ var/
 instance/
 .webassets-cache
 .env
+.env_dev
 .flaskenv
 migrations/
 

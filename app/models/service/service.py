@@ -44,6 +44,12 @@ class Service(db.Model):
     norms = db.relationship("ServiceNorm", backref="service", lazy=True)
     source = db.relationship("ServiceSource", backref="service", uselist=False)
     apis = db.relationship("ServiceApi", backref="service", lazy=True)
+    meta_app_config = db.relationship(
+        "MetaAppConfig",
+        backref="service",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
 
     def __init__(self, **kwargs):
         """初始化Service实例"""
@@ -79,6 +85,14 @@ class Service(db.Model):
             "source": self.source.to_dict() if self.source else None,
         }
         
+        # 元应用：apiList + 把元应用配置合并进 apiList[0]（保持对外响应形状不变）
+        if self.type == 'meta':
+            if len(self.apis) != 1 or self.meta_app_config is None:
+                raise ValueError(f"元应用 {self.id} 配置不完整")
+            base_dict["apiList"] = [api.to_dict() for api in self.apis]
+            base_dict["apiList"][0].update(self.meta_app_config.to_api_fields())
+            return base_dict
+
         # 想定式生成算法：仅 apiList，附上下载路径提示（前端拼接 API 根地址）
         if self.type == 'generated_algorithm':
             base_dict["apiList"] = [api.to_dict() for api in self.apis]
