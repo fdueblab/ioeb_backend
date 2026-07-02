@@ -181,6 +181,28 @@ DATABASE_URL=sqlite:///dev.db
 REMOTE_SERVICE_URL=http://your-remote-service.com/api/process
 ```
 
+### 意见反馈同步到飞书
+
+用户在前端提交意见反馈后，数据仅写入数据库，后端不会在请求链路中实时调用飞书。
+
+定时同步由 GitHub Actions 工作流 [`.github/workflows/feedback-feishu-sync.yml`](.github/workflows/feedback-feishu-sync.yml) 执行，默认每天北京时间 09:00 将 `feishu_sync_status` 为 `pending` 或 `failed` 的记录批量写入飞书多维表格。
+
+在 GitHub 仓库 **Settings → Secrets and variables → Actions** 中配置：
+
+- `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USERNAME` / `DB_PASSWORD`
+- `FEISHU_APP_ID` / `FEISHU_APP_SECRET`
+- `FEISHU_BITABLE_APP_TOKEN` / `FEISHU_BITABLE_TABLE_ID`
+
+本地手动执行同步（可先 dry-run）：
+
+```bash
+# 复制 .env.example 为 .env 并填入真实配置
+python scripts/sync_feedback_to_feishu.py --dry-run
+python scripts/sync_feedback_to_feishu.py
+```
+
+飞书多维表格需包含字段：`反馈ID`、`提交用户`、`反馈内容`、`提交时间`、`处理状态`。
+
 ### 初始化数据库
 
 ```bash

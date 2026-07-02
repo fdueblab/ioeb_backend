@@ -5,6 +5,7 @@
 
 from app.models.dataset import Dataset
 from app.models.dictionary import Dictionary
+from app.models.feedback import Feedback
 from app.models.service.meta_app_config import MetaAppConfig
 from app.models.service.service import Service
 from app.models.service.service_api import ServiceApi
@@ -39,4 +40,5 @@ __all__ = [
     "MetaAppConfig",
     "Dictionary",
     "Dataset",
+    "Feedback",
 ]
