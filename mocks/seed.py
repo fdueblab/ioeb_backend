@@ -1,4 +1,4 @@
-"""全量 mock 数据灌库（manage.py seed_db / wsgi_verify 共用）。"""
+"""全量 mock 数据灌库（manage.py seed_db 使用）。"""
 
 import json
 import uuid
