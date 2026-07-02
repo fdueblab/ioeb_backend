@@ -239,6 +239,9 @@ class ServiceList(Resource):
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
 
+        if data.get("type") == "meta":
+            return {"status": "error", "message": "元应用请使用预发布接口"}, 400
+
         try:
             service = service_service.create_service(data)
             return {

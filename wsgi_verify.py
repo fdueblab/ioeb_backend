@@ -9,7 +9,7 @@
 登录：admin / 123456
 
 prepublish 后查库：
-  sqlite3 local_verify.db "SELECT simulation_build_id, meta_app_artifact_id, meta_app_artifact_hash, run_mode FROM service_apis ORDER BY rowid DESC LIMIT 1;"
+  sqlite3 local_verify.db "SELECT simulation_build_id, meta_app_artifact_id, meta_app_artifact_hash, run_mode FROM meta_app_configs ORDER BY rowid DESC LIMIT 1;"
 """
 
 import os

@@ -11,41 +11,11 @@ from typing import Dict, List, Optional, Union
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
-from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
+from app.models import MetaAppConfig, Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
 
 
 class ServiceRepository:
     """微服务数据仓库"""
-
-    def _convert_services_list_to_string(self, services_list):
-        """
-        将服务ID列表转换为逗号分隔的字符串
-        
-        Args:
-            services_list: 服务ID列表，可以是list或None
-            
-        Returns:
-            str: 逗号分隔的服务ID字符串，如果输入为空返回None
-        """
-        try:
-            if not services_list or not isinstance(services_list, list):
-                return None
-            
-            # 过滤掉空值和非字符串值
-            valid_ids = []
-            for service_id in services_list:
-                if isinstance(service_id, str) and service_id.strip():
-                    valid_ids.append(service_id.strip())
-            
-            # 如果没有有效的ID，返回None
-            if not valid_ids:
-                return None
-                
-            return ','.join(valid_ids)
-            
-        except Exception:
-            # 如果处理过程中出现任何异常，返回None
-            return None
 
     def get_all_services(self) -> List[Service]:
         """
@@ -304,20 +274,6 @@ class ServiceRepository:
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
                         example_msg=example_msg,
-                        subtitle=api_data.get("subtitle"),
-                        services=self._convert_services_list_to_string(api_data.get("services")),
-                        input_name=api_data.get("inputName"),
-                        output_name=api_data.get("outputName"),
-                        output_visualization=api_data.get("outputVisualization", False),
-                        submit_button_text=api_data.get("submitButtonText"),
-                        simulation_build_id=api_data.get("simulationBuildId"),
-                        meta_app_artifact_id=api_data.get("metaAppArtifactId"),
-                        meta_app_artifact_hash=api_data.get("metaAppArtifactHash"),
-                        meta_app_artifact=api_data.get("metaAppArtifact"),
-                        run_mode=api_data.get("runMode"),
-                        runtime_spec=self._materialize_runtime_spec(
-                            api_data.get("runtimeSpec"), service_id
-                        )
                     )
                     db.session.add(api)
                     
@@ -343,7 +299,13 @@ class ServiceRepository:
                                 description=tool_data.get("description", tool_data.get("des", ""))
                             )
                             db.session.add(tool)
-            
+
+            # 元应用：把元应用专属字段写入独立配置表（与服务 1:1）
+            if service_data.get("type") == "meta":
+                db.session.add(MetaAppConfig.from_api_fields(
+                    service_id, service_data["apiList"][0], current_time
+                ))
+
             # 提交事务
             db.session.commit()
             return service
@@ -351,16 +313,6 @@ class ServiceRepository:
             db.session.rollback()
             raise e
 
-    @staticmethod
-    def _materialize_runtime_spec(runtime_spec: Optional[Dict], service_id: str) -> Optional[Dict]:
-        if not isinstance(runtime_spec, dict):
-            return runtime_spec
-        value = json.loads(json.dumps(runtime_spec, ensure_ascii=False))
-        docker = value.get("docker")
-        if isinstance(docker, dict) and isinstance(docker.get("containerName"), str):
-            docker["containerName"] = docker["containerName"].replace("{serviceId}", service_id)
-        return value
-    
     def update_service(self, service_id: str, service_data: Dict) -> Optional[Service]:
         """
         更新微服务信息
@@ -493,12 +445,6 @@ class ServiceRepository:
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
                         example_msg=example_msg,
-                        subtitle=api_data.get("subtitle"),
-                        services=self._convert_services_list_to_string(api_data.get("services")),
-                        input_name=api_data.get("inputName"),
-                        output_name=api_data.get("outputName"),
-                        output_visualization=api_data.get("outputVisualization", False),
-                        submit_button_text=api_data.get("submitButtonText")
                     )
                     db.session.add(api)
                     
@@ -524,6 +470,12 @@ class ServiceRepository:
                                 description=tool_data.get("description", tool_data.get("des", ""))
                             )
                             db.session.add(tool)
+
+                if service.type == "meta":
+                    service.meta_app_config.update_display_fields(
+                        service_data["apiList"][0],
+                        int(datetime.now().timestamp() * 1000),
+                    )
             
             # 提交事务
             db.session.commit()

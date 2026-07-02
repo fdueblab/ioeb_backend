@@ -33,19 +33,6 @@ def seed_db():
     click.echo("示例数据添加成功")
 
 
-@cli.command("migrate_meta_app_config")
-def migrate_meta_app_config():
-    """补齐并回填已发布元应用的Artifact运行配置。"""
-    from app.services.meta_app_config import migrate_meta_app_services
-
-    try:
-        count = migrate_meta_app_services()
-    except ValueError as exc:
-        raise click.ClickException(str(exc)) from exc
-
-    click.echo(f"已迁移 {count} 个元应用")
-
-
 @cli.command("import_cos_datasets")
 @click.option("--prefix", default="datasets/", help="COS对象前缀路径")
 @click.option("--creator-id", help="创建者ID")

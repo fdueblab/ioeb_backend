@@ -30,7 +30,11 @@ from app.utils.cleanup_utils import (
     cleanup_docker_resources,
     cleanup_service_files
 )
-from app.services.meta_app_config import ARTIFACT_SCHEMA, stable_hash
+from app.services.meta_app_config import (
+    ARTIFACT_SCHEMA,
+    DEPLOYABLE_STATUSES,
+    STOPPABLE_STATUSES,
+)
 
 
 class ServiceServiceError(Exception):
@@ -43,6 +47,10 @@ class ServiceService:
     def __init__(self):
         """初始化微服务服务"""
         self.service_repository = ServiceRepository()
+
+    def _is_deploy_still_active(self, service_id: str) -> bool:
+        service = self.service_repository.get_service_by_id(service_id)
+        return service is not None and service.status == "deploying"
 
     def get_all_services(self) -> List[Dict]:
         """
@@ -189,8 +197,6 @@ class ServiceService:
             raise ServiceServiceError("Artifact ID不一致")
         if not api.get("simulationBuildId"):
             raise ServiceServiceError("元应用缺少simulationBuildId")
-        if api.get("metaAppArtifactHash") != stable_hash(artifact):
-            raise ServiceServiceError("Artifact哈希校验失败")
         if not isinstance(api.get("runtimeSpec"), dict):
             raise ServiceServiceError("元应用缺少runtimeSpec")
 
@@ -213,6 +219,13 @@ class ServiceService:
             service = self.service_repository.get_service_by_id(service_id)
             if not service:
                 raise ServiceServiceError(f"微服务ID {service_id} 不存在")
+            target_type = service_data.get("type", service.type)
+            if (service.type == "meta") != (target_type == "meta"):
+                raise ServiceServiceError("不允许通过更新接口切换元应用类型")
+            if service.type == "meta" and "apiList" in service_data:
+                apis = service_data["apiList"]
+                if not isinstance(apis, list) or len(apis) != 1 or not isinstance(apis[0], dict):
+                    raise ServiceServiceError("元应用必须包含且仅包含一个API配置")
             
             # 使用仓库层更新服务及其关联数据
             updated_service = self.service_repository.update_service_with_relations(service_id, service_data)
@@ -314,6 +327,8 @@ class ServiceService:
             # 检查服务状态是否允许部署
             if service.status == "deploying":
                 raise ServiceServiceError("微服务正在部署中，请稍后再试")
+            if service.status not in DEPLOYABLE_STATUSES:
+                raise ServiceServiceError(f"当前状态 {service.status} 不允许部署")
             
             # 先设置状态为部署中
             self.service_repository.update_service_status(service_id, "deploying")
@@ -329,6 +344,9 @@ class ServiceService:
                         # 原型阶段仅模拟部署状态推进
                         time.sleep(current_app.config.get("META_APP_DEPLOY_DELAY_SECONDS", 10))
                         
+                        if not self._is_deploy_still_active(service_id):
+                            return
+
                         target_status = (
                             "pre_release_pending"
                             if service_type == "meta"
@@ -337,9 +355,9 @@ class ServiceService:
                         self.service_repository.update_service_status(service_id, target_status)
                         print(f"服务 {service_id} 部署成功")
                     except Exception as e:
-                        # 如果部署失败，设置状态为错误
-                        self.service_repository.update_service_status(service_id, "error")
-                        print(f"服务 {service_id} 部署失败: {str(e)}")
+                        if self._is_deploy_still_active(service_id):
+                            self.service_repository.update_service_status(service_id, "error")
+                            print(f"服务 {service_id} 部署失败: {str(e)}")
             
             # 启动后台线程执行部署
             deploy_thread = threading.Thread(target=deploy_task)
@@ -372,8 +390,8 @@ class ServiceService:
                 raise ServiceServiceError(f"微服务ID {service_id} 不存在")
             
             # 检查服务状态是否允许停止
-            if service.status == "not_deployed":
-                raise ServiceServiceError("微服务已经处于未部署状态")
+            if service.status not in STOPPABLE_STATUSES:
+                raise ServiceServiceError(f"当前状态 {service.status} 不允许停止")
             
             # 设置状态为未部署
             success = self.service_repository.update_service_status(service_id, "not_deployed")
@@ -525,6 +543,9 @@ class ServiceService:
                         # 执行docker-compose部署
                         success, message = docker_deploy(project_root, service_id, timeout=600)
                         
+                        if not self._is_deploy_still_active(service_id):
+                            return
+
                         if success:
                             # 部署成功，更新状态为预发布(未测评)
                             self.service_repository.update_service_status(
@@ -535,11 +556,13 @@ class ServiceService:
                         else:
                             # 部署失败，清理资源
                             print(f"服务 {service_id} 部署失败: {message}")
-                            self._cleanup_failed_deployment(service_id, project_root, service_dir)
+                            if self._is_deploy_still_active(service_id):
+                                self._cleanup_failed_deployment(service_id, project_root, service_dir)
                             
                     except Exception as e:
                         print(f"服务 {service_id} 部署异常: {str(e)}")
-                        self._cleanup_failed_deployment(service_id, project_root, service_dir)
+                        if self._is_deploy_still_active(service_id):
+                            self._cleanup_failed_deployment(service_id, project_root, service_dir)
             
             # 启动后台线程执行部署
             deploy_thread = threading.Thread(target=deploy_task)
