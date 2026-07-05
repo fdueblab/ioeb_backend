@@ -86,9 +86,9 @@ class MetaAppConfig(db.Model):
         if update_time is not None:
             self.update_time = update_time
 
-    def to_api_fields(self):
+    def to_api_fields(self, include_artifact=True):
         """输出合并进 apiList[0] 的元应用字段（camelCase）。"""
-        return {
+        fields = {
             "subtitle": self.subtitle,
             "services": self._services_to_list(self.services),
             "inputName": self.input_name,
@@ -98,7 +98,9 @@ class MetaAppConfig(db.Model):
             "simulationBuildId": self.simulation_build_id,
             "metaAppArtifactId": self.meta_app_artifact_id,
             "metaAppArtifactHash": self.meta_app_artifact_hash,
-            "metaAppArtifact": self.meta_app_artifact,
             "runMode": self.run_mode,
             "runtimeSpec": self.runtime_spec,
         }
+        if include_artifact:
+            fields["metaAppArtifact"] = self.meta_app_artifact
+        return fields

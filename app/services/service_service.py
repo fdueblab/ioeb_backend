@@ -3,6 +3,7 @@
 处理微服务相关的业务逻辑
 """
 
+import re
 from typing import Dict, List, Optional, Tuple
 import threading
 import time
@@ -139,7 +140,7 @@ class ServiceService:
         """
         try:
             services = self.service_repository.find_by_attribute(attribute)
-            return [service.to_dict() for service in services]
+            return [service.to_dict(include_artifact=False) for service in services]
         except Exception as e:
             raise ServiceServiceError(f"查询微服务失败: {str(e)}")
 
@@ -278,32 +279,179 @@ class ServiceService:
         """
         try:
             services = self.service_repository.search_by_keyword(keyword)
-            return [service.to_dict() for service in services]
+            return [service.to_dict(include_artifact=False) for service in services]
         except Exception as e:
             raise ServiceServiceError(f"搜索微服务失败: {str(e)}")
 
-    def filter_services(self, **filters) -> List[Dict]:
+    @staticmethod
+    def _normalize_search_text(value) -> str:
+        return str(value or "").strip().lower()
+
+    @classmethod
+    def _extract_smart_search_terms(cls, **fields) -> List[str]:
+        raw = " ".join(str(fields.get(key) or "") for key in ("name", "description", "role", "function", "requirement"))
+        parts = re.split(r"[\s,，;；、。.!！?？/\\|]+", raw)
+        terms = []
+        seen = set()
+        for part in parts:
+            term = cls._normalize_search_text(part)
+            if term and term not in seen:
+                seen.add(term)
+                terms.append(term)
+        return terms
+
+    @classmethod
+    def _build_service_search_text(cls, service) -> Dict[str, str]:
+        api_chunks = []
+        for api in service.apis or []:
+            api_chunks.extend([api.name or "", api.des or ""])
+            for tool in api.tools or []:
+                api_chunks.extend([tool.name or "", tool.description or ""])
+
+        source = service.source
+        source_chunks = []
+        if source:
+            source_chunks = [
+                source.ms_introduce or "",
+                source.company_introduce or "",
+                source.company_name or "",
+            ]
+
+        name = cls._normalize_search_text(service.name)
+        description = cls._normalize_search_text(" ".join(source_chunks + api_chunks))
+        metadata = cls._normalize_search_text(
+            " ".join(
+                [
+                    service.attribute or "",
+                    service.type or "",
+                    service.industry or "",
+                    service.scenario or "",
+                    service.technology or "",
+                    service.status or "",
+                ]
+            )
+        )
+        return {
+            "name": name,
+            "description": description,
+            "metadata": metadata,
+            "all": f"{name} {description} {metadata}",
+        }
+
+    @classmethod
+    def _score_service_for_smart_search(cls, service, terms: List[str]) -> int:
+        text = cls._build_service_search_text(service)
+        if not all(term in text["all"] for term in terms):
+            return 0
+        score = 0
+        for term in terms:
+            if term in text["name"]:
+                score += 8
+            if term in text["description"]:
+                score += 5
+            if term in text["metadata"]:
+                score += 3
+            score += 1
+        return score
+
+    def smart_search(
+        self,
+        domain: str,
+        *,
+        name: str = "",
+        description: str = "",
+        role: str = "",
+        function: str = "",
+        requirement: str = "",
+    ) -> List[Dict]:
         """
-        根据条件筛选微服务
+        领域内智能检索：将 5 个表单字段拆词后，对现有文本字段做全表模糊匹配。
+
+        说明：role / function / requirement 在库中无独立列，仅作为检索词参与匹配。
+        """
+        if not domain or not str(domain).strip():
+            raise ServiceServiceError("domain 不能为空")
+        terms = self._extract_smart_search_terms(
+            name=name,
+            description=description,
+            role=role,
+            function=function,
+            requirement=requirement,
+        )
+        if not terms:
+            raise ServiceServiceError("请至少填写一个检索条件")
+
+        try:
+            services = self.service_repository.list_services_in_domain(str(domain).strip())
+            ranked = []
+            for service in services:
+                score = self._score_service_for_smart_search(service, terms)
+                if score > 0:
+                    ranked.append((score, service))
+            ranked.sort(key=lambda item: (-item[0], -(item[1].create_time or 0)))
+            return [service.to_list_dict() for _, service in ranked]
+        except ServiceServiceError:
+            raise
+        except Exception as e:
+            raise ServiceServiceError(f"智能检索失败: {str(e)}")
+
+    def filter_services(
+        self, page: int = None, page_size: int = None, **filters
+    ) -> Dict:
+        """
+        根据条件筛选微服务（列表视图，可选分页）。
 
         Args:
-            **filters: 筛选条件，可包括:
-                - attribute: 服务属性（支持单个值或多个值列表）
-                - type: 服务类型（支持单个值或多个值列表）
-                - domain: 领域（支持单个值或多个值列表）
-                - industry: 行业（支持单个值或多个值列表）
-                - scenario: 场景（支持单个值或多个值列表）
-                - technology: 技术（支持单个值或多个值列表）
-                - status: 服务状态（支持单个值或多个值列表）
+            page: 页码（从 1 开始）；与 page_size 同时传入时启用分页
+            page_size: 每页条数（最大 100）
+            **filters: 筛选条件
 
         Returns:
-            List[Dict]: 符合条件的微服务列表
+            Dict: services, total, page, pageSize
         """
         try:
-            services = self.service_repository.filter_services(**filters)
-            return [service.to_dict() for service in services]
+            services, total = self.service_repository.filter_services(
+                page=page, page_size=page_size, **filters
+            )
+            return {
+                "services": [service.to_list_dict() for service in services],
+                "total": total,
+                "page": page,
+                "pageSize": page_size,
+            }
         except Exception as e:
             raise ServiceServiceError(f"筛选微服务失败: {str(e)}")
+
+    def get_mcp_options(self, domain: str) -> List[Dict]:
+        """仿真构建 MCP 服务选择器：返回含 tools 的精简选项列表。"""
+        if not domain or not str(domain).strip():
+            raise ServiceServiceError("domain 不能为空")
+        try:
+            services = self.service_repository.list_mcp_options(str(domain).strip())
+            options = []
+            for service in services:
+                api = service.apis[0] if service.apis else None
+                tools = []
+                if api and api.tools:
+                    for tool in api.tools:
+                        item = tool.to_dict()
+                        item["des"] = item.get("description") or ""
+                        tools.append(item)
+                options.append({
+                    "id": service.id,
+                    "name": service.name,
+                    "status": service.status,
+                    "des": (api.des if api else "") or "",
+                    "url": (api.url if api else "") or "",
+                    "method": (api.method if api else "sse") or "sse",
+                    "isFake": bool(api.is_fake) if api else False,
+                    "tools": tools,
+                })
+            return options
+        except ServiceServiceError:
+            raise
+        except Exception as e:
+            raise ServiceServiceError(f"获取 MCP 服务选项失败: {str(e)}")
 
     def deploy_service(self, service_id: str) -> bool:
         """

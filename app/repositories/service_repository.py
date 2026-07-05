@@ -35,7 +35,7 @@ class ServiceRepository:
             List[Dict]: 微服务字典列表
         """
         services = self.get_all_services()
-        return [service.to_dict() for service in services]
+        return [service.to_dict(include_artifact=False) for service in services]
     
     def get_service_by_id(self, service_id: str) -> Optional[Service]:
         """
@@ -503,42 +503,63 @@ class ServiceRepository:
         db.session.commit()
         return True
     
-    def filter_services(self, **filters) -> List[Service]:
+    def filter_services(
+        self, page: int = None, page_size: int = None, **filters
+    ) -> tuple:
         """
-        根据条件筛选微服务
-
-        Args:
-            **filters: 筛选条件，可包括:
-                - attribute: 服务属性（支持多个值）
-                - type: 服务类型（支持多个值）
-                - domain: 领域（支持多个值）
-                - industry: 行业（支持多个值）
-                - scenario: 场景（支持多个值）
-                - technology: 技术（支持多个值）
-                - status: 服务状态（支持多个值）
+        根据条件筛选微服务，可选分页。
 
         Returns:
-            List[Service]: 符合条件的微服务对象列表
+            tuple[List[Service], int]: (结果列表, 总记录数)
         """
         query = Service.query.options(
             selectinload(Service.norms),
             joinedload(Service.source),
-            selectinload(Service.apis).selectinload(ServiceApi.parameters),
-            selectinload(Service.apis).selectinload(ServiceApi.tools),
-            joinedload(Service.meta_app_config),
+            selectinload(Service.apis),
         ).filter_by(deleted=0)
 
-        # 应用筛选条件
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
             if key in valid_filters and value is not None:
-                # 支持所有条件都能使用多个值
                 if isinstance(value, list) and len(value) > 0:
                     query = query.filter(getattr(Service, key).in_(value))
                 elif not isinstance(value, list) and value:
                     query = query.filter(getattr(Service, key) == value)
-        
-        return query.all()
+
+        query = query.order_by(Service.create_time.desc())
+        total = query.count()
+
+        if page is not None and page_size is not None:
+            page = max(1, int(page))
+            page_size = max(1, min(int(page_size), 100))
+            services = query.offset((page - 1) * page_size).limit(page_size).all()
+        else:
+            services = query.all()
+
+        return services, total
+
+    def list_mcp_options(self, domain: str) -> List[Service]:
+        """获取指定领域的 MCP 服务（含 tools），供仿真构建选择器使用。"""
+        return (
+            Service.query.options(
+                selectinload(Service.apis).selectinload(ServiceApi.tools),
+            )
+            .filter_by(deleted=0, type="atomic_mcp", domain=domain)
+            .order_by(Service.name.asc())
+            .all()
+        )
+
+    def list_services_in_domain(self, domain: str) -> List[Service]:
+        """获取指定领域下全部未删除服务（含检索所需关联数据）。"""
+        return (
+            Service.query.options(
+                selectinload(Service.norms),
+                joinedload(Service.source),
+                selectinload(Service.apis).selectinload(ServiceApi.tools),
+            )
+            .filter_by(deleted=0, domain=domain)
+            .all()
+        )
     
     def get_service_norms(self, service_id: str) -> List[ServiceNorm]:
         """
