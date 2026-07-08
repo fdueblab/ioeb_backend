@@ -525,7 +525,6 @@ class ServiceRepository:
                     query = query.filter(getattr(Service, key).in_(value))
                 elif not isinstance(value, list) and value:
                     query = query.filter(getattr(Service, key) == value)
-
         query = query.order_by(Service.create_time.desc())
         total = query.count()
 
@@ -537,6 +536,16 @@ class ServiceRepository:
             services = query.all()
 
         return services, total
+
+    def get_services_by_creator(self, creator_id: str) -> List[Service]:
+        """按创建者获取未删除的服务，按创建时间倒序。"""
+        if not creator_id:
+            return []
+        return (
+            Service.query.filter_by(deleted=0, creator_id=creator_id)
+            .order_by(Service.create_time.desc())
+            .all()
+        )
 
     def list_mcp_options(self, domain: str) -> List[Service]:
         """获取指定领域的 MCP 服务（含 tools），供仿真构建选择器使用。"""

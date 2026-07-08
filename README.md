@@ -183,9 +183,12 @@ REMOTE_SERVICE_URL=http://your-remote-service.com/api/process
 
 ### 意见反馈同步到飞书
 
-用户在前端提交意见反馈后，数据仅写入数据库，后端不会在请求链路中实时调用飞书。
+用户在前端 **个人中心 → 意见反馈** 提交反馈后，数据写入数据库；后端不会在请求链路中实时调用飞书。登录用户可在同一页面查看反馈记录及平台回复。
 
-定时同步由 GitHub Actions 工作流 [`.github/workflows/feedback-feishu-sync.yml`](.github/workflows/feedback-feishu-sync.yml) 执行，默认每天北京时间 09:00 将 `feishu_sync_status` 为 `pending` 或 `failed` 的记录批量写入飞书多维表格。
+定时同步由 GitHub Actions 工作流 [`.github/workflows/feedback-feishu-sync.yml`](.github/workflows/feedback-feishu-sync.yml) 执行，默认每天北京时间 09:00：
+
+1. **推送**：将 `feishu_sync_status` 为 `pending` 或 `failed` 的记录批量写入飞书多维表格
+2. **拉取**：从飞书读取已同步记录的「处理状态」「处理总结」，回写到数据库供用户端展示
 
 在 GitHub 仓库 **Settings → Secrets and variables → Actions** 中配置：
 
@@ -199,9 +202,20 @@ REMOTE_SERVICE_URL=http://your-remote-service.com/api/process
 # 复制 .env.example 为 .env 并填入真实配置
 python scripts/sync_feedback_to_feishu.py --dry-run
 python scripts/sync_feedback_to_feishu.py
+python scripts/sync_feedback_from_feishu.py --dry-run
+python scripts/sync_feedback_from_feishu.py
 ```
 
-飞书多维表格需包含字段：`反馈ID`、`提交用户`、`反馈内容`、`提交时间`、`处理状态`。
+飞书多维表格需包含字段：
+
+| 字段名 | 类型 | 说明 |
+|---|---|---|
+| 反馈ID | 文本 | 与数据库 `id` 对应 |
+| 提交用户 | 文本 | 用户名 |
+| 反馈内容 | 多行文本 | 用户提交内容 |
+| 提交时间 | 文本/日期 | 提交时间 |
+| 处理状态 | 单选 | 选项：`待处理` / `处理中` / `已采纳` / `已处理` |
+| **处理总结** | 多行文本 | **需人工新增**；运营填写后同步回用户端「平台回复」 |
 
 ### 初始化数据库
 

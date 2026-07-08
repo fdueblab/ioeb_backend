@@ -18,6 +18,8 @@ from werkzeug.datastructures import FileStorage
 
 from app.repositories.service_repository import ServiceRepository
 from app.extensions import db
+from app.models.service.upgrade_advice import ServiceUpgradeAdvice, ensure_upgrade_advice_table
+from app.models.service.service_api import ensure_service_api_table
 from app.utils.port_utils import allocate_ports, PortAllocationError
 from app.utils.zip_utils import extract_and_find_root, cleanup_directory, ZipProcessError
 from app.utils.docker_utils import (
@@ -49,6 +51,9 @@ class ServiceService:
         """初始化微服务服务"""
         self.service_repository = ServiceRepository()
 
+    def _ensure_service_schema(self):
+        ensure_service_api_table()
+
     def _is_deploy_still_active(self, service_id: str) -> bool:
         service = self.service_repository.get_service_by_id(service_id)
         return service is not None and service.status == "deploying"
@@ -61,6 +66,7 @@ class ServiceService:
             List[Dict]: 微服务列表，每个微服务以字典形式表示
         """
         try:
+            self._ensure_service_schema()
             return self.service_repository.get_all_services_with_dict()
         except Exception as e:
             raise ServiceServiceError(f"获取微服务列表失败: {str(e)}")
@@ -79,6 +85,7 @@ class ServiceService:
             ServiceServiceError: 微服务不存在时抛出
         """
         try:
+            self._ensure_service_schema()
             service_dict = self.service_repository.get_service_dict_by_id(service_id)
             if not service_dict:
                 raise ServiceServiceError(f"微服务ID {service_id} 不存在")
@@ -115,6 +122,7 @@ class ServiceService:
                 seen.add(service_id)
         
         try:
+            self._ensure_service_schema()
             # 使用仓库层批量获取服务
             services = self.service_repository.get_services_dict_by_ids(unique_ids)
             
@@ -410,6 +418,7 @@ class ServiceService:
             Dict: services, total, page, pageSize
         """
         try:
+            self._ensure_service_schema()
             services, total = self.service_repository.filter_services(
                 page=page, page_size=page_size, **filters
             )
@@ -1021,9 +1030,12 @@ class ServiceService:
         }
         if meta.get("source") and isinstance(meta["source"], dict):
             service_data["source"] = meta["source"]
+        if meta.get("creator_id"):
+            service_data["creator_id"] = meta["creator_id"]
 
         service_id = None
         try:
+            self._ensure_service_schema()
             service = self.service_repository.create_service_with_relations(
                 service_data
             )
@@ -1066,6 +1078,67 @@ class ServiceService:
 
         return path, fn
 
+    def get_my_services(self, creator_id: str) -> List[Dict]:
+        """获取当前用户创建的成果列表（含升级建议）。"""
+        if not creator_id:
+            return []
+        try:
+            ensure_upgrade_advice_table()
+            services = self.service_repository.get_services_by_creator(creator_id)
+            service_ids = [item.id for item in services]
+            advice_map = {}
+            if service_ids:
+                rows = ServiceUpgradeAdvice.query.filter(
+                    ServiceUpgradeAdvice.service_id.in_(service_ids)
+                ).all()
+                advice_map = {row.service_id: row.to_dict() for row in rows}
+
+            result = []
+            for service in services:
+                item = service.to_dict()
+                item["upgradeAdvice"] = advice_map.get(service.id)
+                result.append(item)
+            return result
+        except Exception as e:
+            raise ServiceServiceError(f"获取我的成果失败: {str(e)}")
+
+    def save_upgrade_advice(
+        self, service_id: str, user_id: str, payload: Dict
+    ) -> Dict:
+        """保存或更新某成果的升级建议。"""
+        try:
+            ensure_upgrade_advice_table()
+            service = self.service_repository.get_service_by_id(service_id)
+            if not service:
+                raise ServiceServiceError(f"微服务ID {service_id} 不存在")
+            if service.creator_id != user_id:
+                raise ServiceServiceError("无权保存该成果的升级建议")
+
+            leading = str(payload.get("leadingAnalysis") or "").strip()
+            auto_suggestion = str(payload.get("autoUpgradeSuggestion") or "").strip()
+            manual_suggestion = str(payload.get("manualUpdateSuggestion") or "").strip()
+            if not any([leading, auto_suggestion, manual_suggestion]):
+                raise ServiceServiceError("升级建议内容不能为空")
+
+            advice = ServiceUpgradeAdvice.query.filter_by(service_id=service_id).first()
+            if not advice:
+                advice = ServiceUpgradeAdvice(service_id=service_id)
+                db.session.add(advice)
+
+            advice.leading_analysis = leading
+            advice.auto_upgrade_suggestion = auto_suggestion
+            advice.manual_update_suggestion = manual_suggestion
+            advice.generator_user_id = user_id
+            advice.generated_at = int(time.time() * 1000)
+            db.session.commit()
+            return advice.to_dict()
+        except ServiceServiceError:
+            db.session.rollback()
+            raise
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            raise ServiceServiceError(f"保存升级建议失败: {str(e)}")
+
 
 # 创建单例实例，方便导入使用
-service_service = ServiceService() 
+service_service = ServiceService()

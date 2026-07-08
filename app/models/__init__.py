@@ -13,6 +13,7 @@ from app.models.service.service_api_parameter import ServiceApiParameter
 from app.models.service.service_api_tool import ServiceApiTool
 from app.models.service.service_norm import ServiceNorm
 from app.models.service.service_source import ServiceSource
+from app.models.service.upgrade_advice import ServiceUpgradeAdvice
 from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
 from app.models.user_action_log import UserActionLog
@@ -41,4 +42,5 @@ __all__ = [
     "Dictionary",
     "Dataset",
     "Feedback",
+    "ServiceUpgradeAdvice",
 ]
