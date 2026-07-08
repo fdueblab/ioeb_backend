@@ -60,3 +60,6 @@ logs/
 .DS_Store
 Thumbs.db
 *.bat
+
+# Local uploads (generated algorithms, user files)
+uploads/
