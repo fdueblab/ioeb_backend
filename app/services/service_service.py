@@ -18,8 +18,7 @@ from werkzeug.datastructures import FileStorage
 
 from app.repositories.service_repository import ServiceRepository
 from app.extensions import db
-from app.models.service.upgrade_advice import ServiceUpgradeAdvice, ensure_upgrade_advice_table
-from app.models.service.service_api import ensure_service_api_table
+from app.models.service.upgrade_advice import ServiceUpgradeAdvice
 from app.utils.port_utils import allocate_ports, PortAllocationError
 from app.utils.zip_utils import extract_and_find_root, cleanup_directory, ZipProcessError
 from app.utils.docker_utils import (
@@ -51,9 +50,6 @@ class ServiceService:
         """初始化微服务服务"""
         self.service_repository = ServiceRepository()
 
-    def _ensure_service_schema(self):
-        ensure_service_api_table()
-
     def _is_deploy_still_active(self, service_id: str) -> bool:
         service = self.service_repository.get_service_by_id(service_id)
         return service is not None and service.status == "deploying"
@@ -66,7 +62,6 @@ class ServiceService:
             List[Dict]: 微服务列表，每个微服务以字典形式表示
         """
         try:
-            self._ensure_service_schema()
             return self.service_repository.get_all_services_with_dict()
         except Exception as e:
             raise ServiceServiceError(f"获取微服务列表失败: {str(e)}")
@@ -85,7 +80,6 @@ class ServiceService:
             ServiceServiceError: 微服务不存在时抛出
         """
         try:
-            self._ensure_service_schema()
             service_dict = self.service_repository.get_service_dict_by_id(service_id)
             if not service_dict:
                 raise ServiceServiceError(f"微服务ID {service_id} 不存在")
@@ -122,7 +116,6 @@ class ServiceService:
                 seen.add(service_id)
         
         try:
-            self._ensure_service_schema()
             # 使用仓库层批量获取服务
             services = self.service_repository.get_services_dict_by_ids(unique_ids)
             
@@ -418,7 +411,6 @@ class ServiceService:
             Dict: services, total, page, pageSize
         """
         try:
-            self._ensure_service_schema()
             services, total = self.service_repository.filter_services(
                 page=page, page_size=page_size, **filters
             )
@@ -1035,7 +1027,6 @@ class ServiceService:
 
         service_id = None
         try:
-            self._ensure_service_schema()
             service = self.service_repository.create_service_with_relations(
                 service_data
             )
@@ -1083,7 +1074,6 @@ class ServiceService:
         if not creator_id:
             return []
         try:
-            ensure_upgrade_advice_table()
             services = self.service_repository.get_services_by_creator(creator_id)
             service_ids = [item.id for item in services]
             advice_map = {}
@@ -1107,7 +1097,6 @@ class ServiceService:
     ) -> Dict:
         """保存或更新某成果的升级建议。"""
         try:
-            ensure_upgrade_advice_table()
             service = self.service_repository.get_service_by_id(service_id)
             if not service:
                 raise ServiceServiceError(f"微服务ID {service_id} 不存在")

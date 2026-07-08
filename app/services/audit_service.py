@@ -30,20 +30,6 @@ class AuditService:
         "/api/audit/action-logs",
     }
 
-    def __init__(self):
-        self._table_checked = False
-
-    def ensure_table(self):
-        """在没有迁移目录的部署环境中按需创建审计表。"""
-        if self._table_checked:
-            return
-        try:
-            UserActionLog.__table__.create(db.engine, checkfirst=True)
-            self._table_checked = True
-        except SQLAlchemyError as exc:
-            db.session.rollback()
-            current_app.logger.warning("审计日志表检查/创建失败: %s", exc)
-
     def get_user_from_token(self, token: str) -> Optional[User]:
         if not token:
             return None
@@ -175,7 +161,6 @@ class AuditService:
         user_agent: str,
     ):
         try:
-            self.ensure_table()
             log = UserActionLog(
                 user_id=user.id,
                 username=user.username,
@@ -203,7 +188,6 @@ class AuditService:
         page: int = 1,
         page_size: int = 20,
     ):
-        self.ensure_table()
         page = max(int(page or 1), 1)
         page_size = min(max(int(page_size or 20), 1), 100)
 

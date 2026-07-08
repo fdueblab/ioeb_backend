@@ -6,8 +6,6 @@
 import datetime
 import uuid
 
-from sqlalchemy import inspect, text
-
 from app.extensions import db
 
 DISPLAY_STATUS_MAP = {
@@ -103,28 +101,3 @@ class Feedback(db.Model):
             "feishuSyncedAt": self.feishu_synced_at,
             "createdAt": self.created_at,
         }
-
-
-def ensure_feedback_table():
-    table_name = Feedback.__tablename__
-    Feedback.__table__.create(db.engine, checkfirst=True)
-    inspector = inspect(db.engine)
-    if table_name not in inspector.get_table_names():
-        return
-
-    existing_columns = {column["name"] for column in inspector.get_columns(table_name)}
-    missing_columns = {
-        "feishu_record_id": "VARCHAR(100)",
-        "feishu_sync_status": "VARCHAR(20)",
-        "feishu_sync_error": "TEXT",
-        "feishu_synced_at": "BIGINT",
-        "response_summary": "TEXT",
-        "responded_at": "BIGINT",
-        "feishu_status": "VARCHAR(50)",
-    }
-    for column_name, column_type in missing_columns.items():
-        if column_name not in existing_columns:
-            db.session.execute(
-                text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
-            )
-    db.session.commit()

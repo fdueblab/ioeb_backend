@@ -8,7 +8,7 @@ from flask_restx import Namespace, Resource, fields
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
-from app.models.feedback import Feedback, ensure_feedback_table
+from app.models.feedback import Feedback
 from app.models.user.role_permission import RolePermission
 from app.utils.auth_utils import get_request_user
 
@@ -119,7 +119,6 @@ class FeedbackList(Resource):
         )
 
         try:
-            ensure_feedback_table()
             db.session.add(feedback)
             db.session.commit()
             return {
@@ -142,7 +141,6 @@ class FeedbackList(Resource):
             return {"status": "error", "message": "无权限查看反馈列表"}, 403
 
         try:
-            ensure_feedback_table()
             feedbacks = Feedback.query.order_by(Feedback.created_at.desc()).all()
             return {
                 "status": "success",
@@ -168,7 +166,6 @@ class MyFeedbackList(Resource):
             return {"status": "error", "message": "请先登录后再查看反馈记录"}, 401
 
         try:
-            ensure_feedback_table()
             feedbacks = (
                 Feedback.query.filter_by(user_id=user.id)
                 .order_by(Feedback.created_at.desc())

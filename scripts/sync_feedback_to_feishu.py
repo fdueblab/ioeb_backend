@@ -17,7 +17,7 @@ sys.path.insert(0, root_dir)
 
 from app import create_app  # noqa: E402
 from app.extensions import db  # noqa: E402
-from app.models.feedback import Feedback, ensure_feedback_table  # noqa: E402
+from app.models.feedback import Feedback  # noqa: E402
 from app.utils.flask_utils import get_flask_env  # noqa: E402
 from scripts.feishu_client import FeishuClientError, feishu_client  # noqa: E402
 
@@ -106,7 +106,6 @@ def main():
     app = create_app(env)
 
     with app.app_context():
-        ensure_feedback_table()
         stats = run_sync(dry_run=args.dry_run, limit=args.limit)
         if args.dry_run:
             print("dry-run 模式，未写入飞书")
