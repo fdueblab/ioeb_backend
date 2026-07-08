@@ -9,6 +9,7 @@ from flask_restx import Namespace, Resource, fields
 from werkzeug.datastructures import FileStorage
 
 from app.services.service_service import ServiceServiceError, service_service
+from app.utils.auth_utils import get_request_user
 
 # 创建命名空间
 api = Namespace("services", description="微服务管理API")
@@ -115,8 +116,29 @@ service_model = api.model(
         "des": fields.String(description="MCP服务描述(MCP服务使用)"),
         "isFake": fields.Integer(description="是否使用假数据(MCP服务使用)"),
         "tools": fields.List(fields.Nested(tool_model), description="MCP工具列表(MCP服务使用)"),
-        "exampleMsg": fields.Raw(description="示例消息(MCP服务使用)")
+        "exampleMsg": fields.Raw(description="示例消息(MCP服务使用)"),
+        "upgradeAdvice": fields.Raw(description="升级建议（我的成果）"),
     }
+)
+
+upgrade_advice_model = api.model(
+    "UpgradeAdvice",
+    {
+        "leadingAnalysis": fields.String(description="领先情况分析"),
+        "autoUpgradeSuggestion": fields.String(description="自动升级建议"),
+        "manualUpdateSuggestion": fields.String(description="人工更新建议"),
+        "generatedAt": fields.Integer(description="生成时间"),
+        "generatorUserId": fields.String(description="生成用户ID"),
+    },
+)
+
+upgrade_advice_save_model = api.model(
+    "UpgradeAdviceSave",
+    {
+        "leadingAnalysis": fields.String(description="领先情况分析"),
+        "autoUpgradeSuggestion": fields.String(description="自动升级建议"),
+        "manualUpdateSuggestion": fields.String(description="人工更新建议"),
+    },
 )
 
 # 定义创建微服务请求模型
@@ -201,6 +223,36 @@ batch_response_model = api.model(
 )
 
 
+def _require_login_user():
+    user = get_request_user()
+    if not user:
+        return None, ({"status": "error", "message": "请先登录"}, 401)
+    return user, None
+
+
+@api.route("/mine")
+class MyServiceList(Resource):
+    @api.doc("list_my_services")
+    @api.marshal_with(services_response, code=200)
+    @api.response(401, "Unauthorized", error_response)
+    @api.response(500, "Server error", error_response)
+    def get(self):
+        """当前用户查看自己创建的成果列表"""
+        user, err = _require_login_user()
+        if err:
+            return err
+        try:
+            services = service_service.get_my_services(user.id)
+            return {
+                "status": "success",
+                "message": "获取我的成果成功",
+                "total": len(services),
+                "services": services,
+            }, 200
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
 @api.route("")
 class ServiceList(Resource):
     @api.doc("list_services")
@@ -222,9 +274,14 @@ class ServiceList(Resource):
     @api.expect(service_create_model)
     @api.marshal_with(service_response, code=201)
     @api.response(400, "Invalid input", error_response)
+    @api.response(401, "Unauthorized", error_response)
     @api.response(500, "Server error", error_response)
     def post(self):
-        """创建新微服务"""
+        """创建新微服务（需登录）"""
+        user, err = _require_login_user()
+        if err:
+            return err
+
         data = request.get_json()
 
         if not data:
@@ -232,6 +289,8 @@ class ServiceList(Resource):
 
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
+
+        data["creator_id"] = user.id
 
         try:
             service = service_service.create_service(data)
@@ -250,9 +309,14 @@ class ServicePublish(Resource):
     @api.expect(service_create_model)
     @api.marshal_with(service_response, code=201)
     @api.response(400, "Invalid input", error_response)
+    @api.response(401, "Unauthorized", error_response)
     @api.response(500, "Server error", error_response)
     def post(self):
-        """预发布新服务"""
+        """预发布新服务（需登录）"""
+        user, err = _require_login_user()
+        if err:
+            return err
+
         data = request.get_json()
 
         if not data:
@@ -260,6 +324,8 @@ class ServicePublish(Resource):
 
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
+
+        data["creator_id"] = user.id
 
         try:
             service = service_service.create_service(data)
@@ -323,6 +389,40 @@ class ServiceResource(Resource):
             if "不存在" in str(e):
                 return {"status": "error", "message": str(e)}, 404
             return {"status": "error", "message": str(e)}, 400
+
+
+@api.route("/<string:id>/upgrade-advice")
+@api.param("id", "微服务ID")
+class ServiceUpgradeAdviceResource(Resource):
+    @api.doc("save_service_upgrade_advice")
+    @api.expect(upgrade_advice_save_model)
+    @api.marshal_with(service_response, code=200)
+    @api.response(401, "Unauthorized", error_response)
+    @api.response(403, "Forbidden", error_response)
+    @api.response(404, "Service not found", error_response)
+    def post(self, id):
+        """保存当前用户成果的升级建议"""
+        user, err = _require_login_user()
+        if err:
+            return err
+
+        data = request.get_json(silent=True) or {}
+        try:
+            advice = service_service.save_upgrade_advice(id, user.id, data)
+            service = service_service.get_service_by_id(id)
+            service["upgradeAdvice"] = advice
+            return {
+                "status": "success",
+                "message": "升级建议保存成功",
+                "service": service,
+            }, 200
+        except ServiceServiceError as e:
+            message = str(e)
+            if "无权" in message:
+                return {"status": "error", "message": message}, 403
+            if "不存在" in message:
+                return {"status": "error", "message": message}, 404
+            return {"status": "error", "message": message}, 400
 
 
 @api.route("/<string:id>/scenario-generated-code")
@@ -454,9 +554,14 @@ class ScenarioGeneratedUpload(Resource):
     @api.expect(scenario_generated_upload_parser)
     @api.marshal_with(service_response, code=201)
     @api.response(400, "Invalid input", error_response)
+    @api.response(401, "Unauthorized", error_response)
     @api.response(500, "Server error", error_response)
     def post(self):
-        """想定式开发：上传生成的 Python 源码并登记为可检索资源（type=generated_algorithm）"""
+        """想定式开发：上传生成的 Python 源码并登记为可检索资源（需登录）"""
+        user, err = _require_login_user()
+        if err:
+            return err
+
         args = scenario_generated_upload_parser.parse_args()
         py_file = args["file"]
         if not py_file or not py_file.filename:
@@ -475,6 +580,8 @@ class ScenarioGeneratedUpload(Resource):
                 meta["source"] = json.loads(args["source"])
             except json.JSONDecodeError as e:
                 return {"status": "error", "message": f"source JSON 格式错误: {str(e)}"}, 400
+
+        meta["creator_id"] = user.id
 
         try:
             service = service_service.upload_scenario_generated_algorithm(py_file, meta)
@@ -681,9 +788,14 @@ class ServiceUpload(Resource):
     @api.expect(upload_parser)
     @api.marshal_with(service_response, code=201)
     @api.response(400, "Invalid input", error_response)
+    @api.response(401, "Unauthorized", error_response)
     @api.response(500, "Server error", error_response)
     def post(self):
-        """上传ZIP文件并部署微服务"""
+        """上传ZIP文件并部署微服务（需登录）"""
+        user, err = _require_login_user()
+        if err:
+            return err
+
         args = upload_parser.parse_args()
         
         # 获取ZIP文件
@@ -726,7 +838,9 @@ class ServiceUpload(Resource):
                 service_data['apiList'] = json.loads(args['apiList'])
         except json.JSONDecodeError as e:
             return {"status": "error", "message": f"JSON格式错误: {str(e)}"}, 400
-        
+
+        service_data["creator_id"] = user.id
+
         # 调用服务层处理
         try:
             service = service_service.upload_and_deploy_service(zip_file, service_data)

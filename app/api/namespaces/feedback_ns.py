@@ -3,19 +3,16 @@
 提供用户反馈提交和管理员查看能力。
 """
 
-import datetime
-
-from flask import g, request
+from flask import request
 from flask_restx import Namespace, Resource, fields
-from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
-from app.models.feedback import Feedback
+from app.models.feedback import Feedback, ensure_feedback_table
 from app.models.user.role_permission import RolePermission
-from app.models.user.user import User
-from app.models.user.user_tokens import UserToken
+from app.utils.auth_utils import get_request_user
 
+SUCCESS_SUBMIT_MESSAGE = "感谢您的意见，我们将进行论证！"
 
 api = Namespace("feedback", description="意见反馈API")
 
@@ -30,6 +27,10 @@ feedback_model = api.model(
         "content": fields.String(description="反馈内容"),
         "contact": fields.String(description="联系方式"),
         "status": fields.String(description="状态"),
+        "displayStatus": fields.String(description="用户可见状态"),
+        "responseSummary": fields.String(description="平台处理总结"),
+        "respondedAt": fields.Integer(description="平台回复时间"),
+        "feishuStatus": fields.String(description="飞书处理状态"),
         "feishuRecordId": fields.String(description="飞书多维表格记录ID"),
         "feishuSyncStatus": fields.String(description="飞书同步状态"),
         "feishuSyncError": fields.String(description="飞书同步错误"),
@@ -73,48 +74,6 @@ error_response = api.model(
 )
 
 
-def ensure_feedback_table():
-    table_name = Feedback.__tablename__
-    Feedback.__table__.create(db.engine, checkfirst=True)
-    inspector = inspect(db.engine)
-    if table_name not in inspector.get_table_names():
-        return
-
-    existing_columns = {column["name"] for column in inspector.get_columns(table_name)}
-    missing_columns = {
-        "feishu_record_id": "VARCHAR(100)",
-        "feishu_sync_status": "VARCHAR(20)",
-        "feishu_sync_error": "TEXT",
-        "feishu_synced_at": "BIGINT",
-    }
-    for column_name, column_type in missing_columns.items():
-        if column_name not in existing_columns:
-            db.session.execute(
-                text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
-            )
-    db.session.commit()
-
-
-def get_request_user():
-    user = getattr(g, "audit_user", None)
-    if user:
-        return user
-
-    token = request.headers.get("Access-Token", "")
-    if not token:
-        return None
-
-    user_token = UserToken.query.filter_by(token=token).first()
-    if not user_token:
-        return None
-
-    now = int(datetime.datetime.now().timestamp() * 1000)
-    if user_token.expires_at < now:
-        return None
-
-    return User.query.filter_by(id=user_token.user_id, deleted=0).first()
-
-
 def has_admin_permission(user):
     if not user:
         return False
@@ -135,23 +94,28 @@ class FeedbackList(Resource):
     @api.expect(feedback_create_model)
     @api.marshal_with(feedback_response, code=201)
     @api.response(400, "Invalid input", error_response)
+    @api.response(401, "Unauthorized", error_response)
     @api.response(500, "Server error", error_response)
     def post(self):
-        """提交意见反馈"""
+        """提交意见反馈（需登录）"""
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "请先登录后再提交反馈"}, 401
+
         data = request.get_json(silent=True) or {}
         content = str(data.get("content") or "").strip()
 
         if not content:
             return {"status": "error", "message": "反馈内容不能为空"}, 400
 
-        user = get_request_user()
         title = content[:30] or "用户意见反馈"
         feedback = Feedback(
-            user_id=user.id if user else None,
-            username=(user.username if user else None) or "匿名用户",
+            user_id=user.id,
+            username=user.username or user.name or "用户",
             feedback_type="意见反馈",
             title=title[:100],
             content=content[:2000],
+            feishu_status="待处理",
         )
 
         try:
@@ -160,7 +124,7 @@ class FeedbackList(Resource):
             db.session.commit()
             return {
                 "status": "success",
-                "message": "反馈提交成功",
+                "message": SUCCESS_SUBMIT_MESSAGE,
                 "feedback": feedback.to_dict(),
             }, 201
         except SQLAlchemyError as exc:
@@ -183,6 +147,36 @@ class FeedbackList(Resource):
             return {
                 "status": "success",
                 "message": "获取反馈列表成功",
+                "total": len(feedbacks),
+                "feedbacks": [item.to_dict() for item in feedbacks],
+            }, 200
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            return {"status": "error", "message": f"反馈查询失败: {str(exc)}"}, 500
+
+
+@api.route("/mine")
+class MyFeedbackList(Resource):
+    @api.doc("list_my_feedbacks")
+    @api.marshal_with(feedback_list_response, code=200)
+    @api.response(401, "Unauthorized", error_response)
+    @api.response(500, "Server error", error_response)
+    def get(self):
+        """当前登录用户查看自己的反馈记录"""
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "请先登录后再查看反馈记录"}, 401
+
+        try:
+            ensure_feedback_table()
+            feedbacks = (
+                Feedback.query.filter_by(user_id=user.id)
+                .order_by(Feedback.created_at.desc())
+                .all()
+            )
+            return {
+                "status": "success",
+                "message": "获取反馈记录成功",
                 "total": len(feedbacks),
                 "feedbacks": [item.to_dict() for item in feedbacks],
             }, 200

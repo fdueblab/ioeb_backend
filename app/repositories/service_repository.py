@@ -562,6 +562,16 @@ class ServiceRepository:
                     query = query.filter(getattr(Service, key) == value)
         
         return query.all()
+
+    def get_services_by_creator(self, creator_id: str) -> List[Service]:
+        """按创建者获取未删除的服务，按创建时间倒序。"""
+        if not creator_id:
+            return []
+        return (
+            Service.query.filter_by(deleted=0, creator_id=creator_id)
+            .order_by(Service.create_time.desc())
+            .all()
+        )
     
     def get_service_norms(self, service_id: str) -> List[ServiceNorm]:
         """

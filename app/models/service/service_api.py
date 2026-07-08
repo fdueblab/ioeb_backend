@@ -5,6 +5,8 @@
 
 import json
 
+from sqlalchemy import inspect, text
+
 from app.extensions import db
 
 
@@ -110,4 +112,31 @@ class ServiceApi(db.Model):
                 # 如果不是有效JSON，则返回原始字符串
                 result["exampleMsg"] = self.example_msg
 
-        return result 
+        return result
+
+
+def ensure_service_api_table():
+    """补全 service_apis 表缺失列（兼容旧库）。"""
+    table_name = ServiceApi.__tablename__
+    ServiceApi.__table__.create(db.engine, checkfirst=True)
+    inspector = inspect(db.engine)
+    if table_name not in inspector.get_table_names():
+        return
+
+    existing_columns = {column["name"] for column in inspector.get_columns(table_name)}
+    missing_columns = {
+        "response_file_name": "VARCHAR(100)",
+        "example_msg": "TEXT",
+        "subtitle": "VARCHAR(200)",
+        "services": "TEXT",
+        "input_name": "VARCHAR(100)",
+        "output_name": "VARCHAR(100)",
+        "output_visualization": "BOOLEAN",
+        "submit_button_text": "VARCHAR(50)",
+    }
+    for column_name, column_type in missing_columns.items():
+        if column_name not in existing_columns:
+            db.session.execute(
+                text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
+            )
+    db.session.commit()
