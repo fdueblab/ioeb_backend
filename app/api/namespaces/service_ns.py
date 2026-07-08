@@ -80,6 +80,12 @@ api_model = api.model(
         "outputName": fields.String(description="输出名称(元应用专用)"),
         "outputVisualization": fields.Boolean(description="是否可视化输出(元应用专用)"),
         "submitButtonText": fields.String(description="提交按钮文本(元应用专用)"),
+        "simulationBuildId": fields.String(description="仿真构建ID(元应用专用)"),
+        "metaAppArtifactId": fields.String(description="Artifact ID(元应用专用)"),
+        "metaAppArtifactHash": fields.String(description="Artifact哈希(元应用专用)"),
+        "metaAppArtifact": fields.Raw(description="Artifact正文(元应用专用)"),
+        "runMode": fields.String(description="运行模式(元应用专用)"),
+        "runtimeSpec": fields.Raw(description="运行环境预留配置(元应用专用)"),
         # MCP专用字段
         "tools": fields.List(fields.Raw, description="MCP工具列表(MCP专用)"),
         "exampleMsg": fields.Raw(description="示例消息(MCP专用)")
@@ -182,6 +188,84 @@ services_response = api.model(
         "total": fields.Integer(description="总记录数"),
         "services": fields.List(fields.Nested(service_model), description="微服务列表")
     }
+)
+
+service_list_api_brief = api.model(
+    "ServiceListApiBrief",
+    {
+        "responseFileName": fields.String(description="响应文件名(想定式生成算法)"),
+    },
+)
+
+service_list_item_model = api.model(
+    "ServiceListItem",
+    {
+        "id": fields.String(description="服务ID"),
+        "name": fields.String(description="服务名称"),
+        "attribute": fields.String(description="服务属性"),
+        "type": fields.String(description="服务类型"),
+        "domain": fields.String(description="领域"),
+        "industry": fields.String(description="行业"),
+        "scenario": fields.String(description="场景"),
+        "technology": fields.String(description="技术"),
+        "network": fields.String(description="网络类型"),
+        "port": fields.String(description="端口映射"),
+        "volume": fields.String(description="数据卷映射"),
+        "status": fields.String(description="服务状态"),
+        "number": fields.Integer(description="服务调用次数"),
+        "deleted": fields.Integer(description="是否删除"),
+        "createTime": fields.Integer(description="创建时间"),
+        "creatorId": fields.String(description="创建者ID"),
+        "norm": fields.List(fields.Nested(norm_model), description="规范评分"),
+        "source": fields.Nested(source_model, description="来源信息"),
+        "apiList": fields.List(fields.Nested(service_list_api_brief), description="仅想定式生成算法含文件名"),
+    },
+)
+
+services_list_response = api.model(
+    "ServicesListResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+        "total": fields.Integer(description="总记录数"),
+        "page": fields.Integer(description="当前页码，未分页时为 null"),
+        "pageSize": fields.Integer(description="每页条数，未分页时为 null"),
+        "services": fields.List(fields.Nested(service_list_item_model), description="微服务列表(精简)"),
+    },
+)
+
+mcp_tool_option_model = api.model(
+    "McpToolOption",
+    {
+        "id": fields.String(description="工具ID"),
+        "name": fields.String(description="工具名称"),
+        "description": fields.String(description="工具描述"),
+        "des": fields.String(description="工具描述(兼容字段)"),
+    },
+)
+
+mcp_service_option_model = api.model(
+    "McpServiceOption",
+    {
+        "id": fields.String(description="服务ID"),
+        "name": fields.String(description="服务名称"),
+        "status": fields.String(description="服务状态"),
+        "des": fields.String(description="服务描述"),
+        "url": fields.String(description="MCP 地址"),
+        "method": fields.String(description="通信方法"),
+        "isFake": fields.Boolean(description="是否为模拟数据"),
+        "tools": fields.List(fields.Nested(mcp_tool_option_model), description="工具列表"),
+    },
+)
+
+mcp_options_response = api.model(
+    "McpOptionsResponse",
+    {
+        "status": fields.String(description="响应状态"),
+        "message": fields.String(description="响应消息"),
+        "total": fields.Integer(description="总记录数"),
+        "services": fields.List(fields.Nested(mcp_service_option_model), description="MCP 服务选项"),
+    },
 )
 
 # 定义简单响应模型
@@ -290,6 +374,9 @@ class ServiceList(Resource):
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
 
+        if data.get("type") == "meta":
+            return {"status": "error", "message": "元应用请使用预发布接口"}, 400
+
         data["creator_id"] = user.id
 
         try:
@@ -325,6 +412,15 @@ class ServicePublish(Resource):
         if not data.get("name"):
             return {"status": "error", "message": "服务名称不能为空"}, 400
 
+        if data.get("type") != "meta":
+            return {"status": "error", "message": "预发布接口仅接受元应用"}, 400
+
+        try:
+            service_service.validate_meta_app_prepublish(data)
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
+
+        data["status"] = "pre_release_unrated"
         data["creator_id"] = user.id
 
         try:
@@ -332,17 +428,9 @@ class ServicePublish(Resource):
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 400
 
-        try:
-            deployed = service_service.deploy_service(service["id"])
-        except ServiceServiceError as e:
-            return {"status": "error", "message": f"微服务创建成功，但部署失败：{str(e)}"}, 500
-
-        if not deployed:
-            return {"status": "error", "message": "微服务创建成功，但部署任务启动失败"}, 500
-
         return {
             "status": "success",
-            "message": "微服务创建成功，部署已启动，正在部署中...",
+            "message": "元应用预发布成功",
             "service": service
         }, 201
 
@@ -464,6 +552,55 @@ class ServiceSearch(Resource):
             return {"status": "error", "message": str(e)}, 500
 
 
+@api.route("/smart-search")
+class ServiceSmartSearch(Resource):
+    @api.doc(
+        "smart_search_services",
+        description="""
+        领域内智能检索：将名称/通用描述/作用/功能/技术要求拆词后，
+        对服务名称、API 描述、来源介绍、行业场景技术编码等现有文本做全表模糊匹配。
+
+        说明：除 name 外，其余 4 个表单字段在 services 表无独立列，仅作为检索词参与匹配。
+        """,
+    )
+    @api.param("domain", "领域 code", required=True)
+    @api.param("name", "名称")
+    @api.param("description", "通用描述")
+    @api.param("role", "作用")
+    @api.param("function", "功能")
+    @api.param("requirement", "技术要求")
+    @api.marshal_with(services_list_response, code=200)
+    @api.response(400, "Invalid input", error_response)
+    def get(self):
+        """智能检索微服务（领域内全表模糊匹配）"""
+        domain = (request.args.get("domain") or "").strip()
+        if not domain:
+            return {"status": "error", "message": "缺少 domain 参数"}, 400
+
+        fields = {
+            "name": request.args.get("name") or "",
+            "description": request.args.get("description") or "",
+            "role": request.args.get("role") or "",
+            "function": request.args.get("function") or "",
+            "requirement": request.args.get("requirement") or "",
+        }
+        if not any(str(value).strip() for value in fields.values()):
+            return {"status": "error", "message": "请至少填写一个检索条件"}, 400
+
+        try:
+            services = service_service.smart_search(domain, **fields)
+            return {
+                "status": "success",
+                "message": "智能检索成功",
+                "total": len(services),
+                "page": None,
+                "pageSize": None,
+                "services": services,
+            }, 200
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
+
+
 @api.route("/filter")
 class ServiceFilter(Resource):
     @api.doc("filter_services", description="""
@@ -493,9 +630,11 @@ class ServiceFilter(Resource):
     @api.param("scenario", "场景 (取决于domain，查看对应domain的scenario字典)，多个值用逗号分隔")
     @api.param("technology", "技术 (取决于domain，查看对应domain的technology字典)，多个值用逗号分隔")
     @api.param("status", "服务状态 (not_deployed-未部署, deploying-部署中, pre_release_unrated-预发布(未测评), pre_release_pending-预发布(待平台测评), released-已发布, error-服务异常)，多个值用逗号分隔")
-    @api.marshal_with(services_response, code=200)
+    @api.param("page", "页码，从 1 开始；与 pageSize 同时传入时启用分页")
+    @api.param("pageSize", "每页条数，最大 100；与 page 同时传入时启用分页")
+    @api.marshal_with(services_list_response, code=200)
     def get(self):
-        """筛选微服务"""
+        """筛选微服务（列表精简视图，可选分页）"""
         filters = {}
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         
@@ -508,17 +647,55 @@ class ServiceFilter(Resource):
                 value_list = [v.strip() for v in value.split(",") if v.strip()]
                 if value_list:
                     filters[key] = value_list
+
+        page_raw = request.args.get("page")
+        page_size_raw = request.args.get("pageSize")
+        page = None
+        page_size = None
+        if page_raw is not None and page_size_raw is not None:
+            try:
+                page = int(page_raw)
+                page_size = int(page_size_raw)
+            except (TypeError, ValueError):
+                return {"status": "error", "message": "page 与 pageSize 必须为整数"}, 400
         
         try:
-            services = service_service.filter_services(**filters)
+            result = service_service.filter_services(
+                page=page, page_size=page_size, **filters
+            )
             return {
                 "status": "success",
                 "message": "筛选微服务成功",
-                "total": len(services),
-                "services": services
+                "total": result["total"],
+                "page": result.get("page"),
+                "pageSize": result.get("pageSize"),
+                "services": result["services"],
             }, 200
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 500
+
+
+@api.route("/mcp-options")
+class ServiceMcpOptions(Resource):
+    @api.doc("mcp_service_options", description="仿真构建 MCP 服务选择器：返回含 tools 的选项列表，不分页。")
+    @api.param("domain", "领域 code", required=True)
+    @api.marshal_with(mcp_options_response, code=200)
+    @api.response(400, "Invalid input", error_response)
+    def get(self):
+        """获取 MCP 服务选项（含 tools）"""
+        domain = request.args.get("domain")
+        if not domain or not domain.strip():
+            return {"status": "error", "message": "缺少 domain 参数"}, 400
+        try:
+            options = service_service.get_mcp_options(domain.strip())
+            return {
+                "status": "success",
+                "message": "获取 MCP 服务选项成功",
+                "total": len(options),
+                "services": options,
+            }, 200
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 400
 
 
 scenario_generated_upload_parser = api.parser()

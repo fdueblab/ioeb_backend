@@ -9,43 +9,14 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union
 
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.extensions import db
-from app.models import Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
+from app.models import MetaAppConfig, Service, ServiceNorm, ServiceSource, ServiceApi, ServiceApiParameter, ServiceApiTool
 
 
 class ServiceRepository:
     """微服务数据仓库"""
-
-    def _convert_services_list_to_string(self, services_list):
-        """
-        将服务ID列表转换为逗号分隔的字符串
-        
-        Args:
-            services_list: 服务ID列表，可以是list或None
-            
-        Returns:
-            str: 逗号分隔的服务ID字符串，如果输入为空返回None
-        """
-        try:
-            if not services_list or not isinstance(services_list, list):
-                return None
-            
-            # 过滤掉空值和非字符串值
-            valid_ids = []
-            for service_id in services_list:
-                if isinstance(service_id, str) and service_id.strip():
-                    valid_ids.append(service_id.strip())
-            
-            # 如果没有有效的ID，返回None
-            if not valid_ids:
-                return None
-                
-            return ','.join(valid_ids)
-            
-        except Exception:
-            # 如果处理过程中出现任何异常，返回None
-            return None
 
     def get_all_services(self) -> List[Service]:
         """
@@ -64,7 +35,7 @@ class ServiceRepository:
             List[Dict]: 微服务字典列表
         """
         services = self.get_all_services()
-        return [service.to_dict() for service in services]
+        return [service.to_dict(include_artifact=False) for service in services]
     
     def get_service_by_id(self, service_id: str) -> Optional[Service]:
         """
@@ -304,12 +275,6 @@ class ServiceRepository:
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
                         example_msg=example_msg,
-                        subtitle=api_data.get("subtitle"),
-                        services=self._convert_services_list_to_string(api_data.get("services")),
-                        input_name=api_data.get("inputName"),
-                        output_name=api_data.get("outputName"),
-                        output_visualization=api_data.get("outputVisualization", False),
-                        submit_button_text=api_data.get("submitButtonText")
                     )
                     db.session.add(api)
                     
@@ -335,14 +300,20 @@ class ServiceRepository:
                                 description=tool_data.get("description", tool_data.get("des", ""))
                             )
                             db.session.add(tool)
-            
+
+            # 元应用：把元应用专属字段写入独立配置表（与服务 1:1）
+            if service_data.get("type") == "meta":
+                db.session.add(MetaAppConfig.from_api_fields(
+                    service_id, service_data["apiList"][0], current_time
+                ))
+
             # 提交事务
             db.session.commit()
             return service
         except Exception as e:
             db.session.rollback()
             raise e
-    
+
     def update_service(self, service_id: str, service_data: Dict) -> Optional[Service]:
         """
         更新微服务信息
@@ -475,12 +446,6 @@ class ServiceRepository:
                         response=response,
                         response_file_name=api_data.get("responseFileName"),
                         example_msg=example_msg,
-                        subtitle=api_data.get("subtitle"),
-                        services=self._convert_services_list_to_string(api_data.get("services")),
-                        input_name=api_data.get("inputName"),
-                        output_name=api_data.get("outputName"),
-                        output_visualization=api_data.get("outputVisualization", False),
-                        submit_button_text=api_data.get("submitButtonText")
                     )
                     db.session.add(api)
                     
@@ -506,6 +471,12 @@ class ServiceRepository:
                                 description=tool_data.get("description", tool_data.get("des", ""))
                             )
                             db.session.add(tool)
+
+                if service.type == "meta":
+                    service.meta_app_config.update_display_fields(
+                        service_data["apiList"][0],
+                        int(datetime.now().timestamp() * 1000),
+                    )
             
             # 提交事务
             db.session.commit()
@@ -532,36 +503,39 @@ class ServiceRepository:
         db.session.commit()
         return True
     
-    def filter_services(self, **filters) -> List[Service]:
+    def filter_services(
+        self, page: int = None, page_size: int = None, **filters
+    ) -> tuple:
         """
-        根据条件筛选微服务
-
-        Args:
-            **filters: 筛选条件，可包括:
-                - attribute: 服务属性（支持多个值）
-                - type: 服务类型（支持多个值）
-                - domain: 领域（支持多个值）
-                - industry: 行业（支持多个值）
-                - scenario: 场景（支持多个值）
-                - technology: 技术（支持多个值）
-                - status: 服务状态（支持多个值）
+        根据条件筛选微服务，可选分页。
 
         Returns:
-            List[Service]: 符合条件的微服务对象列表
+            tuple[List[Service], int]: (结果列表, 总记录数)
         """
-        query = Service.query.filter_by(deleted=0)
-        
-        # 应用筛选条件
+        query = Service.query.options(
+            selectinload(Service.norms),
+            joinedload(Service.source),
+            selectinload(Service.apis),
+        ).filter_by(deleted=0)
+
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
             if key in valid_filters and value is not None:
-                # 支持所有条件都能使用多个值
                 if isinstance(value, list) and len(value) > 0:
                     query = query.filter(getattr(Service, key).in_(value))
                 elif not isinstance(value, list) and value:
                     query = query.filter(getattr(Service, key) == value)
-        
-        return query.all()
+        query = query.order_by(Service.create_time.desc())
+        total = query.count()
+
+        if page is not None and page_size is not None:
+            page = max(1, int(page))
+            page_size = max(1, min(int(page_size), 100))
+            services = query.offset((page - 1) * page_size).limit(page_size).all()
+        else:
+            services = query.all()
+
+        return services, total
 
     def get_services_by_creator(self, creator_id: str) -> List[Service]:
         """按创建者获取未删除的服务，按创建时间倒序。"""
@@ -570,6 +544,29 @@ class ServiceRepository:
         return (
             Service.query.filter_by(deleted=0, creator_id=creator_id)
             .order_by(Service.create_time.desc())
+            .all()
+        )
+
+    def list_mcp_options(self, domain: str) -> List[Service]:
+        """获取指定领域的 MCP 服务（含 tools），供仿真构建选择器使用。"""
+        return (
+            Service.query.options(
+                selectinload(Service.apis).selectinload(ServiceApi.tools),
+            )
+            .filter_by(deleted=0, type="atomic_mcp", domain=domain)
+            .order_by(Service.name.asc())
+            .all()
+        )
+
+    def list_services_in_domain(self, domain: str) -> List[Service]:
+        """获取指定领域下全部未删除服务（含检索所需关联数据）。"""
+        return (
+            Service.query.options(
+                selectinload(Service.norms),
+                joinedload(Service.source),
+                selectinload(Service.apis).selectinload(ServiceApi.tools),
+            )
+            .filter_by(deleted=0, domain=domain)
             .all()
         )
     

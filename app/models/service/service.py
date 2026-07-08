@@ -44,6 +44,12 @@ class Service(db.Model):
     norms = db.relationship("ServiceNorm", backref="service", lazy=True)
     source = db.relationship("ServiceSource", backref="service", uselist=False)
     apis = db.relationship("ServiceApi", backref="service", lazy=True)
+    meta_app_config = db.relationship(
+        "MetaAppConfig",
+        backref="service",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
 
     def __init__(self, **kwargs):
         """初始化Service实例"""
@@ -56,7 +62,7 @@ class Service(db.Model):
     def __repr__(self):
         return f"<Service {self.name}>"
 
-    def to_dict(self):
+    def to_dict(self, include_artifact=True):
         """将模型转换为字典"""
         base_dict = {
             "id": self.id,
@@ -79,6 +85,16 @@ class Service(db.Model):
             "source": self.source.to_dict() if self.source else None,
         }
         
+        # 元应用：apiList + 把元应用配置合并进 apiList[0]（保持对外响应形状不变）
+        if self.type == 'meta':
+            if len(self.apis) != 1 or self.meta_app_config is None:
+                raise ValueError(f"元应用 {self.id} 配置不完整")
+            base_dict["apiList"] = [api.to_dict() for api in self.apis]
+            base_dict["apiList"][0].update(
+                self.meta_app_config.to_api_fields(include_artifact=include_artifact)
+            )
+            return base_dict
+
         # 想定式生成算法：仅 apiList，附上下载路径提示（前端拼接 API 根地址）
         if self.type == 'generated_algorithm':
             base_dict["apiList"] = [api.to_dict() for api in self.apis]
@@ -122,4 +138,32 @@ class Service(db.Model):
             # 对于REST类型的服务，保持原有的apiList格式
             base_dict["apiList"] = [api.to_dict() for api in self.apis]
         
+        return base_dict
+
+    def to_list_dict(self):
+        """检索列表所需的精简字段（不含 apiList/tools/artifact）。"""
+        base_dict = {
+            "id": self.id,
+            "name": self.name,
+            "attribute": self.attribute,
+            "type": self.type,
+            "domain": self.domain,
+            "industry": self.industry,
+            "scenario": self.scenario,
+            "technology": self.technology,
+            "network": self.network,
+            "port": self.port,
+            "volume": self.volume,
+            "status": self.status,
+            "number": self.number,
+            "deleted": self.deleted,
+            "createTime": self.create_time,
+            "creatorId": self.creator_id,
+            "norm": [norm.to_dict() for norm in self.norms],
+            "source": self.source.to_dict() if self.source else None,
+        }
+        if self.type == "generated_algorithm" and self.apis:
+            response_file_name = self.apis[0].response_file_name
+            if response_file_name:
+                base_dict["apiList"] = [{"responseFileName": response_file_name}]
         return base_dict
