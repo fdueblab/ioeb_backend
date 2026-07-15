@@ -21,6 +21,7 @@ from app.extensions import db
 from app.models.service.upgrade_advice import ServiceUpgradeAdvice
 from app.utils.port_utils import allocate_ports, PortAllocationError
 from app.utils.zip_utils import extract_and_find_root, cleanup_directory, ZipProcessError
+from app.utils.mcp_artifact_utils import load_mcp_artifact_metadata
 from app.utils.docker_utils import (
     parse_ports_from_compose,
     modify_compose_ports,
@@ -645,13 +646,18 @@ class ServiceService:
                 
                 # 从环境变量获取部署服务的宿主机URL
                 service_host_url = os.environ.get('SERVICE_HOST_URL', 'https://fdueblab.cn')
+                artifact_metadata = load_mcp_artifact_metadata(project_root)
+                endpoint = artifact_metadata['endpoint']
+                description = artifact_metadata['description'] or (
+                    f'提供{service_data.get("name", "MCP")}功能的MCP服务'
+                )
                 
                 # 生成默认API
                 default_api = {
                     'name': f'{service_data.get("name", "MCP")} Server',
-                    'url': f'{service_host_url}/mcp-proxy/{host_port}/sse',
-                    'method': 'sse',
-                    'des': f'提供{service_data.get("name", "MCP")}功能的MCP服务',
+                    'url': f'{service_host_url.rstrip("/")}/mcp-proxy/{host_port}{endpoint}',
+                    'method': artifact_metadata['method'],
+                    'des': description,
                     'parameterType': 1,
                     'responseType': 1,
                     'isFake': False,
@@ -661,17 +667,7 @@ class ServiceService:
                             'content': '这是一个自动生成的测试消息'
                         }
                     ],
-                    # 为MCP服务添加默认的tools
-                    'tools': [
-                        {
-                            'name': 'healthCheck',
-                            'description': '判断微服务状态是否正常可用'
-                        },
-                        {
-                            'name': 'getServiceInfo',
-                            'description': '获取服务信息和能力描述'
-                        }
-                    ]
+                    'tools': artifact_metadata['tools']
                 }
                 
                 # 更新服务，添加API
