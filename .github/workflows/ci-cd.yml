@@ -51,6 +51,20 @@ jobs:
           pytest tests/unit --cov=app --cov-report=xml
           pytest tests/integration
 
+      - name: Verify services bind mount permissions
+        run: |
+          docker build -t ioeb-backend:permission-test .
+          services_dir="${RUNNER_TEMP}/ioeb-services-permission-test"
+          sudo mkdir -p "${services_dir}"
+          sudo chown root:root "${services_dir}"
+          sudo chmod 0755 "${services_dir}"
+          docker run --rm \
+            -e SERVICES_BASE_PATH=/app/data/services \
+            -v "${services_dir}:/app/data/services" \
+            ioeb-backend:permission-test \
+            python -c "import os; from pathlib import Path; assert os.getuid() == 1000; Path('/app/data/services/probe').mkdir()"
+          test -d "${services_dir}/probe"
+
   build:
     name: Build & Push Image
     needs: test
