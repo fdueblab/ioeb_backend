@@ -3,6 +3,7 @@
 处理微服务相关的业务逻辑
 """
 
+import json
 import re
 from typing import Dict, List, Optional, Tuple
 import threading
@@ -53,6 +54,56 @@ class ServiceService:
     def _is_deploy_still_active(self, service_id: str) -> bool:
         service = self.service_repository.get_service_by_id(service_id)
         return service is not None and service.status == "deploying"
+
+    @staticmethod
+    def _load_mcp_artifact_metadata(project_root: str) -> Dict:
+        """读取 Agent 产物中的传输端点和真实工具清单。"""
+        metadata = {
+            "endpoint": "/sse",
+            "tools": []
+        }
+
+        manifest_path = os.path.join(project_root, "ioeb-service.json")
+        try:
+            with open(manifest_path, "r", encoding="utf-8") as manifest_file:
+                manifest = json.load(manifest_file)
+            endpoint = manifest.get("endpoint")
+            if (
+                isinstance(endpoint, str)
+                and endpoint.startswith("/")
+                and ".." not in endpoint
+                and "?" not in endpoint
+                and "#" not in endpoint
+            ):
+                metadata["endpoint"] = endpoint
+        except (OSError, ValueError, TypeError):
+            pass
+
+        plan_path = os.path.join(project_root, "packaging_plan.json")
+        try:
+            with open(plan_path, "r", encoding="utf-8") as plan_file:
+                plan = json.load(plan_file)
+            if plan.get("schemaVersion") != "ioeb.agentic-mcp-plan/v1":
+                return metadata
+
+            tools = []
+            seen_names = set()
+            for logical_service in plan.get("services", []):
+                for tool in logical_service.get("tools", []):
+                    name = tool.get("name")
+                    if not isinstance(name, str) or not name or name in seen_names:
+                        continue
+                    description = tool.get("description", "")
+                    tools.append({
+                        "name": name,
+                        "description": description if isinstance(description, str) else ""
+                    })
+                    seen_names.add(name)
+            metadata["tools"] = tools
+        except (OSError, ValueError, TypeError, AttributeError):
+            pass
+
+        return metadata
 
     def get_all_services(self) -> List[Dict]:
         """
@@ -637,19 +688,22 @@ class ServiceService:
             
             self.service_repository.update_service(service_id, update_data)
             
-            # 10. 如果用户没有提供apiList，自动生成默认的MCP API
-            if not service_data.get('apiList'):
-                # 从port_mappings中提取宿主机端口（第一个端口）
-                # port_mappings格式: ["27000:8000"]
-                host_port = port_mappings[0].split(':')[0]
-                
+            # 10. 为MCP产物登记真实端点和Agent规划出的工具清单
+            host_port = port_mappings[0].split(':')[0]
+            artifact_metadata = self._load_mcp_artifact_metadata(project_root)
+            mcp_endpoint = artifact_metadata["endpoint"]
+            is_mcp_service = service_data.get('type') == 'atomic_mcp'
+
+            if is_mcp_service and not service_data.get('apiList'):
                 # 从环境变量获取部署服务的宿主机URL
-                service_host_url = os.environ.get('SERVICE_HOST_URL', 'https://fdueblab.cn')
+                service_host_url = os.environ.get(
+                    'SERVICE_HOST_URL',
+                    'https://fdueblab.cn'
+                ).rstrip('/')
                 
-                # 生成默认API
-                default_api = {
+                mcp_api = {
                     'name': f'{service_data.get("name", "MCP")} Server',
-                    'url': f'{service_host_url}/mcp-proxy/{host_port}/sse',
+                    'url': f'{service_host_url}/mcp-proxy/{host_port}{mcp_endpoint}',
                     'method': 'sse',
                     'des': f'提供{service_data.get("name", "MCP")}功能的MCP服务',
                     'parameterType': 1,
@@ -661,24 +715,17 @@ class ServiceService:
                             'content': '这是一个自动生成的测试消息'
                         }
                     ],
-                    # 为MCP服务添加默认的tools
-                    'tools': [
-                        {
-                            'name': 'healthCheck',
-                            'description': '判断微服务状态是否正常可用'
-                        },
-                        {
-                            'name': 'getServiceInfo',
-                            'description': '获取服务信息和能力描述'
-                        }
-                    ]
+                    'tools': artifact_metadata["tools"]
                 }
                 
                 # 更新服务，添加API
                 self.service_repository.update_service_with_relations(service_id, {
-                    'apiList': [default_api]
+                    'apiList': [mcp_api]
                 })
-                print(f"服务 {service_id} 已自动添加默认API: {default_api['url']}")
+                print(
+                    f"服务 {service_id} 已登记MCP API: {mcp_api['url']}，"
+                    f"工具数: {len(mcp_api['tools'])}"
+                )
             
             # 11. 启动异步部署任务
             app = current_app._get_current_object()
@@ -690,7 +737,19 @@ class ServiceService:
                         print(f"开始部署服务 {service_id}")
                         
                         # 执行docker-compose部署
-                        success, message = docker_deploy(project_root, service_id, timeout=600)
+                        readiness_url = None
+                        if is_mcp_service:
+                            readiness_url = (
+                                f"http://127.0.0.1:{host_port}{mcp_endpoint}"
+                            )
+
+                        success, message = docker_deploy(
+                            project_root,
+                            service_id,
+                            timeout=600,
+                            readiness_url=readiness_url,
+                            readiness_timeout=120
+                        )
                         
                         if not self._is_deploy_still_active(service_id):
                             return

@@ -5,7 +5,9 @@ Docker部署工具模块
 
 import os
 import subprocess
+import time
 import yaml
+import requests
 from typing import List, Tuple
 
 
@@ -163,7 +165,98 @@ def modify_compose_ports(compose_file_path: str, allocated_ports: List[int]) -> 
         raise DockerDeployError(f"修改docker-compose.yml失败: {str(e)}")
 
 
-def deploy_service(project_root: str, service_id: str, timeout: int = 600) -> Tuple[bool, str]:
+def wait_for_mcp_sse_ready(
+    readiness_url: str,
+    timeout: int = 120,
+    interval: float = 2.0
+) -> Tuple[bool, str]:
+    """等待 MCP SSE 端点真正开始提供事件流。"""
+    deadline = time.monotonic() + timeout
+    last_error = "尚未收到有效响应"
+
+    while True:
+        try:
+            response = requests.get(
+                readiness_url,
+                stream=True,
+                timeout=(3, 5)
+            )
+            try:
+                content_type = response.headers.get('Content-Type', '').lower()
+                if response.status_code == 200 and 'text/event-stream' in content_type:
+                    message_endpoint = _read_mcp_message_endpoint(response)
+                    if message_endpoint:
+                        return True, (
+                            f"MCP SSE端点已就绪: {readiness_url}，"
+                            f"消息端点: {message_endpoint}"
+                        )
+                    last_error = "SSE连接成功，但未收到MCP endpoint事件"
+                else:
+                    last_error = (
+                        f"HTTP {response.status_code}, "
+                        f"Content-Type={content_type or 'unknown'}"
+                    )
+            finally:
+                response.close()
+        except requests.RequestException as exc:
+            last_error = str(exc)
+
+        if time.monotonic() >= deadline:
+            return False, f"等待MCP SSE端点超时（{timeout}秒）: {last_error}"
+        time.sleep(interval)
+
+
+def _read_mcp_message_endpoint(response) -> str:
+    """读取 FastMCP 建连后发送的首个 ``endpoint`` SSE 事件。"""
+    event_name = ""
+    data_lines = []
+    for line in response.iter_lines(chunk_size=1, decode_unicode=True):
+        if isinstance(line, bytes):
+            line = line.decode("utf-8", errors="replace")
+        if line == "":
+            if event_name == "endpoint" and data_lines:
+                endpoint = "\n".join(data_lines).strip()
+                if endpoint.startswith("/"):
+                    return endpoint
+            event_name = ""
+            data_lines = []
+            continue
+        if line.startswith("event:"):
+            event_name = line[6:].strip()
+        elif line.startswith("data:"):
+            data_lines.append(line[5:].lstrip())
+    return ""
+
+
+def _get_compose_logs(
+    compose_file: str,
+    project_name: str,
+    project_root: str
+) -> str:
+    """读取有限长度的容器日志，便于定位启动失败原因。"""
+    try:
+        result = subprocess.run(
+            [
+                'docker-compose', '-f', compose_file, '-p', project_name,
+                'logs', '--no-color', '--tail', '100'
+            ],
+            cwd=project_root,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        return (result.stdout or result.stderr or '').strip()
+    except Exception as exc:
+        return f"读取容器日志失败: {str(exc)}"
+
+
+def deploy_service(
+    project_root: str,
+    service_id: str,
+    timeout: int = 600,
+    readiness_url: str = None,
+    readiness_timeout: int = 120
+) -> Tuple[bool, str]:
     """
     使用docker-compose部署服务
     
@@ -171,6 +264,8 @@ def deploy_service(project_root: str, service_id: str, timeout: int = 600) -> Tu
         project_root: 项目根目录路径（包含docker-compose.yml）
         service_id: 服务ID
         timeout: 超时时间（秒），默认600秒（10分钟）
+        readiness_url: 可选的MCP SSE就绪检查地址
+        readiness_timeout: MCP SSE就绪检查超时时间（秒）
         
     Returns:
         Tuple[bool, str]: (是否成功, 错误信息或成功信息)
@@ -197,7 +292,6 @@ def deploy_service(project_root: str, service_id: str, timeout: int = 600) -> Tu
             return False, f"docker-compose up 失败: {error_msg}"
         
         # 等待容器启动
-        import time
         time.sleep(5)
         
         # 检查容器状态
@@ -209,11 +303,23 @@ def deploy_service(project_root: str, service_id: str, timeout: int = 600) -> Tu
             timeout=30
         )
         
-        # 简单判断：输出中包含 "Up" 表示成功
+        # 容器进程必须先处于运行状态
         if check_result.returncode == 0 and 'Up' in check_result.stdout:
-            return True, f"服务部署成功，容器运行中"
-        
-        return False, f"容器启动失败，状态: {check_result.stdout}"
+            if readiness_url:
+                ready, message = wait_for_mcp_sse_ready(
+                    readiness_url,
+                    timeout=readiness_timeout
+                )
+                if not ready:
+                    logs = _get_compose_logs(compose_file, project_name, project_root)
+                    if logs:
+                        message = f"{message}\n容器日志:\n{logs}"
+                    return False, message
+                return True, f"服务部署成功，容器运行中；{message}"
+            return True, "服务部署成功，容器运行中"
+
+        logs = _get_compose_logs(compose_file, project_name, project_root)
+        return False, f"容器启动失败，状态: {check_result.stdout}\n容器日志:\n{logs}"
         
     except subprocess.TimeoutExpired:
         return False, f"docker-compose执行超时（{timeout}秒）"
@@ -256,4 +362,3 @@ def stop_and_remove_service(project_root: str, service_id: str) -> bool:
     except Exception as e:
         print(f"停止容器失败: {str(e)}")
         return False
-
