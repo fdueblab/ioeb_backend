@@ -1,3 +1,7 @@
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
 import requests
 
 from app.utils import docker_utils
@@ -173,3 +177,86 @@ def test_wait_for_mcp_sse_ready_requires_endpoint_event(monkeypatch):
 
     assert ready is False
     assert "未收到MCP endpoint事件" in message
+
+
+def test_wait_for_mcp_sse_ready_accepts_real_idle_event_stream(monkeypatch):
+    class IdleSseHandler(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Connection", "keep-alive")
+            self.send_header("X-Accel-Buffering", "no")
+            self.end_headers()
+            self.wfile.flush()
+            time.sleep(0.2)
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), IdleSseHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    monkeypatch.setattr(docker_utils, "MCP_SSE_READ_TIMEOUT", 0.05)
+
+    try:
+        ready, message = docker_utils.wait_for_mcp_sse_ready(
+            f"http://127.0.0.1:{server.server_port}/sse",
+            timeout=1,
+            interval=0,
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=1)
+
+    assert ready is True
+    assert "HTTP事件流保持连接" in message
+
+
+def test_wait_for_mcp_sse_ready_rejects_non_timeout_stream_error(monkeypatch):
+    times = iter([0.0, 2.0])
+    response = FakeResponse()
+    response.headers.update({
+        "Cache-Control": "no-store",
+        "X-Accel-Buffering": "no",
+    })
+
+    def broken_stream(**kwargs):
+        raise requests.ConnectionError("connection reset by peer")
+
+    response.iter_lines = broken_stream
+    monkeypatch.setattr(docker_utils.time, "monotonic", lambda: next(times))
+    monkeypatch.setattr(docker_utils.requests, "get", lambda *args, **kwargs: response)
+
+    ready, message = docker_utils.wait_for_mcp_sse_ready(
+        "http://127.0.0.1:27001/sse",
+        timeout=1,
+        interval=0,
+    )
+
+    assert ready is False
+    assert "connection reset by peer" in message
+
+
+def test_wait_for_mcp_sse_ready_rejects_idle_stream_without_keepalive_headers(monkeypatch):
+    times = iter([0.0, 2.0])
+    response = FakeResponse()
+
+    def idle_stream(**kwargs):
+        raise requests.ConnectionError("HTTPConnectionPool: Read timed out.")
+
+    response.iter_lines = idle_stream
+    monkeypatch.setattr(docker_utils.time, "monotonic", lambda: next(times))
+    monkeypatch.setattr(docker_utils.requests, "get", lambda *args, **kwargs: response)
+
+    ready, message = docker_utils.wait_for_mcp_sse_ready(
+        "http://127.0.0.1:27001/sse",
+        timeout=1,
+        interval=0,
+    )
+
+    assert ready is False
+    assert "Read timed out" in message
