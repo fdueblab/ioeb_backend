@@ -4,11 +4,13 @@ Docker部署工具模块
 """
 
 import os
+import socket
+import struct
 import subprocess
 import time
 import yaml
 import requests
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 
 class DockerDeployError(Exception):
@@ -165,44 +167,128 @@ def modify_compose_ports(compose_file_path: str, allocated_ports: List[int]) -> 
         raise DockerDeployError(f"修改docker-compose.yml失败: {str(e)}")
 
 
+def _read_default_gateway(route_path: str = "/proc/net/route") -> str:
+    """读取当前网络命名空间的 IPv4 默认网关。"""
+    try:
+        with open(route_path, "r", encoding="utf-8") as route_file:
+            for line in route_file:
+                fields = line.split()
+                if len(fields) < 4 or fields[1] != "00000000":
+                    continue
+                flags = int(fields[3], 16)
+                if not flags & 0x2:
+                    continue
+                gateway = socket.inet_ntoa(
+                    struct.pack("<L", int(fields[2], 16))
+                )
+                if gateway != "0.0.0.0":
+                    return gateway
+    except (OSError, ValueError, IndexError, struct.error):
+        pass
+    return ""
+
+
+def _normalize_host_candidate(host: str) -> str:
+    host = (host or "").strip()
+    if host.startswith("[") and host.endswith("]"):
+        host = host[1:-1]
+    if not host or "://" in host or "/" in host or any(char.isspace() for char in host):
+        return ""
+    return host
+
+
+def get_docker_host_candidates() -> List[str]:
+    """返回兼容宿主机运行、Docker Desktop 和 Linux Docker 的地址。"""
+    candidates = []
+    configured_host = _normalize_host_candidate(
+        os.environ.get("DOCKER_HOST_GATEWAY", "")
+    )
+    if configured_host:
+        candidates.append(configured_host)
+
+    # 后端直接运行在宿主机或使用 host network 时可用。
+    candidates.append("127.0.0.1")
+
+    # Docker Desktop 或配置了 host-gateway extra_hosts 时可用。
+    try:
+        socket.getaddrinfo("host.docker.internal", None)
+        candidates.append("host.docker.internal")
+    except OSError:
+        pass
+
+    # Linux bridge 容器内访问宿主机发布端口的通用回退。
+    default_gateway = _read_default_gateway()
+    if default_gateway:
+        candidates.append(default_gateway)
+
+    return list(dict.fromkeys(candidates))
+
+
+def build_mcp_readiness_urls(host_port: str, endpoint: str) -> List[str]:
+    """为宿主机发布端口构建有序、跨运行环境的就绪检查地址。"""
+    urls = []
+    for host in get_docker_host_candidates():
+        url_host = f"[{host}]" if ":" in host else host
+        urls.append(f"http://{url_host}:{host_port}{endpoint}")
+    return urls
+
+
 def wait_for_mcp_sse_ready(
-    readiness_url: str,
+    readiness_url: Union[str, List[str]],
     timeout: int = 120,
     interval: float = 2.0
 ) -> Tuple[bool, str]:
-    """等待 MCP SSE 端点真正开始提供事件流。"""
+    """依次探测候选地址，等待 MCP SSE 端点真正提供事件流。"""
+    readiness_urls = (
+        [readiness_url]
+        if isinstance(readiness_url, str)
+        else list(readiness_url)
+    )
+    if not readiness_urls:
+        return False, "没有可用的MCP SSE就绪检查地址"
+
     deadline = time.monotonic() + timeout
-    last_error = "尚未收到有效响应"
+    last_errors = {
+        url: "尚未收到有效响应"
+        for url in readiness_urls
+    }
 
     while True:
-        try:
-            response = requests.get(
-                readiness_url,
-                stream=True,
-                timeout=(3, 5)
-            )
+        for candidate_url in readiness_urls:
             try:
-                content_type = response.headers.get('Content-Type', '').lower()
-                if response.status_code == 200 and 'text/event-stream' in content_type:
-                    message_endpoint = _read_mcp_message_endpoint(response)
-                    if message_endpoint:
-                        return True, (
-                            f"MCP SSE端点已就绪: {readiness_url}，"
-                            f"消息端点: {message_endpoint}"
+                response = requests.get(
+                    candidate_url,
+                    stream=True,
+                    timeout=(3, 5)
+                )
+                try:
+                    content_type = response.headers.get('Content-Type', '').lower()
+                    if response.status_code == 200 and 'text/event-stream' in content_type:
+                        message_endpoint = _read_mcp_message_endpoint(response)
+                        if message_endpoint:
+                            return True, (
+                                f"MCP SSE端点已就绪: {candidate_url}，"
+                                f"消息端点: {message_endpoint}"
+                            )
+                        last_errors[candidate_url] = (
+                            "SSE连接成功，但未收到MCP endpoint事件"
                         )
-                    last_error = "SSE连接成功，但未收到MCP endpoint事件"
-                else:
-                    last_error = (
-                        f"HTTP {response.status_code}, "
-                        f"Content-Type={content_type or 'unknown'}"
-                    )
-            finally:
-                response.close()
-        except requests.RequestException as exc:
-            last_error = str(exc)
+                    else:
+                        last_errors[candidate_url] = (
+                            f"HTTP {response.status_code}, "
+                            f"Content-Type={content_type or 'unknown'}"
+                        )
+                finally:
+                    response.close()
+            except requests.RequestException as exc:
+                last_errors[candidate_url] = str(exc)
 
         if time.monotonic() >= deadline:
-            return False, f"等待MCP SSE端点超时（{timeout}秒）: {last_error}"
+            details = "；".join(
+                f"{url}: {error}"
+                for url, error in last_errors.items()
+            )
+            return False, f"等待MCP SSE端点超时（{timeout}秒）: {details}"
         time.sleep(interval)
 
 
@@ -254,7 +340,7 @@ def deploy_service(
     project_root: str,
     service_id: str,
     timeout: int = 600,
-    readiness_url: str = None,
+    readiness_url: Union[str, List[str]] = None,
     readiness_timeout: int = 120
 ) -> Tuple[bool, str]:
     """
@@ -264,7 +350,7 @@ def deploy_service(
         project_root: 项目根目录路径（包含docker-compose.yml）
         service_id: 服务ID
         timeout: 超时时间（秒），默认600秒（10分钟）
-        readiness_url: 可选的MCP SSE就绪检查地址
+        readiness_url: 可选的一个或多个MCP SSE就绪检查地址
         readiness_timeout: MCP SSE就绪检查超时时间（秒）
         
     Returns:
