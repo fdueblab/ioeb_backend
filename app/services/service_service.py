@@ -25,6 +25,7 @@ from app.utils.zip_utils import extract_and_find_root, cleanup_directory, ZipPro
 from app.utils.docker_utils import (
     parse_ports_from_compose,
     modify_compose_ports,
+    build_mcp_readiness_urls,
     deploy_service as docker_deploy,
     stop_and_remove_service,
     DockerDeployError
@@ -737,17 +738,22 @@ class ServiceService:
                         print(f"开始部署服务 {service_id}")
                         
                         # 执行docker-compose部署
-                        readiness_url = None
+                        readiness_urls = None
                         if is_mcp_service:
-                            readiness_url = (
-                                f"http://127.0.0.1:{host_port}{mcp_endpoint}"
+                            readiness_urls = build_mcp_readiness_urls(
+                                host_port,
+                                mcp_endpoint
+                            )
+                            print(
+                                f"服务 {service_id} MCP就绪检查地址: "
+                                f"{readiness_urls}"
                             )
 
                         success, message = docker_deploy(
                             project_root,
                             service_id,
                             timeout=600,
-                            readiness_url=readiness_url,
+                            readiness_url=readiness_urls,
                             readiness_timeout=120
                         )
                         
