@@ -13,6 +13,10 @@ import requests
 from typing import List, Tuple, Union
 
 
+MCP_SSE_CONNECT_TIMEOUT = 3
+MCP_SSE_READ_TIMEOUT = 5
+
+
 class DockerDeployError(Exception):
     """Docker部署错误"""
     pass
@@ -259,12 +263,23 @@ def wait_for_mcp_sse_ready(
                 response = requests.get(
                     candidate_url,
                     stream=True,
-                    timeout=(3, 5)
+                    timeout=(MCP_SSE_CONNECT_TIMEOUT, MCP_SSE_READ_TIMEOUT)
                 )
                 try:
                     content_type = response.headers.get('Content-Type', '').lower()
                     if response.status_code == 200 and 'text/event-stream' in content_type:
-                        message_endpoint = _read_mcp_message_endpoint(response)
+                        try:
+                            message_endpoint = _read_mcp_message_endpoint(response)
+                        except requests.RequestException as exc:
+                            if _is_idle_sse_stream(response, exc):
+                                return True, (
+                                    f"MCP SSE端点已就绪: {candidate_url}，"
+                                    "HTTP事件流保持连接（首个endpoint事件未在探测窗口内到达）"
+                                )
+                            last_errors[candidate_url] = (
+                                f"SSE连接读取失败: {str(exc)}"
+                            )
+                            continue
                         if message_endpoint:
                             return True, (
                                 f"MCP SSE端点已就绪: {candidate_url}，"
@@ -312,6 +327,24 @@ def _read_mcp_message_endpoint(response) -> str:
         elif line.startswith("data:"):
             data_lines.append(line[5:].lstrip())
     return ""
+
+
+def _is_idle_sse_stream(response, exc: requests.RequestException) -> bool:
+    """识别已建立但暂时没有事件数据的真实 SSE 长连接。
+
+    ``requests`` 在 ``iter_lines`` 阶段会把 urllib3 的读取超时包装成
+    ``ConnectionError``。只有响应具备 FastMCP/SSE 的防缓存长连接头时，
+    才把这种读取超时视为服务已经就绪；连接重置等其他异常仍然失败。
+    """
+    if 'read timed out' not in str(exc).lower():
+        return False
+
+    cache_control = response.headers.get('Cache-Control', '').lower()
+    buffering = response.headers.get('X-Accel-Buffering', '').lower()
+    connection = response.headers.get('Connection', '').lower()
+    prevents_cache = 'no-store' in cache_control or 'no-cache' in cache_control
+    keeps_connection = buffering == 'no' or 'keep-alive' in connection
+    return prevents_cache and keeps_connection
 
 
 def _get_compose_logs(
