@@ -19,8 +19,6 @@ services:
       - SERVICE_HOST_URL=http://fdueblab.cn
     env_file:
       - ./.env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
     volumes:
       - app_data:/app/uploads
