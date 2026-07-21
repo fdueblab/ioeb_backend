@@ -4,17 +4,9 @@ Docker部署工具模块
 """
 
 import os
-import socket
-import struct
 import subprocess
-import time
 import yaml
-import requests
-from typing import List, Tuple, Union
-
-
-MCP_SSE_CONNECT_TIMEOUT = 3
-MCP_SSE_READ_TIMEOUT = 5
+from typing import List, Tuple
 
 
 class DockerDeployError(Exception):
@@ -171,211 +163,7 @@ def modify_compose_ports(compose_file_path: str, allocated_ports: List[int]) -> 
         raise DockerDeployError(f"修改docker-compose.yml失败: {str(e)}")
 
 
-def _read_default_gateway(route_path: str = "/proc/net/route") -> str:
-    """读取当前网络命名空间的 IPv4 默认网关。"""
-    try:
-        with open(route_path, "r", encoding="utf-8") as route_file:
-            for line in route_file:
-                fields = line.split()
-                if len(fields) < 4 or fields[1] != "00000000":
-                    continue
-                flags = int(fields[3], 16)
-                if not flags & 0x2:
-                    continue
-                gateway = socket.inet_ntoa(
-                    struct.pack("<L", int(fields[2], 16))
-                )
-                if gateway != "0.0.0.0":
-                    return gateway
-    except (OSError, ValueError, IndexError, struct.error):
-        pass
-    return ""
-
-
-def _normalize_host_candidate(host: str) -> str:
-    host = (host or "").strip()
-    if host.startswith("[") and host.endswith("]"):
-        host = host[1:-1]
-    if not host or "://" in host or "/" in host or any(char.isspace() for char in host):
-        return ""
-    return host
-
-
-def get_docker_host_candidates() -> List[str]:
-    """返回兼容宿主机运行、Docker Desktop 和 Linux Docker 的地址。"""
-    candidates = []
-    configured_host = _normalize_host_candidate(
-        os.environ.get("DOCKER_HOST_GATEWAY", "")
-    )
-    if configured_host:
-        candidates.append(configured_host)
-
-    # 后端直接运行在宿主机或使用 host network 时可用。
-    candidates.append("127.0.0.1")
-
-    # Docker Desktop 或配置了 host-gateway extra_hosts 时可用。
-    try:
-        socket.getaddrinfo("host.docker.internal", None)
-        candidates.append("host.docker.internal")
-    except OSError:
-        pass
-
-    # Linux bridge 容器内访问宿主机发布端口的通用回退。
-    default_gateway = _read_default_gateway()
-    if default_gateway:
-        candidates.append(default_gateway)
-
-    return list(dict.fromkeys(candidates))
-
-
-def build_mcp_readiness_urls(host_port: str, endpoint: str) -> List[str]:
-    """为宿主机发布端口构建有序、跨运行环境的就绪检查地址。"""
-    urls = []
-    for host in get_docker_host_candidates():
-        url_host = f"[{host}]" if ":" in host else host
-        urls.append(f"http://{url_host}:{host_port}{endpoint}")
-    return urls
-
-
-def wait_for_mcp_sse_ready(
-    readiness_url: Union[str, List[str]],
-    timeout: int = 120,
-    interval: float = 2.0
-) -> Tuple[bool, str]:
-    """依次探测候选地址，等待 MCP SSE 端点真正提供事件流。"""
-    readiness_urls = (
-        [readiness_url]
-        if isinstance(readiness_url, str)
-        else list(readiness_url)
-    )
-    if not readiness_urls:
-        return False, "没有可用的MCP SSE就绪检查地址"
-
-    deadline = time.monotonic() + timeout
-    last_errors = {
-        url: "尚未收到有效响应"
-        for url in readiness_urls
-    }
-
-    while True:
-        for candidate_url in readiness_urls:
-            try:
-                response = requests.get(
-                    candidate_url,
-                    stream=True,
-                    timeout=(MCP_SSE_CONNECT_TIMEOUT, MCP_SSE_READ_TIMEOUT)
-                )
-                try:
-                    content_type = response.headers.get('Content-Type', '').lower()
-                    if response.status_code == 200 and 'text/event-stream' in content_type:
-                        try:
-                            message_endpoint = _read_mcp_message_endpoint(response)
-                        except requests.RequestException as exc:
-                            if _is_idle_sse_stream(response, exc):
-                                return True, (
-                                    f"MCP SSE端点已就绪: {candidate_url}，"
-                                    "HTTP事件流保持连接（首个endpoint事件未在探测窗口内到达）"
-                                )
-                            last_errors[candidate_url] = (
-                                f"SSE连接读取失败: {str(exc)}"
-                            )
-                            continue
-                        if message_endpoint:
-                            return True, (
-                                f"MCP SSE端点已就绪: {candidate_url}，"
-                                f"消息端点: {message_endpoint}"
-                            )
-                        last_errors[candidate_url] = (
-                            "SSE连接成功，但未收到MCP endpoint事件"
-                        )
-                    else:
-                        last_errors[candidate_url] = (
-                            f"HTTP {response.status_code}, "
-                            f"Content-Type={content_type or 'unknown'}"
-                        )
-                finally:
-                    response.close()
-            except requests.RequestException as exc:
-                last_errors[candidate_url] = str(exc)
-
-        if time.monotonic() >= deadline:
-            details = "；".join(
-                f"{url}: {error}"
-                for url, error in last_errors.items()
-            )
-            return False, f"等待MCP SSE端点超时（{timeout}秒）: {details}"
-        time.sleep(interval)
-
-
-def _read_mcp_message_endpoint(response) -> str:
-    """读取 FastMCP 建连后发送的首个 ``endpoint`` SSE 事件。"""
-    event_name = ""
-    data_lines = []
-    for line in response.iter_lines(chunk_size=1, decode_unicode=True):
-        if isinstance(line, bytes):
-            line = line.decode("utf-8", errors="replace")
-        if line == "":
-            if event_name == "endpoint" and data_lines:
-                endpoint = "\n".join(data_lines).strip()
-                if endpoint.startswith("/"):
-                    return endpoint
-            event_name = ""
-            data_lines = []
-            continue
-        if line.startswith("event:"):
-            event_name = line[6:].strip()
-        elif line.startswith("data:"):
-            data_lines.append(line[5:].lstrip())
-    return ""
-
-
-def _is_idle_sse_stream(response, exc: requests.RequestException) -> bool:
-    """识别已建立但暂时没有事件数据的真实 SSE 长连接。
-
-    ``requests`` 在 ``iter_lines`` 阶段会把 urllib3 的读取超时包装成
-    ``ConnectionError``。只有响应具备 FastMCP/SSE 的防缓存长连接头时，
-    才把这种读取超时视为服务已经就绪；连接重置等其他异常仍然失败。
-    """
-    if 'read timed out' not in str(exc).lower():
-        return False
-
-    cache_control = response.headers.get('Cache-Control', '').lower()
-    buffering = response.headers.get('X-Accel-Buffering', '').lower()
-    connection = response.headers.get('Connection', '').lower()
-    prevents_cache = 'no-store' in cache_control or 'no-cache' in cache_control
-    keeps_connection = buffering == 'no' or 'keep-alive' in connection
-    return prevents_cache and keeps_connection
-
-
-def _get_compose_logs(
-    compose_file: str,
-    project_name: str,
-    project_root: str
-) -> str:
-    """读取有限长度的容器日志，便于定位启动失败原因。"""
-    try:
-        result = subprocess.run(
-            [
-                'docker-compose', '-f', compose_file, '-p', project_name,
-                'logs', '--no-color', '--tail', '100'
-            ],
-            cwd=project_root,
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        return (result.stdout or result.stderr or '').strip()
-    except Exception as exc:
-        return f"读取容器日志失败: {str(exc)}"
-
-
-def deploy_service(
-    project_root: str,
-    service_id: str,
-    timeout: int = 600,
-    readiness_url: Union[str, List[str]] = None,
-    readiness_timeout: int = 120
-) -> Tuple[bool, str]:
+def deploy_service(project_root: str, service_id: str, timeout: int = 600) -> Tuple[bool, str]:
     """
     使用docker-compose部署服务
     
@@ -383,8 +171,6 @@ def deploy_service(
         project_root: 项目根目录路径（包含docker-compose.yml）
         service_id: 服务ID
         timeout: 超时时间（秒），默认600秒（10分钟）
-        readiness_url: 可选的一个或多个MCP SSE就绪检查地址
-        readiness_timeout: MCP SSE就绪检查超时时间（秒）
         
     Returns:
         Tuple[bool, str]: (是否成功, 错误信息或成功信息)
@@ -411,6 +197,7 @@ def deploy_service(
             return False, f"docker-compose up 失败: {error_msg}"
         
         # 等待容器启动
+        import time
         time.sleep(5)
         
         # 检查容器状态
@@ -422,23 +209,11 @@ def deploy_service(
             timeout=30
         )
         
-        # 容器进程必须先处于运行状态
+        # 简单判断：输出中包含 "Up" 表示成功
         if check_result.returncode == 0 and 'Up' in check_result.stdout:
-            if readiness_url:
-                ready, message = wait_for_mcp_sse_ready(
-                    readiness_url,
-                    timeout=readiness_timeout
-                )
-                if not ready:
-                    logs = _get_compose_logs(compose_file, project_name, project_root)
-                    if logs:
-                        message = f"{message}\n容器日志:\n{logs}"
-                    return False, message
-                return True, f"服务部署成功，容器运行中；{message}"
-            return True, "服务部署成功，容器运行中"
-
-        logs = _get_compose_logs(compose_file, project_name, project_root)
-        return False, f"容器启动失败，状态: {check_result.stdout}\n容器日志:\n{logs}"
+            return True, f"服务部署成功，容器运行中"
+        
+        return False, f"容器启动失败，状态: {check_result.stdout}"
         
     except subprocess.TimeoutExpired:
         return False, f"docker-compose执行超时（{timeout}秒）"
@@ -481,3 +256,4 @@ def stop_and_remove_service(project_root: str, service_id: str) -> bool:
     except Exception as e:
         print(f"停止容器失败: {str(e)}")
         return False
+

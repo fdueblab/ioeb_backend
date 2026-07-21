@@ -41,20 +41,19 @@ COPY . .
 # 定义UID和GID（可通过构建参数覆盖）
 ARG APP_USER_UID=1000
 ARG APP_USER_GID=1000
+ARG DOCKER_GID=998
 
 # 创建非root用户（明确指定UID）
 RUN groupadd -g ${APP_USER_GID} appuser \
     && useradd -m -u ${APP_USER_UID} -g appuser -s /bin/bash appuser
 
+# 创建docker组并将appuser添加到docker组
+# GID必须与宿主机的docker组GID匹配（默认998）
+RUN groupadd -g ${DOCKER_GID} docker || true \
+    && usermod -aG docker appuser
+
 RUN chown -R appuser:appuser /app
-
-# 入口脚本以root初始化宿主机挂载目录，然后立即降权为appuser。
-# 单独复制到/usr/local/bin，避免root入口脚本可被应用用户修改。
-COPY container_entrypoint.py /usr/local/bin/ioeb-backend-entrypoint
-RUN chown root:root /usr/local/bin/ioeb-backend-entrypoint \
-    && chmod 0755 /usr/local/bin/ioeb-backend-entrypoint
-
-ENTRYPOINT ["/usr/local/bin/ioeb-backend-entrypoint"]
+USER appuser
 
 # 暴露端口
 EXPOSE 5000
