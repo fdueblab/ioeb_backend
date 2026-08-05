@@ -254,12 +254,14 @@ class UserInfo(Resource):
         # 查询用户角色
         role = Role.query.filter_by(id=user.role_id, deleted=0).first()
 
-        # 获取权限信息
-        role_permissions = RolePermission.query.filter(RolePermission.role_id == role.id).all()
+        # 初始化角色字典
+        role_dict = None
 
         if role:
+            # 获取权限信息
+            role_permissions = RolePermission.query.filter(RolePermission.role_id == role.id).all()
+
             role_dict = role.to_dict()
-            # 这里需要根据你的实际模型结构来获取权限信息
             role_dict["permissions"] = [
                 p.to_dict() for p in role_permissions
             ]  # 从数据库获取权限信息

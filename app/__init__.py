@@ -47,6 +47,14 @@ def create_app(config_name):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # 自动创建新表（如果不存在）
+    with app.app_context():
+        from app.models.service_message import ServiceMessage
+        from app.models.user_service_relation import UserServiceRelation
+
+        # 创建新表（如果不存在）
+        db.create_all()
+
     # 注册审计钩子：仅记录已认证 API 请求的元数据
     from app.services.audit_service import audit_service
 
@@ -57,6 +65,11 @@ def create_app(config_name):
     from app.utils.cos_utils import cos_utils
 
     cos_utils.init_app(app)
+
+    # 初始化定时任务调度器
+    from app.scheduler.tasks import init_scheduler
+
+    init_scheduler(app)
 
     # 添加首页路由
     @app.route("/")
