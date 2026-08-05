@@ -26,7 +26,8 @@ class RolePermission(db.Model):
         super().__init__(**kwargs)
         if not self.id:
             # 自增
-            self.id = db.session.query(db.func.max(RolePermission.id)).scalar() + 1
+            max_id = db.session.query(db.func.max(RolePermission.id)).scalar()
+            self.id = (max_id or 0) + 1
 
     def __repr__(self):
         return f"<RolePermission {self.role_id} - {self.permission_id}>"

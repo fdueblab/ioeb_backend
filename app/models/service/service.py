@@ -40,6 +40,12 @@ class Service(db.Model):
     create_time = db.Column(db.BigInteger, nullable=False, comment="创建时间戳")
     creator_id = db.Column(db.String(36), nullable=True, comment="创建者ID")
 
+    # 销售相关信息
+    is_for_sale = db.Column(db.Boolean, default=False, comment="是否对外销售")
+    sale_price = db.Column(db.Float, default=0.0, comment="销售价格")
+    sale_description = db.Column(db.Text, comment="销售说明")
+    sale_status = db.Column(db.String(20), default='unpublished', comment="销售状态：unpublished/published/unpublished")
+
     # 关联关系
     norms = db.relationship("ServiceNorm", backref="service", lazy=True)
     source = db.relationship("ServiceSource", backref="service", uselist=False)
@@ -83,6 +89,11 @@ class Service(db.Model):
             "creatorId": self.creator_id,
             "norm": [norm.to_dict() for norm in self.norms],
             "source": self.source.to_dict() if self.source else None,
+            # 销售相关信息
+            "isForSale": self.is_for_sale,
+            "salePrice": self.sale_price,
+            "saleDescription": self.sale_description,
+            "saleStatus": self.sale_status,
         }
         
         # 元应用：apiList + 把元应用配置合并进 apiList[0]（保持对外响应形状不变）
@@ -161,6 +172,11 @@ class Service(db.Model):
             "creatorId": self.creator_id,
             "norm": [norm.to_dict() for norm in self.norms],
             "source": self.source.to_dict() if self.source else None,
+            # 销售相关信息（与 to_dict 保持一致，供列表场景使用）
+            "isForSale": self.is_for_sale,
+            "salePrice": self.sale_price,
+            "saleDescription": self.sale_description,
+            "saleStatus": self.sale_status,
         }
         if self.type == "generated_algorithm" and self.apis:
             response_file_name = self.apis[0].response_file_name

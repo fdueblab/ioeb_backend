@@ -9,6 +9,8 @@ from flask_restx import Namespace, Resource, fields
 from werkzeug.datastructures import FileStorage
 
 from app.services.service_service import ServiceServiceError, service_service
+from app.services.user_service_relation_service import UserServiceRelationError, user_service_relation_service
+from app.services.service_sale_service import ServiceSaleError, service_sale_service
 from app.utils.auth_utils import get_request_user
 
 # 创建命名空间
@@ -124,6 +126,12 @@ service_model = api.model(
         "tools": fields.List(fields.Nested(tool_model), description="MCP工具列表(MCP服务使用)"),
         "exampleMsg": fields.Raw(description="示例消息(MCP服务使用)"),
         "upgradeAdvice": fields.Raw(description="升级建议（我的成果）"),
+        "updateStrategy": fields.Raw(description="更新策略（我的成果）"),
+        # 销售相关字段
+        "isForSale": fields.Boolean(description="是否对外销售"),
+        "salePrice": fields.Float(description="销售价格"),
+        "saleDescription": fields.String(description="销售说明"),
+        "saleStatus": fields.String(description="销售状态"),
     }
 )
 
@@ -219,6 +227,10 @@ service_list_item_model = api.model(
         "norm": fields.List(fields.Nested(norm_model), description="规范评分"),
         "source": fields.Nested(source_model, description="来源信息"),
         "apiList": fields.List(fields.Nested(service_list_api_brief), description="仅想定式生成算法含文件名"),
+        "isForSale": fields.Boolean(description="是否可售"),
+        "salePrice": fields.Float(description="销售价格"),
+        "saleDescription": fields.String(description="销售说明"),
+        "saleStatus": fields.String(description="销售状态"),
     },
 )
 
@@ -1113,4 +1125,203 @@ class ServiceCleanupAll(Resource):
             }, 200
             
         except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 500 
+
+
+# ========== 成果关系管理API ==========
+
+@api.route("/user/<string:relation_type>")
+class UserServiceRelationList(Resource):
+    @api.doc("get_user_services_by_relation", description="获取用户的指定类型成果列表")
+    @api.param("relation_type", "关系类型：developed/purchased/interested", required=True)
+    @api.response(200, "Success")
+    @api.response(400, "Invalid relation type", error_response)
+    @api.response(500, "Server error", error_response)
+    def get(self, relation_type):
+        """获取用户的指定类型成果列表"""
+        # 验证关系类型
+        if relation_type not in ['developed', 'purchased', 'interested']:
+            return {"status": "error", "message": "无效的关系类型"}, 400
+
+        # 获取当前用户
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "未登录"}, 401
+
+        try:
+            services = user_service_relation_service.get_user_services_by_relation(
+                user.id, relation_type
+            )
+            # 兼容前端期望的 services 字段（而非 data）
+            return {
+                "status": "success",
+                "message": "获取成果列表成功",
+                "total": len(services),
+                "services": services,
+            }, 200
+
+        except UserServiceRelationError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
+@api.route("/<string:service_id>/relation")
+class UserServiceRelationResource(Resource):
+    @api.doc("add_service_relation", description="添加成果关系（标记为感兴趣）")
+    @api.expect(api.model("AddRelationRequest", {
+        "relation_type": fields.String(required=True, description="关系类型")
+    }))
+    @api.response(200, "Success")
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self, service_id):
+        """添加成果关系"""
+        # 获取当前用户
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "未登录"}, 401
+
+        # 获取请求参数（兼容 camelCase 和 snake_case）
+        data = request.get_json() or {}
+        relation_type = data.get('relationType') or data.get('relation_type')
+
+        if not relation_type or relation_type not in ['interested', 'purchased']:
+            return {"status": "error", "message": "无效的关系类型"}, 400
+
+        try:
+            relation = user_service_relation_service.add_service_relation(
+                user.id, service_id, relation_type
+            )
+            return {"status": "success", "message": "操作成功", "data": relation.to_dict()}, 200
+
+        except UserServiceRelationError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+    @api.doc("remove_service_relation", description="删除成果关系（取消感兴趣）")
+    @api.param("relation_type", "关系类型（可选）")
+    @api.response(200, "Success")
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def delete(self, service_id):
+        """删除成果关系"""
+        # 获取当前用户
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "未登录"}, 401
+
+        # 获取关系类型（可选）
+        relation_type = request.args.get('relation_type')
+
+        try:
+            success = user_service_relation_service.remove_service_relation(
+                user.id, service_id, relation_type
+            )
+            if success:
+                return {"status": "success", "message": "关系已删除"}, 200
+            else:
+                return {"status": "error", "message": "关系不存在"}, 404
+
+        except UserServiceRelationError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
+# ========== 成果销售管理API ==========
+
+@api.route("/<string:service_id>/publish-sale")
+class ServicePublishSale(Resource):
+    @api.doc("publish_service_sale", description="发布销售信息")
+    @api.expect(api.model("PublishSaleRequest", {
+        "price": fields.Float(required=True, description="销售价格"),
+        "description": fields.String(description="销售说明")
+    }))
+    @api.response(200, "Success")
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def post(self, service_id):
+        """发布销售信息"""
+        # 获取当前用户
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "未登录"}, 401
+
+        # 获取请求参数
+        data = request.get_json()
+        price = data.get('price')
+        description = data.get('description', '')
+
+        if price is None or price < 0:
+            return {"status": "error", "message": "价格无效"}, 400
+
+        try:
+            service = service_sale_service.publish_service_sale(
+                service_id, price, description
+            )
+            return {"status": "success", "data": service.to_dict()}, 200
+
+        except ServiceSaleError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
+@api.route("/<string:service_id>/sale-info")
+class ServiceSaleInfo(Resource):
+    @api.doc("get_service_sale_info", description="获取销售信息")
+    @api.response(200, "Success")
+    @api.response(404, "Not found", error_response)
+    @api.response(500, "Server error", error_response)
+    def get(self, service_id):
+        """获取销售信息"""
+        try:
+            sale_info = service_sale_service.get_service_sale_info(service_id)
+            return {"status": "success", "data": sale_info}, 200
+
+        except ServiceSaleError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+    @api.doc("update_service_sale_info", description="更新销售信息")
+    @api.expect(api.model("UpdateSaleRequest", {
+        "price": fields.Float(description="销售价格"),
+        "description": fields.String(description="销售说明")
+    }))
+    @api.response(200, "Success")
+    @api.response(400, "Invalid input", error_response)
+    @api.response(500, "Server error", error_response)
+    def put(self, service_id):
+        """更新销售信息"""
+        # 获取当前用户
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "未登录"}, 401
+
+        # 获取请求参数
+        data = request.get_json()
+        price = data.get('price')
+        description = data.get('description')
+
+        try:
+            service = service_sale_service.update_service_sale_info(
+                service_id, price, description
+            )
+            return {"status": "success", "data": service.to_dict()}, 200
+
+        except ServiceSaleError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
+@api.route("/<string:service_id>/unpublish-sale")
+class ServiceUnpublishSale(Resource):
+    @api.doc("unpublish_service_sale", description="下架销售")
+    @api.response(200, "Success")
+    @api.response(404, "Not found", error_response)
+    @api.response(500, "Server error", error_response)
+    def delete(self, service_id):
+        """下架销售"""
+        # 获取当前用户
+        user = get_request_user()
+        if not user:
+            return {"status": "error", "message": "未登录"}, 401
+
+        try:
+            service = service_sale_service.unpublish_service_sale(service_id)
+            return {"status": "success", "data": service.to_dict()}, 200
+
+        except ServiceSaleError as e:
             return {"status": "error", "message": str(e)}, 500 

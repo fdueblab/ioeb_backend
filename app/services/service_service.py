@@ -1135,23 +1135,35 @@ class ServiceService:
         return path, fn
 
     def get_my_services(self, creator_id: str) -> List[Dict]:
-        """获取当前用户创建的成果列表（含升级建议）。"""
+        """获取当前用户创建的成果列表（含升级建议和更新策略）。"""
         if not creator_id:
             return []
         try:
             services = self.service_repository.get_services_by_creator(creator_id)
             service_ids = [item.id for item in services]
+            
+            # 查询升级建议
             advice_map = {}
             if service_ids:
                 rows = ServiceUpgradeAdvice.query.filter(
                     ServiceUpgradeAdvice.service_id.in_(service_ids)
                 ).all()
                 advice_map = {row.service_id: row.to_dict() for row in rows}
+            
+            # 查询更新策略
+            strategy_map = {}
+            if service_ids:
+                from app.models.service_update_strategy import ServiceUpdateStrategy
+                strategies = ServiceUpdateStrategy.query.filter(
+                    ServiceUpdateStrategy.service_id.in_(service_ids)
+                ).all()
+                strategy_map = {row.service_id: row.to_dict() for row in strategies}
 
             result = []
             for service in services:
                 item = service.to_dict()
                 item["upgradeAdvice"] = advice_map.get(service.id)
+                item["updateStrategy"] = strategy_map.get(service.id)
                 result.append(item)
             return result
         except Exception as e:

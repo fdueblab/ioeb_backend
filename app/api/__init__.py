@@ -15,6 +15,8 @@ from app.api.namespaces.feedback_ns import api as feedback_ns
 from app.api.namespaces.health_ns import api as health_ns
 from app.api.namespaces.service_ns import api as service_ns
 from app.api.namespaces.user_ns import api as user_ns
+from app.api.namespaces.update_strategy_ns import api as update_strategy_ns
+from app.api.namespaces.message_ns import api as message_ns
 
 # 创建蓝图
 api_bp = Blueprint("api", __name__)
@@ -41,3 +43,5 @@ api.add_namespace(dictionary_ns, path="/dictionaries")
 api.add_namespace(dataset_ns, path="/datasets")  # 添加数据集命名空间
 api.add_namespace(feedback_ns, path="/feedback")  # 添加意见反馈命名空间
 api.add_namespace(audit_ns, path="/audit")  # 添加审计命名空间
+api.add_namespace(update_strategy_ns, path="/update-strategy")  # 添加更新策略命名空间
+api.add_namespace(message_ns, path="/messages")  # 添加消息系统命名空间
