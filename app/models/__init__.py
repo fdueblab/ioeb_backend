@@ -17,6 +17,8 @@ from app.models.service.upgrade_advice import ServiceUpgradeAdvice
 from app.models.user.role import Role
 from app.models.user.role_permission import RolePermission
 from app.models.user_action_log import UserActionLog
+from app.models.user_service_relation import UserServiceRelation
+from app.models.service_message import ServiceMessage
 
 # 导入所有模型，使它们可以通过app.models直接访问
 from app.models.user.user import User
@@ -32,6 +34,8 @@ __all__ = [
     "RolePermission",
     "UserToken",
     "UserActionLog",
+    "UserServiceRelation",
+    "ServiceMessage",
     "Service",
     "ServiceNorm",
     "ServiceSource",
