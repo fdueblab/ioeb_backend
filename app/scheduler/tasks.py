@@ -18,6 +18,16 @@ def init_scheduler(app):
     Args:
         app: Flask应用实例
     """
+    # 检查scheduler是否已初始化，避免重复初始化
+    if hasattr(scheduler, 'running') and scheduler.running:
+        print("[调度器] 调度器已在运行，跳过初始化")
+        return
+
+    # 检查scheduler是否已配置
+    if scheduler.app is not None:
+        print("[调度器] 调度器已配置，跳过初始化")
+        return
+
     # 配置调度器
     app.config['SCHEDULER_API_ENABLED'] = True
     app.config['SCHEDULER_TIMEZONE'] = "Asia/Shanghai"
