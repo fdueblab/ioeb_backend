@@ -103,10 +103,25 @@ jobs:
       - name: Trigger staging deploy webhook
         run: |
           IMAGE_TAG=${GITHUB_SHA::7}
-          curl -sf -X POST "${{ secrets.STAGING_DEPLOY_WEBHOOK_URL }}" \
+          echo "Deploying image: ${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:${IMAGE_TAG}"
+
+          # 尝试调用webhook，并显示详细错误
+          HTTP_CODE=$(curl -s -w "%{http_code}" -o response.txt -X POST "${{ secrets.STAGING_DEPLOY_WEBHOOK_URL }}" \
             -H "X-Deploy-Token: ${{ secrets.STAGING_DEPLOY_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"service\":\"backend\",\"image\":\"${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:${IMAGE_TAG}\"}"
+            -d "{\"service\":\"backend\",\"image\":\"${{ secrets.DOCKER_HUB_USERNAME }}/ioeb-backend:${IMAGE_TAG}\"}")
+
+          echo "HTTP Status Code: $HTTP_CODE"
+          echo "Response:"
+          cat response.txt
+
+          # 如果HTTP状态码不是2xx，则失败
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✓ Deployment triggered successfully"
+          else
+            echo "✗ Deployment webhook failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
 
   deploy-production:
     name: Deploy Production
