@@ -55,6 +55,25 @@ def create_app(config_name):
         # 创建新表（如果不存在）
         db.create_all()
 
+        # 自动为 services 表添加销售相关字段（如果不存在）
+        from sqlalchemy import text, inspect
+        inspector = inspect(db.engine)
+        existing_columns = [c["name"] for c in inspector.get_columns("services")]
+        sale_columns = {
+            "is_for_sale": "BOOLEAN DEFAULT 0",
+            "sale_price": "FLOAT DEFAULT 0.0",
+            "sale_description": "TEXT",
+            "sale_status": "VARCHAR(20) DEFAULT 'unpublished'",
+        }
+        for col_name, col_def in sale_columns.items():
+            if col_name not in existing_columns:
+                try:
+                    db.session.execute(text(f"ALTER TABLE services ADD COLUMN {col_name} {col_def}"))
+                    app.logger.info(f"已添加字段: services.{col_name}")
+                except Exception as e:
+                    app.logger.warning(f"添加字段 services.{col_name} 失败: {e}")
+        db.session.commit()
+
     # 注册审计钩子：仅记录已认证 API 请求的元数据
     from app.services.audit_service import audit_service
 
