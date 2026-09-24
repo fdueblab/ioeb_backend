@@ -965,6 +965,24 @@ class ServiceService:
         except Exception as e:
             raise ServiceServiceError(f"清理所有服务失败: {str(e)}")
 
+    @staticmethod
+    def _require_valid_py_source(file_storage: FileStorage, display: str) -> None:
+        """入库硬门槛：Python 源码必须可编译，语法损坏直接拒收。"""
+        file_storage.seek(0)
+        raw = file_storage.read()
+        try:
+            source = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            raise ServiceServiceError(f"{display} 不是有效的 UTF-8 文本文件")
+        try:
+            compile(source, display, "exec")
+        except SyntaxError as e:
+            raise ServiceServiceError(
+                f"{display} 存在语法错误（第 {e.lineno} 行: {e.msg}），已拒绝入库"
+            )
+        finally:
+            file_storage.seek(0)
+
     def upload_scenario_generated_algorithm(
         self, py_file: FileStorage, meta: Dict
     ) -> Dict:
@@ -984,6 +1002,31 @@ class ServiceService:
         max_py = 16 * 1024 * 1024
         if py_size > max_py:
             raise ServiceServiceError(f"源码文件过大（最大 {max_py // (1024 * 1024)}MB）")
+
+        # 入库硬门槛：语法损坏的算法/测试文件直接拒收
+        # （对应历史缺陷：JS 风格 `||` 写进 Python 的坏模型混入资源库）
+        self._require_valid_py_source(py_file, raw_name)
+
+        test_file = meta.get("test_file")
+        test_name = ""
+        if test_file and getattr(test_file, "filename", ""):
+            test_name = secure_filename(test_file.filename)
+            if not test_name.lower().endswith(".py"):
+                raise ServiceServiceError("测试文件仅支持 .py 格式")
+            self._require_valid_py_source(test_file, test_name)
+
+        dataset_file = meta.get("dataset_file")
+        dataset_name = ""
+        allowed_data_ext = {".csv", ".tsv", ".json", ".txt", ".xlsx", ".parquet"}
+        if dataset_file and getattr(dataset_file, "filename", ""):
+            dataset_name = secure_filename(dataset_file.filename)
+            if (
+                not dataset_name
+                or os.path.splitext(dataset_name)[1].lower() not in allowed_data_ext
+            ):
+                raise ServiceServiceError(
+                    f"数据集文件格式不支持（允许: {', '.join(sorted(allowed_data_ext))}）"
+                )
 
         name = (meta.get("name") or raw_name.replace(".py", "")).strip()
         if not name:
@@ -1037,6 +1080,13 @@ class ServiceService:
             dest_path = os.path.join(subdir, raw_name)
             py_file.seek(0)
             py_file.save(dest_path)
+            # 配套资产留存：测试文件与数据集随算法同目录落盘，供后续复检
+            if test_file and test_name:
+                test_file.seek(0)
+                test_file.save(os.path.join(subdir, test_name))
+            if dataset_file and dataset_name:
+                dataset_file.seek(0)
+                dataset_file.save(os.path.join(subdir, dataset_name))
             return service.to_dict()
         except Exception as e:
             if service_id:
