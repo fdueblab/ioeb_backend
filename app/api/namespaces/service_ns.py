@@ -715,6 +715,14 @@ scenario_generated_upload_parser.add_argument(
     "file", location="files", type=FileStorage, required=True, help=".py 源码文件"
 )
 scenario_generated_upload_parser.add_argument(
+    "test_file", location="files", type=FileStorage, required=False,
+    help="配套测试文件 .py（可选，用于平台留存与后续复检）"
+)
+scenario_generated_upload_parser.add_argument(
+    "dataset_file", location="files", type=FileStorage, required=False,
+    help="生成时使用的数据集文件（可选，用于留存与后续真实数据复检）"
+)
+scenario_generated_upload_parser.add_argument(
     "name", location="form", type=str, required=True, help="服务/算法展示名称"
 )
 scenario_generated_upload_parser.add_argument(
@@ -771,6 +779,8 @@ class ScenarioGeneratedUpload(Resource):
                 return {"status": "error", "message": f"source JSON 格式错误: {str(e)}"}, 400
 
         meta["creator_id"] = user.id
+        meta["test_file"] = args.get("test_file")
+        meta["dataset_file"] = args.get("dataset_file")
 
         try:
             service = service_service.upload_scenario_generated_algorithm(py_file, meta)
