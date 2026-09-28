@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
+from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -504,7 +505,7 @@ class ServiceRepository:
         return True
     
     def filter_services(
-        self, page: int = None, page_size: int = None, **filters
+        self, page: int = None, page_size: int = None, visible_user_id: str = None, **filters
     ) -> tuple:
         """
         根据条件筛选微服务，可选分页。
@@ -517,6 +518,10 @@ class ServiceRepository:
             joinedload(Service.source),
             selectinload(Service.apis),
         ).filter_by(deleted=0)
+        if visible_user_id:
+            query = query.filter(or_(Service.status != "draft", Service.creator_id == visible_user_id))
+        else:
+            query = query.filter(Service.status != "draft")
 
         valid_filters = ["attribute", "type", "domain", "industry", "scenario", "technology", "status"]
         for key, value in filters.items():
