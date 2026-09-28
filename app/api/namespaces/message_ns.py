@@ -197,6 +197,7 @@ class MessageReply(Resource):
     @api.marshal_with(message_response, code=201)
     @api.response(400, "Invalid input", error_response)
     @api.response(401, "Unauthorized", error_response)
+    @api.response(403, "Forbidden", error_response)
     @api.response(404, "Message not found", error_response)
     @api.response(500, "Server error", error_response)
     def post(self, message_id):
@@ -215,7 +216,9 @@ class MessageReply(Resource):
             message = service_message_service.reply_message(message_id, user.id, content)
             return {"status": "success", "message": "回复成功", "data": message}, 201
         except ServiceMessageError as e:
-            return {"status": "error", "message": str(e)}, 500
+            detail = str(e)
+            code = 403 if "无权" in detail else 404 if "不存在" in detail else 400
+            return {"status": "error", "message": detail}, code
 
 
 @api.route("/user")

@@ -1070,12 +1070,20 @@ class ServiceService:
 
         service_id = None
         draft_id = meta.get("draft_id")
+        draft_backup = None
         if draft_id:
             draft = self.service_repository.get_service_by_id(draft_id)
             if not draft or draft.deleted or draft.type != "generated_algorithm" or draft.status != "draft":
                 raise ServiceServiceError("算法草稿不存在或已完成")
             if str(draft.creator_id or "") != str(meta.get("creator_id") or ""):
                 raise ServiceServiceError("无权完成此草稿")
+            before = draft.to_dict()
+            draft_backup = {
+                key: before[key] for key in (
+                    "name", "attribute", "domain", "industry", "scenario", "technology",
+                    "network", "port", "volume", "status", "number", "source", "apiList",
+                ) if key in before
+            }
         try:
             if draft_id:
                 service = self.service_repository.update_service_with_relations(draft_id, service_data)
@@ -1102,9 +1110,9 @@ class ServiceService:
                     self.delete_service(service_id)
                 except Exception:
                     pass
-            elif draft_id:
+            elif draft_id and draft_backup:
                 try:
-                    self.service_repository.update_service_with_relations(draft_id, {"status": "draft"})
+                    self.service_repository.update_service_with_relations(draft_id, draft_backup)
                 except Exception:
                     pass
             raise ServiceServiceError(f"登记生成算法资源失败: {str(e)}")
