@@ -17,10 +17,12 @@ def marketplace_client():
     now = int(datetime.datetime.now().timestamp() * 1000)
     with app.test_client() as client, app.app_context():
         db.session.add(Role(id="user", name="用户", describe="普通用户", status=1, deleted=0, create_time=now))
-        for user_id in ("supplier", "buyer", "outsider"):
+        db.session.add(Role(id="admin", name="管理员", describe="管理员", status=1, deleted=0, create_time=now))
+        for user_id in ("supplier", "buyer", "outsider", "admin"):
             db.session.add(User(
                 id=user_id, username=user_id, name=user_id, password="x",
-                role_id="user", status=1, deleted=0, create_time=now,
+                role_id="admin" if user_id == "admin" else "user",
+                status=1, deleted=0, create_time=now,
             ))
             db.session.add(UserToken(
                 user_id=user_id, token=f"{user_id}-token", expires_at=now + 86400000,
@@ -101,6 +103,7 @@ def test_draft_is_private_and_can_be_completed(marketplace_client, monkeypatch):
 def test_messages_are_limited_to_participants(marketplace_client):
     client = marketplace_client
     service_id = create_algorithm(client, "not_deployed")
+    assert client.post(f"/api/services/{service_id}", headers=auth("admin"), json={"name": "管理员维护的算法"}).status_code == 200
     sent = client.post("/api/messages/contact-purchase", headers=auth("buyer"), json={
         "serviceId": service_id, "content": "请问支持 CSV 吗？",
     })

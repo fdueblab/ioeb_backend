@@ -7,9 +7,9 @@
 独立网站 `zhongzhi-factory` 复用本后端的用户、成果、收藏与消息数据。本分支新增或收紧以下接口：
 
 - `GET /api/services/mine` 返回当前用户的成果（包含草稿）；公共列表、检索、分页筛选和批量查询只对创建者展示其草稿，其他用户的详情请求也无法查看草稿。
-- `POST /api/services` 可创建 `status=draft` 的算法草稿；`POST /api/services/<id>` 仅创建者可编辑商品展示字段，不能更改归属、类型或直接跳过状态流程。
+- `POST /api/services` 可创建 `status=draft` 的算法草稿；`POST /api/services/<id>` 由创建者或管理员编辑，普通创建者不能更改归属、类型或直接跳过状态流程。
 - `POST /api/services/scenario-generated/upload` 支持可选表单字段 `draft_id`，仅草稿创建者可用同一 ID 完成上传；失败时恢复草稿内容。
-- `GET /api/services/<id>/scenario-generated-code` 仅创建者可下载源码；成果部署与停止接口同样要求创建者身份。
+- `GET /api/services/<id>/scenario-generated-code` 仅创建者可下载源码；成果部署与停止接口要求创建者或管理员身份。
 - `GET /api/messages/user` 返回当前用户参与的消息；成果消息列表只返回当前用户参与的对话，回复仅允许原消息接收者。
 
 先部署本后端分支，再发布依赖这些接口的网站版本。回归测试：`python -m pytest tests/integration/test_zzf_marketplace.py -q`。

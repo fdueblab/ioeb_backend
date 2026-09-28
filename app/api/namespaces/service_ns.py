@@ -11,6 +11,7 @@ from werkzeug.datastructures import FileStorage
 from app.services.service_service import ServiceServiceError, service_service
 from app.services.user_service_relation_service import UserServiceRelationError, user_service_relation_service
 from app.services.service_sale_service import ServiceSaleError, service_sale_service
+from app.services.audit_service import audit_service
 from app.utils.auth_utils import get_request_user
 
 # 创建命名空间
@@ -334,6 +335,10 @@ def _visible_services(services):
     )]
 
 
+def _can_manage_service(user, service):
+    return str(service.get("creatorId") or "") == str(user.id) or audit_service.has_admin_permission(user)
+
+
 @api.route("/mine")
 class MyServiceList(Resource):
     @api.doc("list_my_services")
@@ -492,7 +497,7 @@ class ServiceResource(Resource):
             existing = service_service.get_service_by_id(id)
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 404
-        if str(existing.get("creatorId") or "") != str(user.id):
+        if not _can_manage_service(user, existing):
             return {"status": "error", "message": "无权修改此成果"}, 403
         data = request.get_json()
 
@@ -500,7 +505,7 @@ class ServiceResource(Resource):
             return {"status": "error", "message": "缺少请求数据"}, 400
         if "creator_id" in data or "creatorId" in data or "type" in data:
             return {"status": "error", "message": "不允许修改成果归属或类型"}, 400
-        if "status" in data and data["status"] != existing.get("status"):
+        if "status" in data and data["status"] != existing.get("status") and not audit_service.has_admin_permission(user):
             return {"status": "error", "message": "请通过专用接口变更成果状态"}, 400
 
         try:
@@ -948,7 +953,7 @@ class ServiceDeployResource(Resource):
             existing = service_service.get_service_by_id(id)
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 404
-        if str(existing.get("creatorId") or "") != str(user.id):
+        if not _can_manage_service(user, existing):
             return {"status": "error", "message": "无权部署此成果"}, 403
         try:
             result = service_service.deploy_service(id)
@@ -978,7 +983,7 @@ class ServiceStopResource(Resource):
             existing = service_service.get_service_by_id(id)
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 404
-        if str(existing.get("creatorId") or "") != str(user.id):
+        if not _can_manage_service(user, existing):
             return {"status": "error", "message": "无权停止此成果"}, 403
         try:
             result = service_service.stop_service(id)
