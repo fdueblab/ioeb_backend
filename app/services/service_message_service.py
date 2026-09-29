@@ -4,6 +4,7 @@
 """
 
 from app.extensions import db
+from sqlalchemy import or_
 from app.models.service_message import ServiceMessage
 from app.models.service.service import Service
 
@@ -190,9 +191,10 @@ class ServiceMessageService:
             list: 消息字典列表
         """
         try:
-            messages = ServiceMessage.query.filter_by(
-                service_id=service_id
-            ).order_by(ServiceMessage.create_time.asc()).all()
+            query = ServiceMessage.query.filter_by(service_id=service_id)
+            if user_id:
+                query = query.filter(or_(ServiceMessage.sender_id == user_id, ServiceMessage.receiver_id == user_id))
+            messages = query.order_by(ServiceMessage.create_time.asc()).all()
 
             result = ServiceMessageService._enrich_messages(messages)
             # 标记当前用户发送的消息
@@ -220,6 +222,8 @@ class ServiceMessageService:
             original_message = ServiceMessage.query.get(message_id)
             if not original_message:
                 raise ServiceMessageError("原消息不存在")
+            if sender_id != original_message.receiver_id:
+                raise ServiceMessageError("无权回复此消息")
 
             # 回复消息的接收者为原消息发送者
             reply = ServiceMessage(
@@ -266,6 +270,20 @@ class ServiceMessageService:
 
         except Exception as e:
             raise ServiceMessageError(f"获取未读消息失败: {str(e)}")
+
+    @staticmethod
+    def get_user_messages(user_id):
+        """获取当前用户参与的全部成果消息，供消息中心展示历史对话。"""
+        try:
+            messages = ServiceMessage.query.filter(
+                or_(ServiceMessage.sender_id == user_id, ServiceMessage.receiver_id == user_id)
+            ).order_by(ServiceMessage.create_time.desc()).all()
+            result = ServiceMessageService._enrich_messages(messages)
+            for item in result:
+                item["isMine"] = item.get("senderId") == user_id
+            return result
+        except Exception as e:
+            raise ServiceMessageError(f"获取消息失败: {str(e)}")
 
     @staticmethod
     def mark_message_as_read(message_id, user_id=None):

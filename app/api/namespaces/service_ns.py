@@ -11,6 +11,7 @@ from werkzeug.datastructures import FileStorage
 from app.services.service_service import ServiceServiceError, service_service
 from app.services.user_service_relation_service import UserServiceRelationError, user_service_relation_service
 from app.services.service_sale_service import ServiceSaleError, service_sale_service
+from app.services.audit_service import audit_service
 from app.utils.auth_utils import get_request_user
 
 # 创建命名空间
@@ -326,6 +327,18 @@ def _require_login_user():
     return user, None
 
 
+def _visible_services(services):
+    """草稿只对创建者可见。"""
+    user = get_request_user()
+    return [item for item in services if item.get("status") != "draft" or (
+        user and str(item.get("creatorId") or "") == str(user.id)
+    )]
+
+
+def _can_manage_service(user, service):
+    return str(service.get("creatorId") or "") == str(user.id) or audit_service.has_admin_permission(user)
+
+
 @api.route("/mine")
 class MyServiceList(Resource):
     @api.doc("list_my_services")
@@ -356,7 +369,7 @@ class ServiceList(Resource):
     def get(self):
         """获取所有微服务"""
         try:
-            services = service_service.get_all_services()
+            services = _visible_services(service_service.get_all_services())
             return {
                 "status": "success",
                 "message": "获取微服务列表成功",
@@ -457,6 +470,10 @@ class ServiceResource(Resource):
         """获取指定ID的微服务"""
         try:
             service = service_service.get_service_by_id(id)
+            if service.get("status") == "draft":
+                user = get_request_user()
+                if not user or str(service.get("creatorId") or "") != str(user.id):
+                    return {"status": "error", "message": "微服务不存在"}, 404
             return {
                 "status": "success", 
                 "message": "获取微服务成功", 
@@ -473,10 +490,23 @@ class ServiceResource(Resource):
     @api.response(500, "Server error", error_response)
     def post(self, id):
         """更新指定ID的微服务"""
+        user, err = _require_login_user()
+        if err:
+            return err
+        try:
+            existing = service_service.get_service_by_id(id)
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404
+        if not _can_manage_service(user, existing):
+            return {"status": "error", "message": "无权修改此成果"}, 403
         data = request.get_json()
 
         if not data:
             return {"status": "error", "message": "缺少请求数据"}, 400
+        if "creator_id" in data or "creatorId" in data or "type" in data:
+            return {"status": "error", "message": "不允许修改成果归属或类型"}, 400
+        if "status" in data and data["status"] != existing.get("status") and not audit_service.has_admin_permission(user):
+            return {"status": "error", "message": "请通过专用接口变更成果状态"}, 400
 
         try:
             service = service_service.update_service(id, data)
@@ -532,7 +562,13 @@ class ServiceScenarioGeneratedCode(Resource):
     @api.response(404, "Not found", error_response)
     def get(self, id):
         """下载想定式开发生成的算法源码（仅 type=generated_algorithm）"""
+        user, err = _require_login_user()
+        if err:
+            return err
         try:
+            service = service_service.get_service_by_id(id)
+            if str(service.get("creatorId") or "") != str(user.id):
+                return {"status": "error", "message": "无权下载此成果源码"}, 403
             path, download_name = service_service.get_scenario_generated_code_path(id)
             return send_file(
                 path,
@@ -553,7 +589,7 @@ class ServiceSearch(Resource):
         """搜索微服务"""
         keyword = request.args.get("keyword", "")
         try:
-            services = service_service.search_services(keyword)
+            services = _visible_services(service_service.search_services(keyword))
             return {
                 "status": "success",
                 "message": "搜索微服务成功",
@@ -600,7 +636,7 @@ class ServiceSmartSearch(Resource):
             return {"status": "error", "message": "请至少填写一个检索条件"}, 400
 
         try:
-            services = service_service.smart_search(domain, **fields)
+            services = _visible_services(service_service.smart_search(domain, **fields))
             return {
                 "status": "success",
                 "message": "智能检索成功",
@@ -672,8 +708,10 @@ class ServiceFilter(Resource):
                 return {"status": "error", "message": "page 与 pageSize 必须为整数"}, 400
         
         try:
+            user = get_request_user()
             result = service_service.filter_services(
-                page=page, page_size=page_size, **filters
+                page=page, page_size=page_size,
+                visible_user_id=user.id if user else None, **filters
             )
             return {
                 "status": "success",
@@ -743,6 +781,9 @@ scenario_generated_upload_parser.add_argument(
 scenario_generated_upload_parser.add_argument(
     "source", location="form", type=str, required=False, help="来源信息 JSON 字符串"
 )
+scenario_generated_upload_parser.add_argument(
+    "draft_id", location="form", type=str, required=False, help="待完成的本人算法草稿 ID"
+)
 
 
 @api.route("/scenario-generated/upload")
@@ -781,6 +822,8 @@ class ScenarioGeneratedUpload(Resource):
         meta["creator_id"] = user.id
         meta["test_file"] = args.get("test_file")
         meta["dataset_file"] = args.get("dataset_file")
+        if args.get("draft_id"):
+            meta["draft_id"] = args["draft_id"]
 
         try:
             service = service_service.upload_scenario_generated_algorithm(py_file, meta)
@@ -853,6 +896,10 @@ class ServiceBatch(Resource):
 
         try:
             services, not_found_ids = service_service.get_services_by_ids(service_ids)
+            visible = _visible_services(services)
+            hidden_ids = [item["id"] for item in services if item not in visible]
+            services = visible
+            not_found_ids = list(dict.fromkeys([*not_found_ids, *hidden_ids]))
             
             message = "批量获取微服务成功"
             if not_found_ids:
@@ -899,6 +946,15 @@ class ServiceDeployResource(Resource):
     @api.response(404, "Service not found", error_response)
     def get(self, id):
         """部署指定ID的微服务"""
+        user, err = _require_login_user()
+        if err:
+            return err
+        try:
+            existing = service_service.get_service_by_id(id)
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404
+        if not _can_manage_service(user, existing):
+            return {"status": "error", "message": "无权部署此成果"}, 403
         try:
             result = service_service.deploy_service(id)
             if result:
@@ -920,6 +976,15 @@ class ServiceStopResource(Resource):
     @api.response(404, "Service not found", error_response)
     def get(self, id):
         """停止指定ID的微服务"""
+        user, err = _require_login_user()
+        if err:
+            return err
+        try:
+            existing = service_service.get_service_by_id(id)
+        except ServiceServiceError as e:
+            return {"status": "error", "message": str(e)}, 404
+        if not _can_manage_service(user, existing):
+            return {"status": "error", "message": "无权停止此成果"}, 403
         try:
             result = service_service.stop_service(id)
             if result:
@@ -1162,6 +1227,7 @@ class UserServiceRelationList(Resource):
             services = user_service_relation_service.get_user_services_by_relation(
                 user.id, relation_type
             )
+            services = _visible_services(services)
             # 兼容前端期望的 services 字段（而非 data）
             return {
                 "status": "success",
