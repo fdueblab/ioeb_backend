@@ -673,6 +673,8 @@ class ServiceService:
                         }
                     ]
                 }
+                if service_data.get('suppress_placeholder_tools'):
+                    default_api['tools'] = []
                 
                 # 更新服务，添加API
                 self.service_repository.update_service_with_relations(service_id, {
