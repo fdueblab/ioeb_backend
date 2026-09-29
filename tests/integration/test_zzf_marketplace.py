@@ -2,6 +2,7 @@
 
 import datetime
 import io
+import zipfile
 
 import pytest
 from werkzeug.datastructures import FileStorage
@@ -35,6 +36,138 @@ def marketplace_client():
 
 def auth(user_id):
     return {"Access-Token": f"{user_id}-token"}
+
+
+def test_mcp_packaging_job_owner_and_confirmed_tools(marketplace_client, monkeypatch, tmp_path):
+    """Uploaded source and tool choices belong to the signed-in supplier."""
+    monkeypatch.setenv("MCP_PACKAGING_BASE_PATH", str(tmp_path))
+    client = marketplace_client
+    assert client.post("/api/mcp-packaging/jobs", json={}).status_code == 401
+
+    created = client.post("/api/mcp-packaging/jobs", headers=auth("supplier"), json={})
+    assert created.status_code == 201, created.get_json()
+    job = created.get_json()["job"]
+    job_id = job["id"]
+    assert client.get(f"/api/mcp-packaging/jobs/{job_id}", headers=auth("buyer")).status_code == 404
+    assert client.put(f"/api/mcp-packaging/jobs/{job_id}/source", headers=auth("buyer"),
+                      data={"file": (io.BytesIO(b"def stolen(): pass"), "bad.py")},
+                      content_type="multipart/form-data").status_code == 404
+
+    uploaded = client.put(f"/api/mcp-packaging/jobs/{job_id}/source", headers=auth("supplier"),
+                          data={"file": (io.BytesIO(b"def score(value):\n    return value\n"), "model.py")},
+                          content_type="multipart/form-data")
+    assert uploaded.status_code == 200, uploaded.get_json()
+    job = uploaded.get_json()["job"]
+    assert [candidate["entrypoint"] for candidate in job["candidates"]] == ["source.py:score"]
+    assert client.post(f"/api/mcp-packaging/jobs/{job_id}/package", headers=auth("supplier")).status_code == 400
+
+    invalid = client.patch(f"/api/mcp-packaging/jobs/{job_id}", headers=auth("supplier"), json={
+        "revision": job["revision"], "spec": {"service_name": "评分", "scenario": "分析输入",
+                                       "tools": [{"entrypoint": "source.py:nonexistent", "name": "invented",
+                                                  "input_schema": {"type": "object"}}]},
+    })
+    assert invalid.status_code == 400
+    saved = client.patch(f"/api/mcp-packaging/jobs/{job_id}", headers=auth("supplier"), json={
+        "revision": job["revision"], "spec": {"service_name": "评分", "scenario": "分析输入",
+                                       "tools": [{"entrypoint": "source.py:score", "name": "score",
+                                                  "input_schema": {"type": "object", "properties": {"value": {"type": "string"}}}}]},
+    })
+    assert saved.status_code == 200, saved.get_json()
+    assert saved.get_json()["job"]["revision"] == job["revision"] + 1
+    assert client.patch(f"/api/mcp-packaging/jobs/{job_id}", headers=auth("supplier"),
+                        json={"revision": job["revision"], "spec": {}}).status_code == 409
+
+
+def test_generated_mcp_package_rejects_dangerous_compose():
+    from app.api.namespaces.mcp_packaging_ns import _validate_package
+
+    def archive(compose):
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as zipped:
+            zipped.writestr("output/server.py", "")
+            zipped.writestr("output/Dockerfile", "FROM python:3.10-slim")
+            zipped.writestr("output/docker-compose.yml", compose)
+        return buffer.getvalue()
+
+    _validate_package(archive("services:\n  mcp:\n    build: .\n    ports: ['8000:8000']\n"))
+    with pytest.raises(ValueError, match="不允许"):
+        _validate_package(archive("services:\n  mcp:\n    build: .\n    privileged: true\n    ports: ['8000:8000']\n"))
+    with pytest.raises(ValueError, match="不允许"):
+        _validate_package(archive("services:\n  mcp:\n    build: .\n    volumes: ['/var/run/docker.sock:/var/run/docker.sock']\n    ports: ['8000:8000']\n"))
+
+
+def test_mcp_package_download_and_deploy_are_owner_scoped_and_idempotent(marketplace_client, monkeypatch, tmp_path):
+    """The downloadable artifact is private and duplicate deploy clicks reuse one service."""
+    import app.api.namespaces.mcp_packaging_ns as mcp_ns
+
+    monkeypatch.setenv("MCP_PACKAGING_BASE_PATH", str(tmp_path))
+    client = marketplace_client
+    created = client.post("/api/mcp-packaging/jobs", headers=auth("supplier"), json={}).get_json()["job"]
+    job_id = created["id"]
+    uploaded = client.put(f"/api/mcp-packaging/jobs/{job_id}/source", headers=auth("supplier"),
+                          data={"file": (io.BytesIO(b"def score(value):\n    return value\n"), "model.py")},
+                          content_type="multipart/form-data").get_json()["job"]
+    spec = {"service_name": "评分工具", "scenario": "给输入评分", "tools": [
+        {"entrypoint": "source.py:score", "name": "score",
+         "input_schema": {"type": "object", "properties": {"value": {"type": "string"}}, "required": ["value"]}}]}
+    assert client.patch(f"/api/mcp-packaging/jobs/{job_id}", headers=auth("supplier"),
+                        json={"revision": uploaded["revision"], "spec": spec}).status_code == 200
+
+    package = io.BytesIO()
+    with zipfile.ZipFile(package, "w") as zipped:
+        zipped.writestr("output/server.py", "print('server')")
+        zipped.writestr("output/Dockerfile", "FROM python:3.10-slim")
+        zipped.writestr("output/docker-compose.yml", "services:\n  mcp:\n    build: .\n    ports: ['8000:8000']\n")
+
+    def fake_package(_path, _spec, progress):
+        progress("task-1", "已接收")
+        return package.getvalue()
+
+    class ImmediateThread:
+        def __init__(self, target, args, daemon):
+            self.target, self.args = target, args
+
+        def start(self):
+            self.target(*self.args)
+
+    monkeypatch.setattr(mcp_ns, "_agent_package", fake_package)
+    monkeypatch.setattr(mcp_ns.threading, "Thread", ImmediateThread)
+    generated = client.post(f"/api/mcp-packaging/jobs/{job_id}/package", headers=auth("supplier"))
+    assert generated.status_code == 202, generated.get_json()
+    assert client.get(f"/api/mcp-packaging/jobs/{job_id}/artifact", headers=auth("buyer")).status_code == 404
+    artifact = client.get(f"/api/mcp-packaging/jobs/{job_id}/artifact", headers=auth("supplier"))
+    assert artifact.status_code == 200
+    assert zipfile.is_zipfile(io.BytesIO(artifact.data))
+
+    calls = []
+
+    def fake_deploy(file, data):
+        calls.append((file.filename, data["creator_id"]))
+        return {"id": "only-one-service"}
+
+    monkeypatch.setattr(mcp_ns.service_service, "upload_and_deploy_service", fake_deploy)
+    first = client.post(f"/api/mcp-packaging/jobs/{job_id}/deploy", headers=auth("supplier"))
+    second = client.post(f"/api/mcp-packaging/jobs/{job_id}/deploy", headers=auth("supplier"))
+    assert first.status_code == 202, first.get_json()
+    assert second.get_json()["serviceId"] == "only-one-service"
+    assert calls == [("mcp-service-package.zip", "supplier")]
+
+
+def test_mcp_source_algorithm_uses_owner_only(marketplace_client):
+    client = marketplace_client
+    algorithm_id = create_algorithm(client, "draft")
+    uploaded = client.post("/api/services/scenario-generated/upload", headers=auth("supplier"),
+                           data={"file": (io.BytesIO(b"def score(value):\n    return value\n"), "algorithm.py"),
+                                 "name": "已有算法", "domain": "aml", "draft_id": algorithm_id},
+                           content_type="multipart/form-data")
+    assert uploaded.status_code == 201, uploaded.get_json()
+    assert client.post("/api/mcp-packaging/jobs", headers=auth("buyer"),
+                       json={"sourceServiceId": algorithm_id}).status_code == 403
+    created = client.post("/api/mcp-packaging/jobs", headers=auth("supplier"),
+                          json={"sourceServiceId": algorithm_id})
+    assert created.status_code == 201, created.get_json()
+    assert created.get_json()["job"]["sourceServiceId"] == algorithm_id
+    assert created.get_json()["job"]["candidates"][0]["name"] == "score"
 
 
 def create_algorithm(client, status):

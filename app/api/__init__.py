@@ -17,6 +17,7 @@ from app.api.namespaces.service_ns import api as service_ns
 from app.api.namespaces.user_ns import api as user_ns
 from app.api.namespaces.update_strategy_ns import api as update_strategy_ns
 from app.api.namespaces.message_ns import api as message_ns
+from app.api.namespaces.mcp_packaging_ns import api as mcp_packaging_ns
 
 # 创建蓝图
 api_bp = Blueprint("api", __name__)
@@ -45,3 +46,4 @@ api.add_namespace(feedback_ns, path="/feedback")  # 添加意见反馈命名空�
 api.add_namespace(audit_ns, path="/audit")  # 添加审计命名空间
 api.add_namespace(update_strategy_ns, path="/update-strategy")  # 添加更新策略命名空间
 api.add_namespace(message_ns, path="/messages")  # 添加消息系统命名空间
+api.add_namespace(mcp_packaging_ns, path="/mcp-packaging")
