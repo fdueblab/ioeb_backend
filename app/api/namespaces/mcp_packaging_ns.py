@@ -58,6 +58,16 @@ def _service_state(job):
     return service.status if service else "missing"
 
 
+def _refresh_deployment(job):
+    if job.status != "deploying" or not job.service_id:
+        return
+    state = _service_state(job)
+    if state in {"pre_release_unrated", "pre_release_pending", "released"}:
+        _save(job, status="awaiting_check", stage="check")
+    elif state in {"error", "missing"}:
+        _save(job, status="deploy_failed", stage="deploy", error="容器部署失败，请检查部署日志")
+
+
 def _login():
     user = get_request_user()
     if user is None:
@@ -216,6 +226,8 @@ class Jobs(Resource):
     def get(self):
         user = _login()
         jobs = McpPackagingJob.query.filter_by(owner_id=user.id).order_by(McpPackagingJob.updated_at.desc()).limit(100).all()
+        for job in jobs:
+            _refresh_deployment(job)
         return {"jobs": [job.snapshot() for job in jobs]}
 
     def post(self):
@@ -259,6 +271,7 @@ class Job(Resource):
             _save(job, status="interrupted", error="任务长时间没有进度，请重试")
         if job.status == "deploying" and not job.service_id and _now() - job.updated_at > 5 * 60 * 1000:
             _save(job, status="interrupted", error="部署登记中断，请联系管理员核对服务记录")
+        _refresh_deployment(job)
         return {"job": {**job.snapshot(), "serviceStatus": _service_state(job)}}
 
     def patch(self, job_id):
@@ -395,7 +408,7 @@ class JobCancel(Resource):
 class JobArtifact(Resource):
     def get(self, job_id):
         job = _job(job_id, _login())
-        if job.status not in {"packaged", "deploying", "deployed"} or not job.artifact_path or not Path(job.artifact_path).is_file():
+        if job.status not in {"packaged", "deploying", "awaiting_check", "deploy_failed", "deployed"} or not job.artifact_path or not Path(job.artifact_path).is_file():
             api.abort(404, "封装包尚未生成")
         return send_file(job.artifact_path, as_attachment=True, download_name="mcp-service-package.zip")
 
