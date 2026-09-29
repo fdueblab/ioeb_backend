@@ -33,6 +33,46 @@ def seed_db():
     click.echo("示例数据添加成功")
 
 
+@cli.command("seed_clinical")
+def seed_clinical():
+    """Initialize a fresh clinical database without importing demo users or services."""
+    from app.models import Dictionary, Role, RolePermission
+    from mocks.dictionary import MOCK_DICTIONARIES
+    from mocks.user import MOCK_ROLES, MOCK_ROLES_PERMISSIONS
+
+    db.create_all()
+    allowed_roles = {"root", "admin", "publisher", "user", "AppDev", "MPAdm"}
+    for row in MOCK_ROLES:
+        if row["id"] in allowed_roles and not db.session.get(Role, row["id"]):
+            db.session.add(Role(**row))
+    for row in MOCK_ROLES_PERMISSIONS:
+        if row["role_id"] in allowed_roles and not RolePermission.query.filter_by(
+            role_id=row["role_id"], permission_id=row["permission_id"]
+        ).first():
+            db.session.add(RolePermission(**row))
+    for item in MOCK_DICTIONARIES:
+        if item["category"] == "domain" and item["code"] != "clinical":
+            continue
+        if not Dictionary.query.filter_by(category=item["category"], code=item["code"]).first():
+            db.session.add(Dictionary(**item))
+    db.session.commit()
+    click.echo("临床站角色与字典初始化完成；未创建示例用户")
+
+
+@cli.command("grant_clinical_admin")
+@click.argument("username")
+def grant_clinical_admin(username):
+    """Grant the three platform permissions to an existing clinical-site account."""
+    from app.models import User
+
+    user = User.query.filter_by(username=username, deleted=0).first()
+    if not user:
+        raise click.ClickException("用户不存在，请先在临床站注册")
+    user.role_id = "root"
+    db.session.commit()
+    click.echo(f"已授予 {username} 临床站管理员权限")
+
+
 @cli.command("import_cos_datasets")
 @click.option("--prefix", default="datasets/", help="COS对象前缀路径")
 @click.option("--creator-id", help="创建者ID")

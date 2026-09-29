@@ -49,8 +49,12 @@ RUN groupadd -g ${APP_USER_GID} appuser \
 
 # 创建docker组并将appuser添加到docker组
 # GID必须与宿主机的docker组GID匹配（默认998）
-RUN groupadd -g ${DOCKER_GID} docker || true \
-    && usermod -aG docker appuser
+RUN if getent group "${DOCKER_GID}" > /dev/null; then \
+        docker_group="$(getent group "${DOCKER_GID}" | cut -d: -f1)"; \
+    else \
+        groupadd -g "${DOCKER_GID}" docker && docker_group=docker; \
+    fi \
+    && usermod -aG "$docker_group" appuser
 
 RUN chown -R appuser:appuser /app
 USER appuser

@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()  # 加载本地 .env（python wsgi.py 时 Flask CLI 不会自动加载）
+
 from app import create_app
 from app.extensions import db, migrate
 from app.utils.flask_utils import get_flask_env

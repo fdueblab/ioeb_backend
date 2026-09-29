@@ -236,6 +236,21 @@ class UserMessages(Resource):
             return {"status": "error", "message": str(e)}, 500
 
 
+@api.route("/user")
+class UserMessages(Resource):
+    @api.doc("get_user_messages")
+    @api.marshal_with(messages_response, code=200)
+    def get(self):
+        user, err = _require_login_user()
+        if err:
+            return err
+        try:
+            messages = service_message_service.get_user_messages(user.id)
+            return {"status": "success", "total": len(messages), "messages": messages}, 200
+        except ServiceMessageError as e:
+            return {"status": "error", "message": str(e)}, 500
+
+
 @api.route("/user/unread")
 class UserUnreadMessages(Resource):
     @api.doc("get_user_unread_messages")

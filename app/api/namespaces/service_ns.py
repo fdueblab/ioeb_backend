@@ -13,6 +13,10 @@ from app.services.user_service_relation_service import UserServiceRelationError,
 from app.services.service_sale_service import ServiceSaleError, service_sale_service
 from app.services.audit_service import audit_service
 from app.utils.auth_utils import get_request_user
+from app.services.clinical_algorithm import ClinicalAlgorithmError, get_artifact, validate_input, run_isolated, verify_artifact_code
+from app.models.service.algorithm_artifact import AlgorithmArtifact
+from app.models.service.service import Service
+from app.models.user_service_relation import UserServiceRelation
 
 # 创建命名空间
 api = Namespace("services", description="微服务管理API")
@@ -128,6 +132,8 @@ service_model = api.model(
         "exampleMsg": fields.Raw(description="示例消息(MCP服务使用)"),
         "upgradeAdvice": fields.Raw(description="升级建议（我的成果）"),
         "updateStrategy": fields.Raw(description="更新策略（我的成果）"),
+        "algorithmArtifact": fields.Raw(description="算法运行状态与输入规范"),
+        "onlineUsage": fields.Raw(description="在线使用能力"),
         # 销售相关字段
         "isForSale": fields.Boolean(description="是否对外销售"),
         "salePrice": fields.Float(description="销售价格"),
@@ -232,6 +238,7 @@ service_list_item_model = api.model(
         "salePrice": fields.Float(description="销售价格"),
         "saleDescription": fields.String(description="销售说明"),
         "saleStatus": fields.String(description="销售状态"),
+        "onlineUsage": fields.Raw(description="在线使用能力"),
     },
 )
 
@@ -337,6 +344,46 @@ def _visible_services(services):
 
 def _can_manage_service(user, service):
     return str(service.get("creatorId") or "") == str(user.id) or audit_service.has_admin_permission(user)
+
+
+def _algorithm_access(service_id, user):
+    service = Service.query.filter_by(id=service_id, type="generated_algorithm", deleted=0).first()
+    if not service or (service.status == "draft" and str(service.creator_id) != str(user.id)):
+        return None
+    if service.is_for_sale and str(service.creator_id) != str(user.id):
+        purchased = UserServiceRelation.query.filter_by(
+            service_id=service_id, user_id=user.id, relation_type="purchased"
+        ).first()
+        if not purchased:
+            return None
+    return service
+
+
+def _attach_online_usage(services, user):
+    ids = [item["id"] for item in services if item.get("type") == "generated_algorithm"]
+    artifacts = {item.service_id: item for item in AlgorithmArtifact.query.filter(AlgorithmArtifact.service_id.in_(ids)).all()} if ids else {}
+    purchased_ids = set()
+    if user and ids:
+        purchased_ids = {row.service_id for row in UserServiceRelation.query.filter(
+            UserServiceRelation.user_id == user.id,
+            UserServiceRelation.relation_type == "purchased",
+            UserServiceRelation.service_id.in_(ids),
+        ).all()}
+    for item in services:
+        if item.get("type") != "generated_algorithm":
+            continue
+        artifact = artifacts.get(item["id"])
+        can_access = bool(user) and (not item.get("isForSale") or
+            str(item.get("creatorId")) == str(user.id) or item["id"] in purchased_ids)
+        item["onlineUsage"] = {
+            "supported": bool(artifact),
+            "canRun": bool(can_access and artifact and artifact.status == "ready"),
+            "status": artifact.status if artifact else "needs_configuration",
+            "reason": "请先购买该模型" if not can_access else
+                (artifact.validation_error if artifact else "尚未配置在线运行接口"),
+            "version": artifact.version if artifact else None,
+        }
+    return services
 
 
 @api.route("/mine")
@@ -719,7 +766,7 @@ class ServiceFilter(Resource):
                 "total": result["total"],
                 "page": result.get("page"),
                 "pageSize": result.get("pageSize"),
-                "services": result["services"],
+                "services": _attach_online_usage(result["services"], user),
             }, 200
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 500
@@ -782,6 +829,12 @@ scenario_generated_upload_parser.add_argument(
     "source", location="form", type=str, required=False, help="来源信息 JSON 字符串"
 )
 scenario_generated_upload_parser.add_argument(
+    "algorithm_spec", location="form", type=str, required=False, help="算法输入输出规范 JSON"
+)
+scenario_generated_upload_parser.add_argument(
+    "smoke_input", location="form", type=str, required=False, help="算法测试输入 JSON"
+)
+scenario_generated_upload_parser.add_argument(
     "draft_id", location="form", type=str, required=False, help="待完成的本人算法草稿 ID"
 )
 
@@ -824,6 +877,12 @@ class ScenarioGeneratedUpload(Resource):
         meta["dataset_file"] = args.get("dataset_file")
         if args.get("draft_id"):
             meta["draft_id"] = args["draft_id"]
+        if args.get("algorithm_spec") or args.get("smoke_input"):
+            try:
+                meta["algorithm_spec"] = json.loads(args.get("algorithm_spec") or "{}")
+                meta["smoke_input"] = json.loads(args.get("smoke_input") or "{}")
+            except json.JSONDecodeError:
+                return {"status": "error", "message": "算法规范或测试输入不是有效 JSON"}, 400
 
         try:
             service = service_service.upload_scenario_generated_algorithm(py_file, meta)
@@ -834,6 +893,44 @@ class ScenarioGeneratedUpload(Resource):
             }, 201
         except ServiceServiceError as e:
             return {"status": "error", "message": str(e)}, 400
+
+
+@api.route("/<string:id>/clinical-artifact")
+@api.route("/<string:id>/algorithm-artifact")
+class ClinicalAlgorithmArtifactResource(Resource):
+    def get(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        if not _algorithm_access(id, user):
+            return {"status": "error", "message": "算法模型不存在或无权查看"}, 404
+        try:
+            return {"status": "success", "artifact": get_artifact(id).to_dict()}, 200
+        except ClinicalAlgorithmError as exc:
+            return {"status": "error", "message": str(exc)}, 404
+
+
+@api.route("/<string:id>/clinical-run")
+@api.route("/<string:id>/algorithm-run")
+class ClinicalAlgorithmRunResource(Resource):
+    def post(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        if not _algorithm_access(id, user):
+            return {"status": "error", "message": "算法模型不存在或无权运行"}, 404
+        try:
+            artifact = get_artifact(id)
+            if artifact.status != "ready":
+                return {"status": "error", "message": "该模型尚未通过运行验证"}, 409
+            payload = request.get_json(silent=True) or {}
+            values = validate_input(json.loads(artifact.spec_json), payload.get("inputs"))
+            code_path, _ = service_service.get_scenario_generated_code_path(id)
+            verify_artifact_code(artifact, code_path)
+            result = run_isolated(code_path, values)
+            return {"status": "success", "result": result, "version": artifact.version}, 200
+        except (ClinicalAlgorithmError, ServiceServiceError) as exc:
+            return {"status": "error", "message": str(exc)}, 400
 
 
 @api.route("/batch")

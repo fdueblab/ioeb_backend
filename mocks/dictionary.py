@@ -24,6 +24,12 @@ MOCK_DOMAIN_DICTIONARIES = [
     },
     {
         "category": "domain",
+        "code": "clinical",
+        "text": "临床医疗算法模型",
+        "sort": 8
+    },
+    {
+        "category": "domain",
         "code": "agriculture",
         "text": "数字农业AI应用",
         "sort": 4
@@ -604,6 +610,57 @@ MOCK_HEALTH_TECHNOLOGY_DICTIONARIES = [
     }
 ]
 
+
+# 临床站点：专科、诊疗场景、临床任务。疾病编码与检验术语留给后续标准映射。
+MOCK_CLINICAL_INDUSTRY_DICTIONARIES = [
+    {"category": "clinical_industry", "code": code, "text": label, "sort": index}
+    for index, (code, label) in enumerate([
+        ("cardiology", "心血管内科"), ("respiratory", "呼吸与危重症医学"),
+        ("gastroenterology", "消化内科"), ("nephrology", "肾脏内科"),
+        ("endocrinology", "内分泌与代谢"), ("neurology", "神经内科"),
+        ("hematology", "血液科"), ("oncology", "肿瘤科"),
+        ("infectious", "感染科"), ("surgery", "外科及围手术期"),
+        ("emergency", "急诊医学"), ("critical_care", "重症医学"),
+        ("obstetrics", "妇产科"), ("pediatrics", "儿科与新生儿"),
+        ("geriatrics", "老年医学"), ("psychiatry", "精神心理"),
+        ("rehabilitation", "康复医学"), ("imaging", "医学影像"),
+        ("laboratory", "检验医学"), ("pharmacy", "临床药学"),
+        ("nursing", "护理"),
+    ], 1)
+]
+
+MOCK_CLINICAL_SCENARIO_DICTIONARIES = [
+    {"category": "clinical_scenario", "code": code, "text": label, "sort": index}
+    for index, (code, label) in enumerate([
+        ("outpatient", "门诊初评"), ("emergency", "急诊评估"),
+        ("inpatient", "住院监测"), ("perioperative", "围手术期评估"),
+        ("icu", "重症监护"), ("medication", "用药评估"),
+        ("discharge", "出院评估"), ("chronic_followup", "慢病随访"),
+        ("rehabilitation", "康复评估"),
+    ], 1)
+]
+
+MOCK_CLINICAL_TECHNOLOGY_DICTIONARIES = [
+    {"category": "clinical_technology", "code": code, "text": label, "sort": index}
+    for index, (code, label) in enumerate([
+        ("formula", "医学数学公式"), ("score", "临床评分量表"),
+        ("rule", "临床规则"), ("regression", "统计回归"),
+        ("survival", "生存分析"), ("ml", "机器学习推理"),
+        ("dl", "深度学习推理"), ("nlp", "医学文本处理"),
+    ], 1)
+]
+
+MOCK_CLINICAL_TASK_DICTIONARIES = [
+    {"category": "clinical_task", "code": code, "text": label, "sort": index}
+    for index, (code, label) in enumerate([
+        ("physiology", "生理指标计算"), ("score", "量表评分"),
+        ("risk", "风险分层"), ("diagnostic_support", "辅助诊断"),
+        ("prognosis", "预后预测"), ("response", "疗效评估"),
+        ("medication", "用药相关计算"), ("alert", "异常预警"),
+        ("text", "病历信息抽取"), ("imaging", "影像辅助分析"),
+    ], 1)
+]
+
 # 数字农业AI服务领域
 MOCK_AGRICULTURE_INDUSTRY_DICTIONARIES = [
     {
@@ -1133,6 +1190,10 @@ MOCK_DICTIONARIES = (
     + MOCK_HEALTH_INDUSTRY_DICTIONARIES
     + MOCK_HEALTH_SCENARIO_DICTIONARIES
     + MOCK_HEALTH_TECHNOLOGY_DICTIONARIES
+    + MOCK_CLINICAL_INDUSTRY_DICTIONARIES
+    + MOCK_CLINICAL_SCENARIO_DICTIONARIES
+    + MOCK_CLINICAL_TECHNOLOGY_DICTIONARIES
+    + MOCK_CLINICAL_TASK_DICTIONARIES
     + MOCK_AGRICULTURE_INDUSTRY_DICTIONARIES
     + MOCK_AGRICULTURE_SCENARIO_DICTIONARIES
     + MOCK_AGRICULTURE_TECHNOLOGY_DICTIONARIES
