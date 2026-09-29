@@ -9,6 +9,7 @@ import threading
 import time
 import os
 import tempfile
+from pathlib import Path
 
 from werkzeug.utils import secure_filename
 
@@ -1105,7 +1106,31 @@ class ServiceService:
             if dataset_file and dataset_name:
                 dataset_file.seek(0)
                 dataset_file.save(os.path.join(subdir, dataset_name))
-            return service.to_dict()
+            result = service.to_dict()
+            if meta.get("algorithm_spec") and meta.get("smoke_input"):
+                from app.services.clinical_algorithm import (
+                    ClinicalAlgorithmError, create_artifact, normalize_spec,
+                )
+                try:
+                    # Reject unusable contracts before publishing the resource.
+                    source_code = Path(dest_path).read_text(encoding="utf-8")
+                    normalize_spec(meta.get("algorithm_spec"), source_code)
+                    artifact = create_artifact(
+                        service_id, dest_path, meta["algorithm_spec"],
+                        meta.get("smoke_input"), meta.get("source"),
+                    )
+                    result["algorithmArtifact"] = artifact.to_dict()
+                except (ClinicalAlgorithmError, SyntaxError, UnicodeError) as exc:
+                    from app.services.clinical_algorithm import create_unconfigured_artifact
+                    result["algorithmArtifact"] = create_unconfigured_artifact(
+                        service_id, dest_path, meta.get("source"), f"接口规范验证失败：{exc}"
+                    ).to_dict()
+            else:
+                from app.services.clinical_algorithm import create_unconfigured_artifact
+                result["algorithmArtifact"] = create_unconfigured_artifact(
+                    service_id, dest_path, meta.get("source")
+                ).to_dict()
+            return result
         except Exception as e:
             if service_id and not draft_id:
                 try:
