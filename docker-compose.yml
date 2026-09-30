@@ -17,6 +17,8 @@ services:
       - PORT_RANGE_START=27000
       - PORT_RANGE_END=28000
       - SERVICE_HOST_URL=http://fdueblab.cn
+      - CLINICAL_UPLOADS_DOCKER_VOLUME=${CLINICAL_UPLOADS_DOCKER_VOLUME:-}
+      - CLINICAL_RUNNER_IMAGE=${CLINICAL_RUNNER_IMAGE:-python:3.12-slim}
     env_file:
       - ./.env
 

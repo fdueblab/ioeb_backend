@@ -20,13 +20,16 @@ class ClinicalAlgorithmError(ValueError):
 
 
 _TYPES = {"number", "integer", "string", "boolean"}
-_RUNNER = """import contextlib, importlib.util, json, sys
+_RUNNER = """import contextlib, importlib.util, json, os, sys
 with contextlib.redirect_stdout(sys.stderr):
-    spec = importlib.util.spec_from_file_location('clinical_algorithm', '/algorithm/model.py')
+    spec = importlib.util.spec_from_file_location('clinical_algorithm', os.environ['CLINICAL_MODEL_PATH'])
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     result = module.main_process(**json.load(sys.stdin))
-print(json.dumps(result, ensure_ascii=False, allow_nan=False))
+encoded = json.dumps(result, ensure_ascii=False, allow_nan=False)
+if len(encoded.encode('utf-8')) > 65536:
+    raise ValueError('模型输出超过 64 KB')
+print(encoded)
 """
 
 
@@ -51,6 +54,13 @@ def normalize_spec(spec, source_code):
         if options is not None and (not isinstance(options, list) or len(options) > 100 or
                                     any(not isinstance(option, str) or len(option) > 200 for option in options)):
             raise ClinicalAlgorithmError("选项必须是至多 100 个短文本值")
+        minimum, maximum = item.get("minimum"), item.get("maximum")
+        if minimum is not None or maximum is not None:
+            if kind not in ("number", "integer") or any(
+                value is not None and (isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value))
+                for value in (minimum, maximum)
+            ) or (minimum is not None and maximum is not None and minimum > maximum):
+                raise ClinicalAlgorithmError("输入字段的数值范围无效")
         clean_inputs.append({
             "name": name, "type": kind,
             "label": str(item.get("label") or name)[:100],
@@ -58,6 +68,8 @@ def normalize_spec(spec, source_code):
             "description": str(item.get("description") or "")[:300],
             "required": item.get("required") is not False,
             "options": options or [],
+            "minimum": minimum,
+            "maximum": maximum,
         })
     tree = ast.parse(source_code)
     functions = [node for node in tree.body if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "main_process"]
@@ -104,10 +116,42 @@ def validate_input(spec, values):
             raise ClinicalAlgorithmError(f"字段类型无效：{field['label']}")
         if kind in ("number", "integer") and not math.isfinite(value):
             raise ClinicalAlgorithmError(f"数值必须有限：{field['label']}")
+        if kind in ("number", "integer") and ((field.get("minimum") is not None and value < field["minimum"]) or (field.get("maximum") is not None and value > field["maximum"])):
+            raise ClinicalAlgorithmError(f"数值超出允许范围：{field['label']}")
         if kind == "string" and field["options"] and value not in field["options"]:
             raise ClinicalAlgorithmError(f"字段选项无效：{field['label']}")
         clean[name] = value
     return clean
+
+
+def validate_units(spec, units):
+    if not isinstance(units, dict):
+        raise ClinicalAlgorithmError("缺少输入单位信息")
+    expected = {item["name"]: item["unit"] for item in spec["inputs"] if item.get("unit")}
+    for name, unit in expected.items():
+        if units.get(name) != unit:
+            raise ClinicalAlgorithmError(f"字段单位不一致：{name}，需要 {unit}")
+
+
+def compare_reference_output(actual, expected, absolute_tolerance, relative_tolerance):
+    """Compare a real model result with an independently supplied reference result."""
+    if isinstance(actual, bool) or isinstance(expected, bool):
+        return actual is expected
+    if isinstance(actual, (int, float)) and isinstance(expected, (int, float)):
+        return math.isfinite(actual) and math.isfinite(expected) and math.isclose(
+            actual, expected, abs_tol=absolute_tolerance, rel_tol=relative_tolerance,
+        )
+    if isinstance(actual, dict) and isinstance(expected, dict):
+        return actual.keys() == expected.keys() and all(
+            compare_reference_output(actual[key], expected[key], absolute_tolerance, relative_tolerance)
+            for key in expected
+        )
+    if isinstance(actual, list) and isinstance(expected, list):
+        return len(actual) == len(expected) and all(
+            compare_reference_output(left, right, absolute_tolerance, relative_tolerance)
+            for left, right in zip(actual, expected)
+        )
+    return type(actual) is type(expected) and actual == expected
 
 
 def run_isolated(code_path, inputs):
@@ -115,15 +159,24 @@ def run_isolated(code_path, inputs):
     code_path = Path(code_path).resolve()
     upload_root = Path(current_app.config["UPLOAD_FOLDER"]).resolve()
     relative = code_path.relative_to(upload_root)
-    host_root = Path(os.environ.get("CLINICAL_UPLOADS_HOST_PATH", str(upload_root))).resolve()
+    host_root = Path(os.environ.get("CLINICAL_UPLOADS_HOST_PATH") or str(upload_root)).resolve()
     host_code_path = host_root / relative
     image = os.environ.get("CLINICAL_RUNNER_IMAGE", "python:3.12-slim")
+    volume_name = os.environ.get("CLINICAL_UPLOADS_DOCKER_VOLUME", "").strip()
+    if volume_name:
+        mount = f"type=volume,source={volume_name},target=/algorithm/uploads,readonly"
+        model_path = "/algorithm/uploads/" + relative.as_posix()
+    else:
+        mount = f"type=bind,source={host_code_path},target=/algorithm/model.py,readonly"
+        model_path = "/algorithm/model.py"
+    from uuid import uuid4
+    container_name = f"zzf-clinical-{uuid4().hex}"
     cmd = [
-        "docker", "run", "--rm", "--pull", "never", "--interactive", "--network", "none",
+        "docker", "run", "--rm", "--name", container_name, "--pull", "never", "--interactive", "--network", "none",
         "--read-only", "--memory", "256m", "--cpus", "1", "--pids-limit", "64",
         "--security-opt", "no-new-privileges", "--cap-drop", "ALL",
-        "--user", "65534:65534", "--mount",
-        f"type=bind,source={host_code_path},target=/algorithm/model.py,readonly",
+        "--user", "65534:65534", "--mount", mount,
+        "--env", f"CLINICAL_MODEL_PATH={model_path}",
         image, "python", "-B", "-c", _RUNNER,
     ]
     try:
@@ -131,7 +184,13 @@ def run_isolated(code_path, inputs):
             cmd, input=json.dumps(inputs, ensure_ascii=False), text=True,
             capture_output=True, timeout=20, check=False,
         )
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except subprocess.TimeoutExpired as exc:
+        try:
+            subprocess.run(["docker", "rm", "-f", container_name], capture_output=True, timeout=5, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        raise ClinicalAlgorithmError("模型运行超时") from exc
+    except OSError as exc:
         raise ClinicalAlgorithmError(f"受控运行环境不可用：{type(exc).__name__}") from exc
     if proc.returncode:
         raise ClinicalAlgorithmError("模型运行失败；请检查输入、依赖和代码")
@@ -195,6 +254,33 @@ def create_unconfigured_artifact(service_id, code_path, source=None, reason=None
         source_json=_source_with_validation(source, "needs_configuration", reason or "缺少可验证的输入规范或运行样例"),
     )
     db.session.add(artifact)
+    db.session.commit()
+    return artifact
+
+
+def configure_artifact(service_id, code_path, spec, smoke_input):
+    """Revalidate an existing artifact when its author supplies a runnable contract."""
+    artifact = get_artifact(service_id)
+    source_code = Path(code_path).read_text(encoding="utf-8")
+    normalized = normalize_spec(spec, source_code)
+    smoke = validate_input(normalized, smoke_input)
+    source = json.loads(artifact.source_json or "{}")
+    source.pop("referenceCheck", None)
+    artifact.version += 1
+    artifact.code_sha256 = hashlib.sha256(Path(code_path).read_bytes()).hexdigest()
+    artifact.spec_json = json.dumps(normalized, ensure_ascii=False)
+    artifact.smoke_input_json = json.dumps(smoke, ensure_ascii=False)
+    artifact.status = "draft"
+    artifact.validation_error = None
+    artifact.validated_at = None
+    source["publicTrialEnabled"] = False
+    db.session.commit()
+    try:
+        run_isolated(code_path, smoke)
+        artifact.mark_ready()
+    except ClinicalAlgorithmError as exc:
+        artifact.validation_error = str(exc)
+    artifact.source_json = _source_with_validation(source, artifact.status, artifact.validation_error)
     db.session.commit()
     return artifact
 

@@ -4,16 +4,20 @@
 """
 
 import json
-from flask import request, send_file
+import math
+from datetime import datetime, timezone
+from pathlib import Path
+from flask import current_app, request, send_file
 from flask_restx import Namespace, Resource, fields
 from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
 
 from app.services.service_service import ServiceServiceError, service_service
 from app.services.user_service_relation_service import UserServiceRelationError, user_service_relation_service
 from app.services.service_sale_service import ServiceSaleError, service_sale_service
 from app.services.audit_service import audit_service
 from app.utils.auth_utils import get_request_user
-from app.services.clinical_algorithm import ClinicalAlgorithmError, get_artifact, validate_input, run_isolated, verify_artifact_code
+from app.services.clinical_algorithm import ClinicalAlgorithmError, compare_reference_output, configure_artifact, get_artifact, validate_input, validate_units, run_isolated, verify_artifact_code
 from app.models.service.algorithm_artifact import AlgorithmArtifact
 from app.models.service.service import Service
 from app.models.user_service_relation import UserServiceRelation
@@ -356,7 +360,49 @@ def _algorithm_access(service_id, user):
         ).first()
         if not purchased:
             return None
+    if service.domain == "health" and str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user):
+        if not _clinical_approved(service):
+            return None
+        artifact = AlgorithmArtifact.query.filter_by(service_id=service_id).first()
+        source = json.loads(artifact.source_json or "{}") if artifact else {}
+        if not source.get("publicTrialEnabled"):
+            return None
     return service
+
+
+_CLINICAL_PREFIX = "ZZF_CLINICAL_V1:"
+
+
+def _clinical_card(service):
+    raw = service.source.company_introduce if service.source else ""
+    if service.domain != "health" or not raw.startswith(_CLINICAL_PREFIX):
+        return None
+    try:
+        card = json.loads(raw[len(_CLINICAL_PREFIX):])
+    except (ValueError, TypeError):
+        return None
+    return card if isinstance(card, dict) else None
+
+
+def _clinical_approved(service):
+    card = _clinical_card(service)
+    return bool(card and card.get("reviewStatus") == "approved" and all(card.get(key) for key in ("population", "inputs", "output", "intendedUse")))
+
+
+def _pending_clinical_source(source):
+    if not isinstance(source, dict):
+        return source
+    raw = source.get("companyIntroduce", "")
+    if not isinstance(raw, str) or not raw.startswith(_CLINICAL_PREFIX):
+        return source
+    try:
+        card = json.loads(raw[len(_CLINICAL_PREFIX):])
+        if isinstance(card, dict):
+            card["reviewStatus"] = "pending"
+            return {**source, "companyIntroduce": _CLINICAL_PREFIX + json.dumps(card, ensure_ascii=False)}
+    except (ValueError, TypeError):
+        pass
+    return source
 
 
 def _attach_online_usage(services, user):
@@ -375,13 +421,20 @@ def _attach_online_usage(services, user):
         artifact = artifacts.get(item["id"])
         can_access = bool(user) and (not item.get("isForSale") or
             str(item.get("creatorId")) == str(user.id) or item["id"] in purchased_ids)
+        clinical_public = item.get("domain") != "health" or _clinical_approved(
+            Service.query.filter_by(id=item["id"]).first()
+        )
         item["onlineUsage"] = {
             "supported": bool(artifact),
-            "canRun": bool(can_access and artifact and artifact.status == "ready"),
+            "canRun": bool(can_access and artifact and artifact.status == "ready" and (
+                (bool(user) and str(item.get("creatorId")) == str(user.id))
+                or (clinical_public and bool(json.loads(artifact.source_json or "{}").get("publicTrialEnabled")))
+            )),
             "status": artifact.status if artifact else "needs_configuration",
             "reason": "请先购买该模型" if not can_access else
                 (artifact.validation_error if artifact else "尚未配置在线运行接口"),
             "version": artifact.version if artifact else None,
+            "publicTrialEnabled": bool(json.loads(artifact.source_json or "{}").get("publicTrialEnabled")) if artifact else False,
         }
     return services
 
@@ -450,6 +503,8 @@ class ServiceList(Resource):
             return {"status": "error", "message": "元应用请使用预发布接口"}, 400
 
         data["creator_id"] = user.id
+        if data.get("domain") == "health" and "source" in data:
+            data["source"] = _pending_clinical_source(data["source"])
 
         try:
             service = service_service.create_service(data)
@@ -554,6 +609,8 @@ class ServiceResource(Resource):
             return {"status": "error", "message": "不允许修改成果归属或类型"}, 400
         if "status" in data and data["status"] != existing.get("status") and not audit_service.has_admin_permission(user):
             return {"status": "error", "message": "请通过专用接口变更成果状态"}, 400
+        if (existing.get("domain") == "health" or data.get("domain") == "health") and "source" in data:
+            data["source"] = _pending_clinical_source(data["source"])
 
         try:
             service = service_service.update_service(id, data)
@@ -832,6 +889,10 @@ scenario_generated_upload_parser.add_argument(
     "algorithm_spec", location="form", type=str, required=False, help="算法输入输出规范 JSON"
 )
 scenario_generated_upload_parser.add_argument(
+    "reference_files", location="files", type=FileStorage, action="append", required=False,
+    help="Reference PDF or DOCX files used to reproduce the algorithm",
+)
+scenario_generated_upload_parser.add_argument(
     "smoke_input", location="form", type=str, required=False, help="算法测试输入 JSON"
 )
 scenario_generated_upload_parser.add_argument(
@@ -868,13 +929,14 @@ class ScenarioGeneratedUpload(Resource):
         }
         if args.get("source"):
             try:
-                meta["source"] = json.loads(args["source"])
+                meta["source"] = _pending_clinical_source(json.loads(args["source"]))
             except json.JSONDecodeError as e:
                 return {"status": "error", "message": f"source JSON 格式错误: {str(e)}"}, 400
 
         meta["creator_id"] = user.id
         meta["test_file"] = args.get("test_file")
         meta["dataset_file"] = args.get("dataset_file")
+        meta["reference_files"] = args.get("reference_files") or []
         if args.get("draft_id"):
             meta["draft_id"] = args["draft_id"]
         if args.get("algorithm_spec") or args.get("smoke_input"):
@@ -910,6 +972,30 @@ class ClinicalAlgorithmArtifactResource(Resource):
             return {"status": "error", "message": str(exc)}, 404
 
 
+@api.route("/<string:id>/clinical-artifact/configure")
+class ClinicalAlgorithmConfigureResource(Resource):
+    def post(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        if not service or (str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user)):
+            return {"status": "error", "message": "模型不存在或无权配置"}, 404
+        payload = request.get_json(silent=True) or {}
+        try:
+            code_path, _ = service_service.get_scenario_generated_code_path(id)
+            artifact = configure_artifact(id, code_path, payload.get("spec"), payload.get("smokeInput"))
+            card = _clinical_card(service)
+            if card and card.get("reviewStatus") == "approved":
+                card["reviewStatus"] = "pending"
+                service.source.company_introduce = _CLINICAL_PREFIX + json.dumps(card, ensure_ascii=False)
+                from app.extensions import db
+                db.session.commit()
+            return {"status": "success", "artifact": artifact.to_dict()}, 200
+        except (ClinicalAlgorithmError, ServiceServiceError, OSError, SyntaxError, UnicodeError) as exc:
+            return {"status": "error", "message": str(exc)}, 400
+
+
 @api.route("/<string:id>/clinical-run")
 @api.route("/<string:id>/algorithm-run")
 class ClinicalAlgorithmRunResource(Resource):
@@ -924,13 +1010,193 @@ class ClinicalAlgorithmRunResource(Resource):
             if artifact.status != "ready":
                 return {"status": "error", "message": "该模型尚未通过运行验证"}, 409
             payload = request.get_json(silent=True) or {}
-            values = validate_input(json.loads(artifact.spec_json), payload.get("inputs"))
+            spec = json.loads(artifact.spec_json)
+            if payload.get("version") is not None and payload.get("version") != artifact.version:
+                return {"status": "error", "message": "模型版本已更新，请刷新运行规范"}, 409
+            values = validate_input(spec, payload.get("inputs"))
+            validate_units(spec, payload.get("units") or {})
             code_path, _ = service_service.get_scenario_generated_code_path(id)
             verify_artifact_code(artifact, code_path)
             result = run_isolated(code_path, values)
             return {"status": "success", "result": result, "version": artifact.version}, 200
         except (ClinicalAlgorithmError, ServiceServiceError) as exc:
             return {"status": "error", "message": str(exc)}, 400
+
+
+@api.route("/clinical-catalog")
+class ClinicalCatalog(Resource):
+    def get(self):
+        """Clinical site catalog: approved models only, regardless of legacy domain tags."""
+        query = (request.args.get("q") or "").strip().lower()
+        services = Service.query.filter_by(type="generated_algorithm", domain="health", deleted=0).all()
+        visible = [service.to_dict() for service in services if service.status != "draft" and _clinical_approved(service) and (
+            not query or query in f"{service.name} {service.scenario} {service.source.ms_introduce if service.source else ''}".lower()
+        )]
+        _attach_online_usage(visible, get_request_user())
+        return {"status": "success", "services": visible, "total": len(visible)}, 200
+
+
+@api.route("/clinical-catalog/<string:id>")
+class ClinicalCatalogItem(Resource):
+    def get(self, id):
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        if not service or service.status == "draft" or not _clinical_approved(service):
+            return {"status": "error", "message": "临床模型不存在或未通过目录审核"}, 404
+        item = service.to_dict()
+        _attach_online_usage([item], get_request_user())
+        return {"status": "success", "service": item}, 200
+
+
+@api.route("/<string:id>/clinical-trial-policy")
+class ClinicalTrialPolicy(Resource):
+    def post(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        if not service or (str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user)):
+            return {"status": "error", "message": "模型不存在或无权配置"}, 404
+        artifact = AlgorithmArtifact.query.filter_by(service_id=id).first()
+        if not artifact:
+            return {"status": "error", "message": "请先登记模型运行规范"}, 409
+        payload = request.get_json(silent=True) or {}
+        if not isinstance(payload.get("enabled"), bool):
+            return {"status": "error", "message": "enabled 必须为布尔值"}, 400
+        if payload["enabled"] and artifact.status != "ready":
+            return {"status": "error", "message": "模型样例验证通过后才能开启试用"}, 409
+        source = json.loads(artifact.source_json or "{}")
+        source["publicTrialEnabled"] = payload["enabled"]
+        artifact.source_json = json.dumps(source, ensure_ascii=False)
+        from app.extensions import db
+        db.session.commit()
+        return {"status": "success", "enabled": payload["enabled"]}, 200
+
+
+@api.route("/<string:id>/clinical-reference-check")
+class ClinicalReferenceCheck(Resource):
+    def post(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        if not service or (str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user)):
+            return {"status": "error", "message": "模型不存在或无权验证"}, 404
+        payload = request.get_json(silent=True) or {}
+        citation = str(payload.get("citation") or "").strip()
+        if not citation or len(citation) > 300 or "expected" not in payload:
+            return {"status": "error", "message": "请填写原文页码或公式号及预期输出"}, 400
+        try:
+            if len(json.dumps(payload["expected"], ensure_ascii=False, allow_nan=False)) > 16384:
+                return {"status": "error", "message": "对照输出不能超过 16 KB"}, 400
+        except (TypeError, ValueError):
+            return {"status": "error", "message": "对照输出必须是有限的 JSON 数据"}, 400
+        abs_tol, rel_tol = payload.get("absoluteTolerance", 1e-6), payload.get("relativeTolerance", 1e-6)
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0 or value > 1 for value in (abs_tol, rel_tol)):
+            return {"status": "error", "message": "误差容忍度必须是 0 到 1 的有限数值"}, 400
+        try:
+            artifact = get_artifact(id)
+            if artifact.status != "ready":
+                return {"status": "error", "message": "请先通过样例运行验证"}, 409
+            spec = json.loads(artifact.spec_json)
+            inputs = validate_input(spec, payload.get("inputs"))
+            validate_units(spec, payload.get("units") or {})
+            code_path, _ = service_service.get_scenario_generated_code_path(id)
+            verify_artifact_code(artifact, code_path)
+            actual = run_isolated(code_path, inputs)
+            passed = compare_reference_output(actual, payload["expected"], abs_tol, rel_tol)
+            source = json.loads(artifact.source_json or "{}")
+            report = {"passed": passed, "citation": citation, "expected": payload["expected"],
+                      "actual": actual, "absoluteTolerance": abs_tol, "relativeTolerance": rel_tol,
+                      "artifactVersion": artifact.version, "checkedAt": datetime.now(timezone.utc).isoformat()}
+            source["referenceCheck"] = report
+            artifact.source_json = json.dumps(source, ensure_ascii=False)
+            from app.extensions import db
+            db.session.commit()
+            return {"status": "success", "referenceCheck": report}, 200
+        except (ClinicalAlgorithmError, ServiceServiceError, TypeError, ValueError) as exc:
+            return {"status": "error", "message": str(exc)}, 400
+
+
+@api.route("/<string:id>/clinical-review")
+class ClinicalDirectoryReview(Resource):
+    def post(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        if not audit_service.has_admin_permission(user):
+            return {"status": "error", "message": "需要审核权限"}, 403
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        card = _clinical_card(service) if service else None
+        if not card or not all(card.get(key) for key in ("population", "inputs", "output", "intendedUse")):
+            return {"status": "error", "message": "临床说明卡不完整"}, 400
+        payload = request.get_json(silent=True) or {}
+        decision = payload.get("decision")
+        if decision not in ("approved", "rejected"):
+            return {"status": "error", "message": "审核决定无效"}, 400
+        artifact = AlgorithmArtifact.query.filter_by(service_id=id).first()
+        provenance = json.loads(artifact.source_json or "{}") if artifact else {}
+        if decision == "approved" and provenance.get("reproductionMode") and not (
+            provenance.get("referenceCheck", {}).get("passed") and
+            provenance["referenceCheck"].get("artifactVersion") == artifact.version
+        ):
+            return {"status": "error", "message": "复现模型需先通过原文对照用例"}, 409
+        if decision == "approved" and provenance.get("reproductionMode"):
+            if artifact.status != "ready":
+                return {"status": "error", "message": "复现模型尚未通过样例运行"}, 409
+            try:
+                code_path, _ = service_service.get_scenario_generated_code_path(id)
+                verify_artifact_code(artifact, code_path)
+            except (ClinicalAlgorithmError, ServiceServiceError) as exc:
+                return {"status": "error", "message": str(exc)}, 409
+        card["reviewStatus"] = decision
+        service.source.company_introduce = _CLINICAL_PREFIX + json.dumps(card, ensure_ascii=False)
+        from app.extensions import db
+        db.session.commit()
+        return {"status": "success", "reviewStatus": decision}, 200
+
+
+@api.route("/clinical-review-queue")
+class ClinicalReviewQueue(Resource):
+    def get(self):
+        user, err = _require_login_user()
+        if err:
+            return err
+        if not audit_service.has_admin_permission(user):
+            return {"status": "error", "message": "需要审核权限"}, 403
+        services = Service.query.filter_by(type="generated_algorithm", domain="health", deleted=0).all()
+        pending = []
+        for item in services:
+            if item.status == "draft" or (_clinical_card(item) or {}).get("reviewStatus") != "pending":
+                continue
+            details = item.to_dict()
+            artifact = AlgorithmArtifact.query.filter_by(service_id=item.id).first()
+            provenance = json.loads(artifact.source_json or "{}") if artifact else {}
+            details["referenceAssets"] = provenance.get("referenceAssets", [])
+            details["referenceCheck"] = provenance.get("referenceCheck")
+            details["reproductionMode"] = bool(provenance.get("reproductionMode"))
+            pending.append(details)
+        return {"status": "success", "services": pending, "total": len(pending)}, 200
+
+
+@api.route("/<string:id>/clinical-reference/<int:index>")
+class ClinicalReferenceDownload(Resource):
+    def get(self, id, index):
+        user, err = _require_login_user()
+        if err:
+            return err
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        if not service or (str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user)):
+            return {"status": "error", "message": "资料不存在或无权读取"}, 404
+        artifact = AlgorithmArtifact.query.filter_by(service_id=id).first()
+        assets = json.loads(artifact.source_json or "{}").get("referenceAssets", []) if artifact else []
+        if not isinstance(assets, list) or index < 0 or index >= len(assets):
+            return {"status": "error", "message": "参考资料不存在"}, 404
+        asset = assets[index]
+        stored_name = secure_filename(asset.get("storedName", "")) if isinstance(asset, dict) else ""
+        path = Path(current_app.config["UPLOAD_FOLDER"]) / "generated_algorithm" / id / "references" / stored_name
+        if not stored_name or not path.is_file():
+            return {"status": "error", "message": "参考资料文件不存在"}, 404
+        return send_file(path, as_attachment=True, download_name=asset.get("name") or stored_name)
 
 
 @api.route("/batch")
