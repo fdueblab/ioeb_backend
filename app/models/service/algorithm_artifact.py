@@ -29,6 +29,8 @@ class AlgorithmArtifact(db.Model):
             "validationError": self.validation_error,
             "validatedAt": self.validated_at,
             "source": json.loads(self.source_json) if self.source_json else None,
+            "smokeInput": json.loads(self.smoke_input_json) if self.smoke_input_json else None,
+            "publicTrialEnabled": bool((json.loads(self.source_json) if self.source_json else {}).get("publicTrialEnabled")),
         }
 
     def mark_ready(self):

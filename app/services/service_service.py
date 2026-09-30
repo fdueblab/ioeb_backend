@@ -4,6 +4,7 @@
 """
 
 import re
+import hashlib
 from typing import Dict, List, Optional, Tuple
 import threading
 import time
@@ -1031,6 +1032,26 @@ class ServiceService:
                     f"数据集文件格式不支持（允许: {', '.join(sorted(allowed_data_ext))}）"
                 )
 
+        references = [item for item in (meta.get("reference_files") or []) if item and item.filename]
+        if len(references) > 5:
+            raise ServiceServiceError("最多上传 5 份参考资料")
+        reference_assets = []
+        for index, item in enumerate(references, start=1):
+            safe_name = secure_filename(item.filename)
+            if not safe_name or os.path.splitext(safe_name)[1].lower() not in {".pdf", ".docx", ".txt", ".md", ".py", ".ipynb", ".json", ".csv", ".zip"}:
+                raise ServiceServiceError("参考资料格式不受支持")
+            item.seek(0)
+            payload = item.read(10 * 1024 * 1024 + 1)
+            if len(payload) > 10 * 1024 * 1024:
+                raise ServiceServiceError("单份参考资料不能超过 10 MB")
+            item.seek(0)
+            reference_assets.append({
+                "name": item.filename,
+                "storedName": f"{index}_{safe_name}",
+                "size": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+            })
+
         name = (meta.get("name") or raw_name.replace(".py", "")).strip()
         if not name:
             raise ServiceServiceError("服务名称不能为空")
@@ -1067,7 +1088,9 @@ class ServiceService:
             ],
         }
         if meta.get("source") and isinstance(meta["source"], dict):
-            service_data["source"] = meta["source"]
+            service_data["source"] = dict(meta["source"])
+        if reference_assets:
+            service_data.setdefault("source", {})["referenceAssets"] = reference_assets
         if meta.get("creator_id"):
             service_data["creator_id"] = meta["creator_id"]
 
@@ -1106,6 +1129,12 @@ class ServiceService:
             if dataset_file and dataset_name:
                 dataset_file.seek(0)
                 dataset_file.save(os.path.join(subdir, dataset_name))
+            if reference_assets:
+                reference_dir = os.path.join(subdir, "references")
+                os.makedirs(reference_dir, exist_ok=True)
+                for item, asset in zip(references, reference_assets):
+                    item.seek(0)
+                    item.save(os.path.join(reference_dir, asset["storedName"]))
             result = service.to_dict()
             if meta.get("algorithm_spec") and meta.get("smoke_input"):
                 from app.services.clinical_algorithm import (
@@ -1117,18 +1146,18 @@ class ServiceService:
                     normalize_spec(meta.get("algorithm_spec"), source_code)
                     artifact = create_artifact(
                         service_id, dest_path, meta["algorithm_spec"],
-                        meta.get("smoke_input"), meta.get("source"),
+                        meta.get("smoke_input"), service_data.get("source"),
                     )
                     result["algorithmArtifact"] = artifact.to_dict()
                 except (ClinicalAlgorithmError, SyntaxError, UnicodeError) as exc:
                     from app.services.clinical_algorithm import create_unconfigured_artifact
                     result["algorithmArtifact"] = create_unconfigured_artifact(
-                        service_id, dest_path, meta.get("source"), f"接口规范验证失败：{exc}"
+                        service_id, dest_path, service_data.get("source"), f"接口规范验证失败：{exc}"
                     ).to_dict()
             else:
                 from app.services.clinical_algorithm import create_unconfigured_artifact
                 result["algorithmArtifact"] = create_unconfigured_artifact(
-                    service_id, dest_path, meta.get("source")
+                    service_id, dest_path, service_data.get("source")
                 ).to_dict()
             return result
         except Exception as e:
