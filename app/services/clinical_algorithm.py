@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 import os
+import time
 from pathlib import Path
 import subprocess
 
@@ -20,12 +21,12 @@ class ClinicalAlgorithmError(ValueError):
 
 
 _TYPES = {"number", "integer", "string", "boolean"}
-_RUNNER = """import contextlib, importlib.util, json, os, sys
+_RUNNER = """import contextlib, json, sys
+payload = json.load(sys.stdin)
 with contextlib.redirect_stdout(sys.stderr):
-    spec = importlib.util.spec_from_file_location('clinical_algorithm', os.environ['CLINICAL_MODEL_PATH'])
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    result = module.main_process(**json.load(sys.stdin))
+    namespace = {'__name__': 'clinical_algorithm'}
+    exec(compile(payload['code'], 'model.py', 'exec'), namespace)
+    result = namespace['main_process'](**payload['inputs'])
 encoded = json.dumps(result, ensure_ascii=False, allow_nan=False)
 if len(encoded.encode('utf-8')) > 65536:
     raise ValueError('模型输出超过 64 KB')
@@ -80,13 +81,34 @@ def normalize_spec(spec, source_code):
         raise ClinicalAlgorithmError("main_process 必须使用明确命名的参数")
     if names != [arg.arg for arg in args.args]:
         raise ClinicalAlgorithmError("输入规范与 main_process 参数不一致")
+    defaults = len(args.defaults)
+    for index, field in enumerate(clean_inputs):
+        if not field["required"] and index < len(names) - defaults:
+            raise ClinicalAlgorithmError(f"可选字段必须在 main_process 中提供默认值：{field['name']}")
+    output = spec.get("output") if isinstance(spec.get("output"), dict) else {}
+    if output.get("type") and output["type"] not in {"number", "integer", "string", "boolean", "object", "array"}:
+        raise ClinicalAlgorithmError("输出类型不受支持")
     return {
         "title": str(spec.get("title") or "临床算法")[:100],
         "description": str(spec.get("description") or "")[:500],
         "clinicalScope": str(spec.get("clinicalScope") or "")[:500],
         "inputs": clean_inputs,
-        "output": spec.get("output") if isinstance(spec.get("output"), dict) else {},
+        "output": {"type": output.get("type"), "description": str(output.get("description") or "")[:500]},
     }
+
+
+def describe_parameters(source_code):
+    """Read the source signature without importing or executing supplier code."""
+    tree = ast.parse(source_code)
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "main_process"]
+    if len(functions) != 1:
+        raise ClinicalAlgorithmError("代码需要一个同步的 main_process 入口")
+    args = functions[0].args
+    if args.vararg or args.kwarg or args.posonlyargs or args.kwonlyargs:
+        raise ClinicalAlgorithmError("main_process 必须使用明确命名的参数")
+    required_count = len(args.args) - len(args.defaults)
+    return [{"name": arg.arg, "required": index < required_count}
+            for index, arg in enumerate(args.args)]
 
 
 def validate_input(spec, values):
@@ -94,7 +116,7 @@ def validate_input(spec, values):
         serialized = json.dumps(values, ensure_ascii=False, allow_nan=False)
     except (TypeError, ValueError) as exc:
         raise ClinicalAlgorithmError("输入必须是有限的 JSON 数据") from exc
-    if not isinstance(values, dict) or len(serialized) > 16384:
+    if not isinstance(values, dict) or len(serialized.encode("utf-8")) > 16384:
         raise ClinicalAlgorithmError("输入需要是大小不超过 16 KB 的对象")
     expected = {item["name"]: item for item in spec["inputs"]}
     if set(values) - set(expected):
@@ -133,6 +155,23 @@ def validate_units(spec, units):
             raise ClinicalAlgorithmError(f"字段单位不一致：{name}，需要 {unit}")
 
 
+def validate_output(spec, result):
+    kind = (spec.get("output") or {}).get("type")
+    if not kind:
+        return result
+    valid = {
+        "number": isinstance(result, (int, float)) and not isinstance(result, bool),
+        "integer": isinstance(result, int) and not isinstance(result, bool),
+        "string": isinstance(result, str),
+        "boolean": isinstance(result, bool),
+        "object": isinstance(result, dict),
+        "array": isinstance(result, list),
+    }.get(kind, False)
+    if not valid:
+        raise ClinicalAlgorithmError("模型输出与配置的类型不一致")
+    return result
+
+
 def compare_reference_output(actual, expected, absolute_tolerance, relative_tolerance):
     """Compare a real model result with an independently supplied reference result."""
     if isinstance(actual, bool) or isinstance(expected, bool):
@@ -154,34 +193,31 @@ def compare_reference_output(actual, expected, absolute_tolerance, relative_tole
     return type(actual) is type(expected) and actual == expected
 
 
-def run_isolated(code_path, inputs):
+def run_isolated(code_path, inputs, expected_sha256=None):
     """Run untrusted model code in a resource-limited container."""
     code_path = Path(code_path).resolve()
     upload_root = Path(current_app.config["UPLOAD_FOLDER"]).resolve()
-    relative = code_path.relative_to(upload_root)
-    host_root = Path(os.environ.get("CLINICAL_UPLOADS_HOST_PATH") or str(upload_root)).resolve()
-    host_code_path = host_root / relative
+    code_path.relative_to(upload_root)
+    code_bytes = code_path.read_bytes()
+    if expected_sha256 and hashlib.sha256(code_bytes).hexdigest() != expected_sha256:
+        raise ClinicalAlgorithmError("模型源码与验证版本不一致，请重新登记并验证")
+    if len(code_bytes) > 1024 * 1024:
+        raise ClinicalAlgorithmError("在线运行源码不能超过 1 MB")
+    source_code = code_bytes.decode("utf-8")
     image = os.environ.get("CLINICAL_RUNNER_IMAGE", "python:3.12-slim")
-    volume_name = os.environ.get("CLINICAL_UPLOADS_DOCKER_VOLUME", "").strip()
-    if volume_name:
-        mount = f"type=volume,source={volume_name},target=/algorithm/uploads,readonly"
-        model_path = "/algorithm/uploads/" + relative.as_posix()
-    else:
-        mount = f"type=bind,source={host_code_path},target=/algorithm/model.py,readonly"
-        model_path = "/algorithm/model.py"
     from uuid import uuid4
     container_name = f"zzf-clinical-{uuid4().hex}"
     cmd = [
         "docker", "run", "--rm", "--name", container_name, "--pull", "never", "--interactive", "--network", "none",
         "--read-only", "--memory", "256m", "--cpus", "1", "--pids-limit", "64",
         "--security-opt", "no-new-privileges", "--cap-drop", "ALL",
-        "--user", "65534:65534", "--mount", mount,
-        "--env", f"CLINICAL_MODEL_PATH={model_path}",
+        "--user", "65534:65534",
         image, "python", "-B", "-c", _RUNNER,
     ]
     try:
         proc = subprocess.run(
-            cmd, input=json.dumps(inputs, ensure_ascii=False), text=True,
+            cmd, input=json.dumps({"code": source_code, "inputs": inputs}, ensure_ascii=False), text=True,
+            encoding="utf-8",
             capture_output=True, timeout=20, check=False,
         )
     except subprocess.TimeoutExpired as exc:
@@ -195,6 +231,10 @@ def run_isolated(code_path, inputs):
     if proc.returncode:
         raise ClinicalAlgorithmError("模型运行失败；请检查输入、依赖和代码")
     try:
+        if len(proc.stdout.encode("utf-8")) > 65536:
+            raise ClinicalAlgorithmError("模型输出超过 64 KB")
+        if len(proc.stderr.encode("utf-8")) > 65536:
+            raise ClinicalAlgorithmError("模型日志超过 64 KB")
         return json.loads(proc.stdout)
     except json.JSONDecodeError as exc:
         raise ClinicalAlgorithmError("模型输出不是 JSON 数据") from exc
@@ -232,7 +272,7 @@ def create_artifact(service_id, code_path, spec, smoke_input, source=None):
     db.session.add(artifact)
     db.session.commit()
     try:
-        run_isolated(code_path, smoke)
+        validate_output(normalized, run_isolated(code_path, smoke))
         artifact.mark_ready()
     except ClinicalAlgorithmError as exc:
         artifact.status = "draft"
@@ -258,31 +298,50 @@ def create_unconfigured_artifact(service_id, code_path, source=None, reason=None
     return artifact
 
 
-def configure_artifact(service_id, code_path, spec, smoke_input):
+def configure_artifact(service_id, code_path, spec, smoke_input, expected_version=None):
     """Revalidate an existing artifact when its author supplies a runnable contract."""
     artifact = get_artifact(service_id)
+    current_version = artifact.version
+    if expected_version is not None and expected_version != current_version:
+        raise ClinicalAlgorithmError("模型版本已更新，请刷新运行规范")
     source_code = Path(code_path).read_text(encoding="utf-8")
     normalized = normalize_spec(spec, source_code)
     smoke = validate_input(normalized, smoke_input)
     source = json.loads(artifact.source_json or "{}")
     source.pop("referenceCheck", None)
-    artifact.version += 1
-    artifact.code_sha256 = hashlib.sha256(Path(code_path).read_bytes()).hexdigest()
-    artifact.spec_json = json.dumps(normalized, ensure_ascii=False)
-    artifact.smoke_input_json = json.dumps(smoke, ensure_ascii=False)
-    artifact.status = "draft"
-    artifact.validation_error = None
-    artifact.validated_at = None
     source["publicTrialEnabled"] = False
+    new_version = current_version + 1
+    updated = AlgorithmArtifact.query.filter_by(service_id=service_id, version=current_version).update({
+        "version": new_version,
+        "code_sha256": hashlib.sha256(Path(code_path).read_bytes()).hexdigest(),
+        "spec_json": json.dumps(normalized, ensure_ascii=False),
+        "smoke_input_json": json.dumps(smoke, ensure_ascii=False),
+        "source_json": _source_with_validation(source, "draft"),
+        "status": "draft",
+        "validation_error": None,
+        "validated_at": None,
+    }, synchronize_session=False)
+    if updated != 1:
+        db.session.rollback()
+        raise ClinicalAlgorithmError("模型版本已更新，请刷新运行规范")
     db.session.commit()
+    validation_error = None
     try:
-        run_isolated(code_path, smoke)
-        artifact.mark_ready()
+        validate_output(normalized, run_isolated(code_path, smoke))
     except ClinicalAlgorithmError as exc:
-        artifact.validation_error = str(exc)
-    artifact.source_json = _source_with_validation(source, artifact.status, artifact.validation_error)
+        validation_error = str(exc)
+    status = "draft" if validation_error else "ready"
+    finished = AlgorithmArtifact.query.filter_by(service_id=service_id, version=new_version).update({
+        "status": status,
+        "validation_error": validation_error,
+        "validated_at": int(time.time() * 1000) if status == "ready" else None,
+        "source_json": _source_with_validation(source, status, validation_error),
+    }, synchronize_session=False)
+    if finished != 1:
+        db.session.rollback()
+        raise ClinicalAlgorithmError("验证期间模型版本已更新，请刷新运行规范")
     db.session.commit()
-    return artifact
+    return get_artifact(service_id)
 
 
 def get_artifact(service_id):

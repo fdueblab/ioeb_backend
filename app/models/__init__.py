@@ -8,6 +8,7 @@ from app.models.dictionary import Dictionary
 from app.models.feedback import Feedback
 from app.models.service.meta_app_config import MetaAppConfig
 from app.models.service.algorithm_artifact import AlgorithmArtifact
+from app.models.service.algorithm_run import AlgorithmRun
 from app.models.service.service import Service
 from app.models.service.service_api import ServiceApi
 from app.models.service.service_api_parameter import ServiceApiParameter
@@ -46,6 +47,7 @@ __all__ = [
     "ServiceApiTool",
     "MetaAppConfig",
     "AlgorithmArtifact",
+    "AlgorithmRun",
     "Dictionary",
     "Dataset",
     "Feedback",
