@@ -5,6 +5,8 @@
 
 import json
 import math
+import time
+from uuid import uuid4
 from datetime import datetime, timezone
 from pathlib import Path
 from flask import current_app, request, send_file
@@ -17,8 +19,9 @@ from app.services.user_service_relation_service import UserServiceRelationError,
 from app.services.service_sale_service import ServiceSaleError, service_sale_service
 from app.services.audit_service import audit_service
 from app.utils.auth_utils import get_request_user
-from app.services.clinical_algorithm import ClinicalAlgorithmError, compare_reference_output, configure_artifact, get_artifact, validate_input, validate_units, run_isolated, verify_artifact_code
+from app.services.clinical_algorithm import ClinicalAlgorithmError, compare_reference_output, configure_artifact, describe_parameters, get_artifact, validate_input, validate_output, validate_units, run_isolated, verify_artifact_code
 from app.models.service.algorithm_artifact import AlgorithmArtifact
+from app.models.service.algorithm_run import AlgorithmRun
 from app.models.service.service import Service
 from app.models.user_service_relation import UserServiceRelation
 
@@ -424,17 +427,30 @@ def _attach_online_usage(services, user):
         clinical_public = item.get("domain") != "health" or _clinical_approved(
             Service.query.filter_by(id=item["id"]).first()
         )
+        owner = bool(user) and str(item.get("creatorId")) == str(user.id)
+        enabled = bool(json.loads(artifact.source_json or "{}").get("publicTrialEnabled")) if artifact else False
+        can_run = bool(can_access and artifact and artifact.status == "ready" and (owner or (clinical_public and enabled)))
+        reason = None
+        if not can_run:
+            if not user:
+                reason = "请先登录"
+            elif not can_access:
+                reason = "请先购买该模型"
+            elif not artifact:
+                reason = "尚未配置在线运行规范"
+            elif artifact.status != "ready":
+                reason = artifact.validation_error or "模型尚未通过样例验证"
+            elif not clinical_public:
+                reason = "模型尚未通过目录审核"
+            else:
+                reason = "作者尚未开启公开试用"
         item["onlineUsage"] = {
             "supported": bool(artifact),
-            "canRun": bool(can_access and artifact and artifact.status == "ready" and (
-                (bool(user) and str(item.get("creatorId")) == str(user.id))
-                or (clinical_public and bool(json.loads(artifact.source_json or "{}").get("publicTrialEnabled")))
-            )),
+            "canRun": can_run,
             "status": artifact.status if artifact else "needs_configuration",
-            "reason": "请先购买该模型" if not can_access else
-                (artifact.validation_error if artifact else "尚未配置在线运行接口"),
+            "reason": reason,
             "version": artifact.version if artifact else None,
-            "publicTrialEnabled": bool(json.loads(artifact.source_json or "{}").get("publicTrialEnabled")) if artifact else False,
+            "publicTrialEnabled": enabled,
         }
     return services
 
@@ -964,10 +980,16 @@ class ClinicalAlgorithmArtifactResource(Resource):
         user, err = _require_login_user()
         if err:
             return err
-        if not _algorithm_access(id, user):
+        service = _algorithm_access(id, user)
+        if not service:
             return {"status": "error", "message": "算法模型不存在或无权查看"}, 404
         try:
-            return {"status": "success", "artifact": get_artifact(id).to_dict()}, 200
+            artifact = get_artifact(id).to_dict()
+            if str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user):
+                artifact.pop("source", None)
+                artifact.pop("codeSha256", None)
+                artifact.pop("validationError", None)
+            return {"status": "success", "artifact": artifact}, 200
         except ClinicalAlgorithmError as exc:
             return {"status": "error", "message": str(exc)}, 404
 
@@ -984,7 +1006,7 @@ class ClinicalAlgorithmConfigureResource(Resource):
         payload = request.get_json(silent=True) or {}
         try:
             code_path, _ = service_service.get_scenario_generated_code_path(id)
-            artifact = configure_artifact(id, code_path, payload.get("spec"), payload.get("smokeInput"))
+            artifact = configure_artifact(id, code_path, payload.get("spec"), payload.get("smokeInput"), payload.get("expectedVersion"))
             card = _clinical_card(service)
             if card and card.get("reviewStatus") == "approved":
                 card["reviewStatus"] = "pending"
@@ -992,6 +1014,23 @@ class ClinicalAlgorithmConfigureResource(Resource):
                 from app.extensions import db
                 db.session.commit()
             return {"status": "success", "artifact": artifact.to_dict()}, 200
+        except (ClinicalAlgorithmError, ServiceServiceError, OSError, SyntaxError, UnicodeError) as exc:
+            return {"status": "error", "message": str(exc)}, 400
+
+
+@api.route("/<string:id>/clinical-artifact/parameters")
+class ClinicalAlgorithmParametersResource(Resource):
+    def get(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        service = Service.query.filter_by(id=id, type="generated_algorithm", domain="health", deleted=0).first()
+        if not service or (str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user)):
+            return {"status": "error", "message": "模型不存在或无权配置"}, 404
+        try:
+            code_path, _ = service_service.get_scenario_generated_code_path(id)
+            source_code = Path(code_path).read_text(encoding="utf-8")
+            return {"status": "success", "parameters": describe_parameters(source_code)}, 200
         except (ClinicalAlgorithmError, ServiceServiceError, OSError, SyntaxError, UnicodeError) as exc:
             return {"status": "error", "message": str(exc)}, 400
 
@@ -1011,16 +1050,69 @@ class ClinicalAlgorithmRunResource(Resource):
                 return {"status": "error", "message": "该模型尚未通过运行验证"}, 409
             payload = request.get_json(silent=True) or {}
             spec = json.loads(artifact.spec_json)
-            if payload.get("version") is not None and payload.get("version") != artifact.version:
+            if payload.get("version") != artifact.version:
                 return {"status": "error", "message": "模型版本已更新，请刷新运行规范"}, 409
             values = validate_input(spec, payload.get("inputs"))
             validate_units(spec, payload.get("units") or {})
             code_path, _ = service_service.get_scenario_generated_code_path(id)
             verify_artifact_code(artifact, code_path)
-            result = run_isolated(code_path, values)
-            return {"status": "success", "result": result, "version": artifact.version}, 200
+            from app.extensions import db
+            started_at = int(time.time() * 1000)
+            AlgorithmRun.query.filter_by(user_id=str(user.id), status="running").filter(
+                AlgorithmRun.started_at < started_at - 60000
+            ).update({"status": "interrupted", "error_code": "RUN_INTERRUPTED",
+                      "finished_at": started_at}, synchronize_session=False)
+            db.session.commit()
+            recent = AlgorithmRun.query.filter_by(user_id=str(user.id)).filter(
+                AlgorithmRun.started_at >= started_at - 60000
+            ).count()
+            active = AlgorithmRun.query.filter_by(user_id=str(user.id), status="running").count()
+            if recent >= 30 or active >= 1:
+                return {"status": "error", "code": "RATE_LIMITED", "message": "试用请求过于频繁，请稍后重试"}, 429
+            run = AlgorithmRun(id=str(uuid4()), service_id=id, user_id=str(user.id),
+                               artifact_version=artifact.version, status="running", started_at=started_at)
+            db.session.add(run)
+            db.session.commit()
+            try:
+                result = validate_output(spec, run_isolated(code_path, values, artifact.code_sha256))
+            except ClinicalAlgorithmError as exc:
+                run.status = "failed"
+                run.error_code = "RUN_TIMEOUT" if "超时" in str(exc) else "RUN_FAILED"
+                run.finished_at = int(time.time() * 1000)
+                run.duration_ms = run.finished_at - started_at
+                db.session.commit()
+                return {"status": "error", "code": run.error_code, "message": str(exc), "runId": run.id}, 400
+            run.status = "succeeded"
+            run.finished_at = int(time.time() * 1000)
+            run.duration_ms = run.finished_at - started_at
+            db.session.commit()
+            return {"status": "success", "runId": run.id, "durationMs": run.duration_ms,
+                    "result": result, "version": artifact.version}, 200
         except (ClinicalAlgorithmError, ServiceServiceError) as exc:
             return {"status": "error", "message": str(exc)}, 400
+
+
+@api.route("/<string:id>/algorithm-runs")
+class ClinicalAlgorithmRunsResource(Resource):
+    def get(self, id):
+        user, err = _require_login_user()
+        if err:
+            return err
+        service = _algorithm_access(id, user)
+        if not service:
+            return {"status": "error", "message": "模型不存在或无权查看"}, 404
+        from app.extensions import db
+        expired_at = int(time.time() * 1000) - 60000
+        AlgorithmRun.query.filter_by(service_id=id, status="running").filter(
+            AlgorithmRun.started_at < expired_at
+        ).update({"status": "interrupted", "error_code": "RUN_INTERRUPTED",
+                  "finished_at": int(time.time() * 1000)}, synchronize_session=False)
+        db.session.commit()
+        query = AlgorithmRun.query.filter_by(service_id=id)
+        if str(service.creator_id) != str(user.id) and not audit_service.has_admin_permission(user):
+            query = query.filter_by(user_id=str(user.id))
+        runs = query.order_by(AlgorithmRun.started_at.desc()).limit(30).all()
+        return {"status": "success", "runs": [run.to_dict() for run in runs]}, 200
 
 
 @api.route("/clinical-catalog")
@@ -1102,7 +1194,7 @@ class ClinicalReferenceCheck(Resource):
             validate_units(spec, payload.get("units") or {})
             code_path, _ = service_service.get_scenario_generated_code_path(id)
             verify_artifact_code(artifact, code_path)
-            actual = run_isolated(code_path, inputs)
+            actual = run_isolated(code_path, inputs, artifact.code_sha256)
             passed = compare_reference_output(actual, payload["expected"], abs_tol, rel_tol)
             source = json.loads(artifact.source_json or "{}")
             report = {"passed": passed, "citation": citation, "expected": payload["expected"],
