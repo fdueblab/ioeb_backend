@@ -1,0 +1,12 @@
+验收范围：仅复现 Figure 2 的总分及分项。以下是本次验收对 PDF 第11页原图逐项核对的文字转录，不是 OCR，不是患者验证数据。出处均为 page 11, Figure 2。原图已经包含全部分值，不借用其他 NEWS2 量表。
+Respiratory rate (per minute): 12-20=0; 9-11=1; 21-24=2; <9 or >24=3.
+Oxygen saturation (%): >95=0; 94-95=1; 92-93=2; <92=3.
+Heart rate (per minute): 51-90=0; 41-50 or 91-110=1; 111-130=2; <41 or >130=3.
+Systolic BP (mmHg): 111-219=0; 101-110=1; 91-100=2; <91 or >219=3.
+Temperature (C): 36.1-38.0=0; 35.1-36.0 or 38.1-39.0=1; >39.0=2; <35.1=3.
+Alertness: Alert=0; Confused or not alert=3.
+Inspired oxygen: Air=0; Supplemental oxygen=2.
+Sex: Female=0; Male=1.
+Age (years): 16-49=0; 50-65=2; 66-80=3; >80=4.
+Performance status: Unrestricted normal activity=0; Limited strenuous activity, can do light activity=1; Limited activity, can self-care=2; Limited self-care=3; Bed/chair bound, no self-care=4.
+平台输入约定（不是论文的缺失值处理方法）：全部10项必填，缺失、错误类型和非法值报错，不插补，不给默认零分。年龄、呼吸频率、心率、收缩压和血氧按整数输入；体温最多一位小数，避免图表精度以外的模糊区间。年龄必须至少16岁。performance_status用0至4的整数对应上述原图描述。alert和supplemental_oxygen使用布尔值。sex使用female/male。不要用其他功能状态量表替换原图描述。只计算分值，不宣称风险概率、临床验证通过或治疗建议。

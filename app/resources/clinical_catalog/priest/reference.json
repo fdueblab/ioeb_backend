@@ -1,0 +1,1168 @@
+{
+  "source": "journal.pone.0245840, PDF page 11, Figure 2",
+  "baseline": {
+    "respiratory_rate": 16,
+    "oxygen_saturation": 98,
+    "heart_rate": 70,
+    "systolic_bp": 120,
+    "temperature": 37.0,
+    "alert": true,
+    "supplemental_oxygen": false,
+    "sex": "female",
+    "age": 30,
+    "performance_status": 0
+  },
+  "boundaries": {
+    "respiratory_rate": [
+      [
+        8,
+        3
+      ],
+      [
+        9,
+        1
+      ],
+      [
+        11,
+        1
+      ],
+      [
+        12,
+        0
+      ],
+      [
+        20,
+        0
+      ],
+      [
+        21,
+        2
+      ],
+      [
+        24,
+        2
+      ],
+      [
+        25,
+        3
+      ]
+    ],
+    "oxygen_saturation": [
+      [
+        91,
+        3
+      ],
+      [
+        92,
+        2
+      ],
+      [
+        93,
+        2
+      ],
+      [
+        94,
+        1
+      ],
+      [
+        95,
+        1
+      ],
+      [
+        96,
+        0
+      ]
+    ],
+    "heart_rate": [
+      [
+        40,
+        3
+      ],
+      [
+        41,
+        1
+      ],
+      [
+        50,
+        1
+      ],
+      [
+        51,
+        0
+      ],
+      [
+        90,
+        0
+      ],
+      [
+        91,
+        1
+      ],
+      [
+        110,
+        1
+      ],
+      [
+        111,
+        2
+      ],
+      [
+        130,
+        2
+      ],
+      [
+        131,
+        3
+      ]
+    ],
+    "systolic_bp": [
+      [
+        90,
+        3
+      ],
+      [
+        91,
+        2
+      ],
+      [
+        100,
+        2
+      ],
+      [
+        101,
+        1
+      ],
+      [
+        110,
+        1
+      ],
+      [
+        111,
+        0
+      ],
+      [
+        219,
+        0
+      ],
+      [
+        220,
+        3
+      ]
+    ],
+    "temperature": [
+      [
+        35.0,
+        3
+      ],
+      [
+        35.1,
+        1
+      ],
+      [
+        36.0,
+        1
+      ],
+      [
+        36.1,
+        0
+      ],
+      [
+        38.0,
+        0
+      ],
+      [
+        38.1,
+        1
+      ],
+      [
+        39.0,
+        1
+      ],
+      [
+        39.1,
+        2
+      ]
+    ],
+    "age": [
+      [
+        16,
+        0
+      ],
+      [
+        49,
+        0
+      ],
+      [
+        50,
+        2
+      ],
+      [
+        65,
+        2
+      ],
+      [
+        66,
+        3
+      ],
+      [
+        80,
+        3
+      ],
+      [
+        81,
+        4
+      ]
+    ],
+    "alert": [
+      [
+        false,
+        3
+      ]
+    ],
+    "supplemental_oxygen": [
+      [
+        true,
+        2
+      ]
+    ],
+    "sex": [
+      [
+        "male",
+        1
+      ]
+    ],
+    "performance_status": [
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        4
+      ]
+    ]
+  },
+  "cases": [
+    {
+      "name": "baseline",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "respiratory_rate=8",
+      "inputs": {
+        "respiratory_rate": 8,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "respiratory_rate=9",
+      "inputs": {
+        "respiratory_rate": 9,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "respiratory_rate=11",
+      "inputs": {
+        "respiratory_rate": 11,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "respiratory_rate=12",
+      "inputs": {
+        "respiratory_rate": 12,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "respiratory_rate=20",
+      "inputs": {
+        "respiratory_rate": 20,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "respiratory_rate=21",
+      "inputs": {
+        "respiratory_rate": 21,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "respiratory_rate=24",
+      "inputs": {
+        "respiratory_rate": 24,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "respiratory_rate=25",
+      "inputs": {
+        "respiratory_rate": 25,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "oxygen_saturation=91",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 91,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "oxygen_saturation=92",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 92,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "oxygen_saturation=93",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 93,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "oxygen_saturation=94",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 94,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "oxygen_saturation=95",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 95,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "oxygen_saturation=96",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 96,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "heart_rate=40",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 40,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "heart_rate=41",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 41,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "heart_rate=50",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 50,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "heart_rate=51",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 51,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "heart_rate=90",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 90,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "heart_rate=91",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 91,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "heart_rate=110",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 110,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "heart_rate=111",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 111,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "heart_rate=130",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 130,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "heart_rate=131",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 131,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "systolic_bp=90",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 90,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "systolic_bp=91",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 91,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "systolic_bp=100",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 100,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "systolic_bp=101",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 101,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "systolic_bp=110",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 110,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "systolic_bp=111",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 111,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "systolic_bp=219",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 219,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "systolic_bp=220",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 220,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "temperature=35.0",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 35.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "temperature=35.1",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 35.1,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "temperature=36.0",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 36.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "temperature=36.1",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 36.1,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "temperature=38.0",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 38.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "temperature=38.1",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 38.1,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "temperature=39.0",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 39.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "temperature=39.1",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 39.1,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "age=16",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 16,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "age=49",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 49,
+        "performance_status": 0
+      },
+      "expected_total": 0
+    },
+    {
+      "name": "age=50",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 50,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "age=65",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 65,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "age=66",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 66,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "age=80",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 80,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "age=81",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 81,
+        "performance_status": 0
+      },
+      "expected_total": 4
+    },
+    {
+      "name": "alert=False",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": false,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "supplemental_oxygen=True",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": true,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "sex=male",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "male",
+        "age": 30,
+        "performance_status": 0
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "performance_status=1",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 1
+      },
+      "expected_total": 1
+    },
+    {
+      "name": "performance_status=2",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 2
+      },
+      "expected_total": 2
+    },
+    {
+      "name": "performance_status=3",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 3
+      },
+      "expected_total": 3
+    },
+    {
+      "name": "performance_status=4",
+      "inputs": {
+        "respiratory_rate": 16,
+        "oxygen_saturation": 98,
+        "heart_rate": 70,
+        "systolic_bp": 120,
+        "temperature": 37.0,
+        "alert": true,
+        "supplemental_oxygen": false,
+        "sex": "female",
+        "age": 30,
+        "performance_status": 4
+      },
+      "expected_total": 4
+    },
+    {
+      "name": "maximum",
+      "inputs": {
+        "respiratory_rate": 8,
+        "oxygen_saturation": 91,
+        "heart_rate": 40,
+        "systolic_bp": 90,
+        "temperature": 35.0,
+        "alert": false,
+        "supplemental_oxygen": true,
+        "sex": "male",
+        "age": 81,
+        "performance_status": 4
+      },
+      "expected_total": 29
+    },
+    {
+      "name": "mixed",
+      "inputs": {
+        "respiratory_rate": 25,
+        "oxygen_saturation": 94,
+        "heart_rate": 111,
+        "systolic_bp": 100,
+        "temperature": 38.1,
+        "alert": false,
+        "supplemental_oxygen": true,
+        "sex": "male",
+        "age": 66,
+        "performance_status": 2
+      },
+      "expected_total": 20
+    }
+  ],
+  "provenance": "Independently transcribed from original table images before examining generated code; engineering reference, not clinical validation."
+}

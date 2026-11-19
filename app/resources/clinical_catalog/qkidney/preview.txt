@@ -1,0 +1,222 @@
+Hippisley-Cox and Coupland BMC Family Practice 2010, 11:49
+http://www.biomedcentral.com/1471-2296/11/49
+Open AccessRESEARCH ARTICLE
+© 2010 Hippisley-Cox and Coupland; licensee BioMed Central Ltd. This is an Open Access article distributed under the terms of the Cre-
+ative Commons Attribution License (http://creativecommons.org/licenses/by/2.0), which permits unrestricted use, distribution, and re-
+production in any medium, provided the original work is properly cited.
+Research articlePredicting the risk of Chronic Kidney Disease in 
+Men and Women in England and Wales: 
+prospective derivation and external validation of 
+the QKidney® Scores
+Julia Hippisley-Cox* and Carol Coupland
+Abstract
+Background: Chronic Kidney Disease is a major cause of morbidity and interventions now exist which can reduce risk. 
+We sought to develop and validate two new risk algorithms (the QKidney® Scores) for estimating (a) the individual 5 
+year risk of moderate-severe CKD and (b) the individual 5 year risk of developing End Stage Kidney Failure in a primary 
+care population.
+Methods: We conducted a prospective open cohort study using data from 368 QResearch® general practices to 
+develop the scores. We validated the scores using two separate sets of practices - 188 separate QResearch® practices 
+and 364 practices contributing to the THIN database.
+We studied 775,091 women and 799,658 men aged 35-74 years in the QResearch® derivation cohort, who contributed
+4,068,643 and 4,121,926 person-years of observation respectively.
+We had two main outcomes (a) moderate-severe CKD (defined as the first evidence of CKD based on the earliest of any
+of the following: kidney transplant; kidney dialysis; diagno sis of nephropathy; persistent  proteinuria; or glomerular
+filtration rate of < 45 mL/min) and (b) End Stage Kidney Failure.
+We derived separate risk equations for men and women. We  calculated measures of calibration and discrimination
+using the two separate validation cohorts.
+Results: Our final model for moderate-severe CKD included: age, ethnicity, deprivation, smoking, BMI, systolic blood 
+pressure, diabetes, rheumatoid arthritis, cardiovascular disease, treated hypertension, congestive cardiac failure; 
+peripheral vascular disease, NSAID use and family history of kidney disease. In addition, it included SLE and kidney 
+stones in women. The final model for End Stage Kidney Failure was similar except it did not include NSAID use.
+Each risk prediction algorithms performed well across all meas ures in both validation cohorts. For the THIN cohort, the
+model to predict moderate-severe CKD explained 56.38% of the total variation in women and 57.49% for men. The D
+statistic values were high with values of 2.33 for women and 2.38 for men. The ROC statistic was 0.875 for women and
+0.876 for men.
+Conclusions: These new algorithms have the potential to identify high risk patients who might benefit from more 
+detailed assessment, closer monitoring or interventions to reduce their risk.
+Background
+Chronic Kidney Disease (CKD) is a significant cause of
+morbidity and mortality across the developed world. It is
+associated with increased risk of death from cardiovascu-
+lar disease[1-3], as well as from End Stage Kidney Fail-
+* Correspondence: julia.hippisley-cox@nottingham.ac.uk
+1 Division of Primary Care, 13th floor, Tower Building, University Park, 
+Nottingham, NG2 7RD, UK
+Full list of author information is available at the end of the article
+Hippisley-Cox and Coupland BMC Family Practice 2010, 11:49
+http://www.biomedcentral.com/1471-2296/11/49
+Page 2 of 13
+ure[3]. The health burden due to CKD is likely to
+continue to rise with the ageing population and world-
+wide increase in T ype 2 Diabetes[4]. CKD is an insidious
+disease characterised by a clear natural history with a
+detectable asymptomatic period during which interven-
+tions (such as blood pressure control) could help prevent
+or delay progression to En d Stage Kidney Failure[5].
+Despite this, patients are often identified and referred late
+when up to half already require Kidney dialysis or trans-
+plantation[6,7].
+Whilst there are no randomised trials demonstrating
+that screening for CKD improves clinical outcomes,
+national programmes recommend that individuals who
+are at increased risk of CKD are tested for undetected
+kidney disease[8,9]. Reliable methods for identification of
+high risk patients are likely to be needed to identify and
+target early assessment and interventions to maximise
+health gain and improve outcomes[4].
+High quality representative data within electronic
+patient records from primary care can be used to derive
+and validate robust risk prediction algorithms which can
+be then implemented and evaluated in clinical settings.
+This has already been achieved with the cardiovascular
+risk algorithm QRISK ®2[10] which is integrated into the
+EMIS Clinic Computer System used by over half of gen-
+eral practices in the UK. The approach is being extended
+to other clinical conditions[11,12].
+Although the case for developing a risk prediction
+model for CKD has been articulated[13], there are cur-
+rently no widely accepted algorithms available to predict
+risk of CKD for an individual patient within primary care.
+In this paper, we describe the derivation and validation of
+two new risk predictions algorithms to predict 5 year risk
+of moderate-severe kidney disease. Designed to integrate
+with QRISK®2[10] and the QDScore ®[12] for diabetes, the
+QKidney® Scores complete the triad of prediction algo-
+rithms developed to identify patients at high risk of vas-
+cular disease for intervention.
+Methods
+Study design and sample
+We did a prospective open cohort study in a large popula-
+tion of primary care patients using the QResearch ® data-
+base (version 22). We included all practices in England
+and Wales who had been using their EMIS computer sys-
+tem for at least a year. We used established methods for
+the study design and analysis which we summarise here
+and which are described and reviewed in detail else-
+where[10-12,14-16].
+We randomly allocated two thirds of practices to the
+derivation cohort and the remaining third to a validation
+cohort. We identified an open cohort of patients aged 35-
+74 years without recorded evidence of CKD at study
+entry, registered with practices between the study start
+date of 01 Jan 2002 and the study end date of 31 Dec 2008.
+Patients entered the study on the latest of study start date,
+d a t e  o f  f i r s t  r e g i s t r a t i o n  w i t h  t h e  p r a c t i c e  o r  d a t e  t h e y
+became 35 years old. Patients were censored at the earli-
+est date of development of CKD, death, de-registration
+with the practice, last upload of computerised data or the
+study end date. Patients could therefore have up to 7
+years of follow up data available.
+We used the same inclusion and exclusion criteria to
+i d e n t i f y  a  s e p a r a t e  s a m p l e  o f  p a t i e n t s  d r a w n  f r o m  a n
+independent set of practices contributing to the THIN
+primary care research database http://www.thin-uk.com
+except the study end date for this sample was 30 June
+2008.
+Definition of Outcomes
+We had two main outcomes. One outcome was recorded
+evidence of moderate-severe CKD defined as the first
+occurrence of any of the following during follow-up:
+a) recorded kidney transplant;
+b) recorded kidney dialysis;
+c) recorded diagnosis of nephropathy;
+d) glomerular filtration rate < 45 mL/min/1.73m2 cor-
+responding to stage 3B CKD[9].
+e) recorded diagnosis of proteinuria;
+Our second main outcome was End Stage Kidney Fail-
+ure which was defined as the first occurrence of any of
+the following during follow-up:
+a) recorded kidney transplant;
+b) recorded kidney dialysis;
+c) glomerular filtration rate < 15 mL/min/1.73m2 cor-
+responding to stage 5 CKD[9].
+We calculated the glomerular filtration rates using the
+MDRD equation[17] using laboratory reported creatinine
+values
+Predictor variables
+We developed models for men and women for each of
+our two main outcomes. Our initial list of predictor vari-
+ables included those known to be associated with
+increased risk of CKD based on the literature[1,2,5,18,19]
+and from national guidance[9] which are also likely to be
+recorded in the patients electronic health record. We also
+sought the opinions of two senior nephrologists including
+the National Clinical Director for Kidney Services in Eng-
+land, Dr Donal O'Donoghue.
+Variables examined for inclusion in both models were:
+• Age at study entry (in single years)
+• Body mass index
+• Systolic blood pressure (mmHg)
+• Smoking status (non-smoker, ex-smoker; light 
+smoker: < 10 cigarettes/day, moderate smoker: 10-19 
+cigarettes per day, heavy smoker: 20 or more ciga-
+rettes per day)
+Hippisley-Cox and Coupland BMC Family Practice 2010, 11:49
+http://www.biomedcentral.com/1471-2296/11/49
+Page 3 of 13
+• Ethnic group
+• Townsend deprivation score (derived from the 
+patient's postcode) [20]
+• Diagnosis of type 1 diabetes
+• Diagnosis of type 2 diabetes
+• Diagnosis of cardiovascular disease
+• Diagnosis of rheumatoid arthritis
+• Treated hypertension
+• Diagnosis of congestive cardiac failure
+• Diagnosis of peripheral vascular disease
+• Diagnosis of systemic lupus erythematosis
+• Two or more prescriptions for NSAIDs drugs in the 
+6 months before study entry
+• Evidence of kidney stones based on diagnosis or 
+operative procedure at baseline
+• Recorded family history of kidney disease including 
+polycystic kidneys
+• Prostatic hypertrophy at baseline (men)
+In both models we only used diagnoses recorded prior
+to the baseline date as predictor variables, for body mass
+index, smoking status and systolic blood pressure we
+used the values recorded closest to the study entry date.
+Ethnic group was categorised as in previous publica-
+tions[10].
+Statistical analysis
+We developed and validated the risk prediction algo-
+rithms using established methods described in detail
+elsewhere [10-12,14-16]. In summary, we used Cox's pro-
+portional hazards models to estimate the coefficients for
+each risk factor for both outcomes for men and women
+separately, adjusting for other baseline risk factors. We
+excluded patients with the outcome at baseline. We used
+fractional polynomials to model non-linear risk relation-
+ships with continuous variables[21]. We compared mod-
+els using the Akaike information criterion (AIC). We
+used multiple imputation to replace missing values for
+body mass index, systolic blood pressure and smoking
+status and used these values in our main analyses[22-25].
+We carried out 5 imputations. We examined interactions
+between predictor variables and age, and we included sig-
+nificant variables and significant interaction terms in the
+final models. We took the regression coefficients for each
+variable from the final models and used these as weights
+which we combined with the baseline survivor function
+for moderate-severe CKD evaluated at 5 years to derive
+risk equations for (a) moderate-severe CKD and (b) End
+Stage Kidney Failure at 5 years' follow-up.
+We applied the algorithms obtained from the deriva-
+tion cohort to both validation cohorts and calculated
+m e a s u r e s  o f  d i s c r i m i n a t i o n  ( D  s t a t i s t i c [ 2 6 ]  ,  R2 statistic
+for survival data and area under the receiver operating
+characteristic curve (ROC statistic)) and calibration
+(comparing observed with predicted risks by tenth of pre-
+dicted risk). We used the THIN validation sample for our
+main validation as this is from practices using a different
+clinical computer system from QResearch practices. We
+used all the available data on each database to maximise
+the power and also generalisability of the results. We used
+STATA (version 11) for all analyses.
+The project has been independently reviewed in accor-
+dance with the QResearch ® agreement with Trent Multi-
+Centre Research Ethics Committee.
+Results
+Study population
+Overall, 556 QResearch ® practices in England and Wales
+met our inclusion criteria, of which 368 wer

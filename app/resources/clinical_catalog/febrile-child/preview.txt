@@ -1,0 +1,241 @@
+EUR Research Information Portal
+Clinical prediction model to aid emergency doctors managing febrile children at risk of
+serious bacterial infections: diagnostic study
+Published in:
+BMJ Open Gastroenterology
+Publication status and date:
+Published: 01/01/2013
+DOI (link to publisher):
+10.1136/bmj.f1706
+Document Version
+Publisher's PDF, also known as Version of record
+Citation for the published version (APA):
+Nijman, R., Vergouwe, Y., Thompson, M., Veen, M., van Meurs, AHJ., Lei, J., Steyerberg, E., Moll, H., & Oostenbrink, R.
+(2013). Clinical prediction model to aid emergency doctors managing febrile children at risk of serious bacterial infections:
+diagnostic study. BMJ Open Gastroenterology, 346, f1706. https://doi.org/10.1136/bmj.f1706
+Link to publication on the EUR Research Information Portal
+Terms and Conditions of Use
+Except as permitted by the applicable copyright law, you may not reproduce or make this material available to any third party
+without the prior written permission from the copyright holder(s). Copyright law allows the following uses of this material
+without prior permission:
+            • you may download, save and print a copy of this material for your personal use only;
+            • you may share the EUR portal link to this material.
+In case the material is published with an open access license (e.g. a Creative Commons (CC) license), other uses may be
+allowed. Please check the terms and conditions of the specific license.
+Take-down policy
+If you believe that this material infringes your copyright and/or any other intellectual property rights, you may request its
+removal by contacting us at the following email address: openaccess.library@eur.nl. Please provide us with all the relevant
+information, including the reasons why you believe any of your rights have been infringed. In case of a legitimate complaint,
+we will make the material inaccessible and/or remove it from the website.
+Clinicalpredictionmodeltoaidemergencydoctors
+managingfebrilechildrenatriskofseriousbacterial
+infections:diagnosticstudy
+OPENACCESS
+RuudGNijman PhD student
+1
+,YvonneVergouwe methodologist
+2
+,MatthewThompson clinical
+reader
+3
+,MirjamvanVeen resident
+1
+,AlfredHJvanMeurs paediatrician
+4
+,JohanvanderLei
+professor
+5
+,EwoutWSteyerberg professor
+2
+,HenrietteAMoll professor
+1
+,RianneOostenbrink
+paediatrician
+1
+1DepartmentofGeneralPaediatrics,ErasmusMC-SophiaChildren’sHospital,3015GJ,Rotterdam,Netherlands; 2DepartmentofPublicHealth,
+CenterforMedicalDecisionMaking,ErasmusMC,Rotterdam; 3DepartmentofPrimaryCareHealthSciences,OxfordUniversity,Oxford,UK;
+4DepartmentofPaediatrics,Haga-JulianaChildren’sHospital,TheHague,Netherlands;5DepartmentofMedicalInformatics,ErasmusMC,Rotterdam
+Abstract
+ObjectiveToderive,crossvalidate,andexternallyvalidateaclinical
+predictionmodelthatassessestherisksofdifferentseriousbacterial
+infectionsinchildrenwithfeverattheemergencydepartment.
+DesignProspectiveobservationaldiagnosticstudy.
+SettingThreepaediatricemergencycareunits:twointheNetherlands
+andoneintheUnitedKingdom.
+ParticipantsChildrenwithfever,aged1monthto15years,atthree
+paediatricemergencycareunits:Rotterdam(n=1750)andtheHague
+(n=967),theNetherlands,andCoventry(n=487),UnitedKingdom.A
+predictionmodelwasconstructedusingmultivariablepolytomouslogistic
+regressionanalysisandincludedthepredefinedpredictorvariablesage,
+durationoffever,tachycardia,temperature,tachypnoea,illappearance,
+chestwallretractions,prolongedcapillaryrefilltime(>3seconds),oxygen
+saturation<94%,andCreactiveprotein.
+MainoutcomemeasuresPneumonia,otherseriousbacterialinfections
+(SBIs,includingsepticaemia/meningitis,urinarytractinfections,and
+others),andnoSBIs.
+ResultsOxygensaturation<94%andpresenceoftachypnoeawere
+importantpredictorsofpneumonia.AraisedCreactiveproteinlevel
+predictedthepresenceofbothpneumoniaandotherSBIs,whereas
+chestwallretractionsandoxygensaturation<94%wereusefultorule
+outthepresenceofotherSBIs.Discriminativeability(Cstatistic)to
+predictpneumoniawas0.81(95%confidenceinterval0.73to0.88);for
+otherSBIsthiswasevenbetter:0.86(0.79to0.92).Riskthresholdsof
+10%ormorewereusefultoidentifychildrenwithseriousbacterial
+infections;riskthresholdslessthan2.5%wereusefultoruleoutthe
+presenceofseriousbacterialinfections.Externalvalidationshowedgood
+discriminationforthepredictionofpneumonia(0.81,0.69to0.93);
+discriminativeabilityforthepredictionofotherSBIswaslower(0.69,
+0.53to0.86).
+ConclusionAvalidatedpredictionmodel,includingclinicalsigns,
+symptoms,andCreactiveproteinlevel,wasusefulforestimatingthe
+likelihoodofpneumoniaandotherSBIsinchildrenwithfever,suchas
+septicaemia/meningitisandurinarytractinfections.
+Introduction
+Feverisamongthemostcommonpresentingsignsofillnessin
+children.Between10%and20%ofallpaediatricvisitsto
+hospitalemergencydepartmentsareduetofebrileillnesses.1-3
+Todifferentiatechildrenwhohaveabenignselflimitingviral
+infectionfromthesmallproportionwithseriousbacterial
+infections,manypredictionmodelshavebeenproposed.4-9Most
+ofthesepredictionmodelshavenot,however,beenvalidated,9
+andthosethathaveperformedpoorlyinemergencydepartment
+Correspondence to: R Oostenbrink r.oostenbrink@erasmusmc.nl
+Extra material supplied by the author (see http://www.bmj.com/content/346/bmj.f1706?tab=related#webextra)
+Appendix A
+Appendix B
+Appendix C
+Appendix D
+Appendix E
+Digital calculator
+Legend for digital calculator
+No commercial reuse: See rights and reprints http://www.bmj.com/permissions Subscribe: http://www.bmj.com/subscribe
+BMJ2013;346:f1706doi:10.1136/bmj.f1706(Published2April2013) Page1of16
+Research
+RESEARCH
+settings.10Typicallythesemodelsalsoattempttopredictthe
+overallriskofseriousbacterialinfectionsandignorethefact
+thatmanydifferenttypesofbacterialinfectionareinvolved,
+eachrequiringdiscretediagnosticandtherapeuticmanagement.
+Inoneofthemostrobustmodelstodate,researchersshowed
+thatclinicalsignsandsymptomscontributedifferentlyto
+predictingtheriskofparticularseriousbacterialinfections—that
+is,pneumonia,urinarytractinfection,andbacteraemia.11Inthat
+studytheyalsoshowedthataclinicalmodeloutperformedthe
+clinician’simpressionforassessingtheriskofaseriousbacterial
+infection.However,thispredictionmodel,althoughaccurate,
+involvedtheinputof26clinicalvariables,whichlimitsthe
+feasibilityofusingthemodelinmanyclinicalsettings.11This
+largenumberofclinicalvariablesinvitesthedevelopmentofa
+morepracticalpredictionmodelwithfewervariables.In
+addition,itwouldbeworthwhiletoincludeserumCreactive
+proteinlevelinapredictionmodel,animportantpredictorof
+seriousbacterialinfections.12-14Creactiveproteiniswidelyused
+inmanyemergencycaresettingsinEuropeandNorthAmerica,
+andpointofcareversionsofthetesthavebeenprovedtobe
+reliablewhenappliedroutinelyingeneralpractices.15 16This
+potentiallyallowstheuseofrapidandminimallyinvasiveC
+reactiveproteintestsinpredictionmodelsatthefirstclinical
+assessment.
+Wedevelopedandexternallyvalidatedaclinicalprediction
+model,includingbothclinicalcharacteristicsandCreactive
+protein,toidentifyfebrilechildrenpresentingtoemergency
+caresettingsatincreasedriskofseriousbacterialinfections.
+Methods
+Weperformedadiagnosticstudybyfirstdevelopingaclinical
+predictionmodel,withderivationandcrossvalidationintwo
+Dutchpopulations(ErasmusMC-SophiaandHaga-Juliana
+children’shospitals,thederivationpopulation),thenexternally
+validatingthepredictionmodelinaUKpopulation(Coventry,
+broadvalidationpopulation).17
+Derivationpopulationsusedtodevelop
+predictionmodel
+Weprospectivelyenrolledallchildren(1monthto15years)
+presentingwithfeverattheemergencydepartmentofthe
+ErasmusMC-Sophiachildren’shospital,Rotterdam(2003-05),
+andtheHaga-Julianachildren’shospital,theHague(2007),the
+Netherlands.TheErasmusMC-Sophiachildren’shospitalisan
+innercityuniversityhospitalwith9000annualemergency
+departmentvisits(90%forbasicpaediatricemergencycare).
+TheHaga-Julianachildren’shospitalisaninnercityteaching
+hospitalwith16000annualemergencydepartmentvisits.
+InErasmusMC-Sophiafebrilechildrenwereeligibleto
+participateinthestudyiffeverhadbeennotedathomeinthe
+24hoursbeforepresentationorbodytemperaturemeasuredin
+theemergencydepartmentwas≥38.0°C.18InHaga-Juliana
+childrenwereeligibleiftheirtemperaturewhenmeasured
+rectallyintheemergencydepartmentwas≥38.0°C.19Inboth
+populationsweexcludedchildrenwithchroniccomorbidity(for
+example,malignancies,cysticfibrosis,severepsychomotor
+retardation)andthosewhoreceivedantibioticsintheweek
+beforetheemergencydepartmentvisit.Inchildrenwho
+reattendedtheemergencydepartmentwithinfivedaysoftheir
+firstpresentationweusedonlydatafromthefirstvisit.
+Laboratorytestswereobtainedatthediscretionoftheattending
+emergencydepartmentdoctor.Informedconsentwasobtained
+fromtheparents.18
+Populationusedforexternalvalidation
+Toassessbroadexternalvalidationofthepredictionmodelwe
+usedasecondlargecohortoffebrilechildrenfromadifferent
+setting.Thiscohortconsistedofchildren(1monthto15years)
+whowererecruitedprospectivelyatthepaediatricassessment
+unitattheUniversityHospitalCoventryandWarwickshireNHS
+Trust,UnitedKingdom,in2005and2006,ifanacuteinfection
+wassuspectedbytheparents,thereferringclinician,orthetriage
+nurse.20TheCoventryhospitalisaninnercityhospitaldelivering
+emergencycareto25000childrenannually.Childrenwere
+eligibleiffeverwasreportedbytheparentsorwasdocumented
+bythetriagingnurse(≥38.5ºC).Weexcludedchildrenwithan
+increasedriskofrecurrentseriousinfections,includingthose
+withiatrogenicimmunosuppressionandhaematological
+malignancies.Laboratorytestswereobtainedatthediscretion
+oftheattendingemergencydepartmentdoctor.Informedconsent
+wasobtained.20
+Datacollection
+FortheErasmusMC-SophiaandtheHaga-Julianaderivation
+populationstrainednursesinpaediatricemergencycareroutinely
+collecteddatausingastructureddataentryapplicationform,
+whichwascustomisedforthisstudy.21FortheCoventry
+validationpopulationatriageemergencycarenurserecorded
+data,includingaquestionnaireofpresentingsymptoms,
+prospectivelyinthemedicalornursingrecordsonarrivalofthe
+children.20Alldatawerecollectedblindedtofinaloutcome
+measures.
+Outcomemeasures
+Theoutcomecategorieswerepneumonia,otherseriousbacterial
+infections(SBIs),andnoSBIs.OtherSBIsincludedmeningitis,
+septicaemia,urinarytractinfections,andother(erysipelas,
+cellulitis,bacterialgastroenteritis,orbitalcellulitis,bacterial
+upperairwayinfection,ethmoiditis,arthritis,osteomyelitis).
+Theoutcomescategorieswerechosenaccordingtodifferences
+inclinicalpresentation,diagnosticmanagement,andfrequency
+ofoccurrence.Outcomesweredefinedaprioribypositive
+bacteriologicalculturesresultsofnormalsterilesitesorby
+consensusdiagnosis.22InErasmusMC-Sophiathediagnosisof
+pneumoniawasbasedonthepresenceofnodularinfiltrations
+orconsolidationinthelungonchestradiographsassessedby
+twoboardcertifiedradiologistsblindedtoclinicalinformation
+(κ=0.64,95%confidenceinterval0.52to0.75).Forthe
+Haga-JulianaandtheCoventrypopulationsasingleradiologist,
+notblindedtoclinicalinformation,interpretedthechest
+radiographs.Weusedaoneweekfollow-upperiodtoruleout
+thepossibilityofamisseddiagnosisofseriousbacterialinfection
+andtoavoidverificationbias.23Follow-upconsistedoftelephone
+contactorfollow-uphospitalvisitandcheckingforrepeatvisits
+totheemergencydepartmentorhospitaladmissions.Alldata
+werecollectedindependentofstudyoutcomemeasures.
+Predictorvariables
+Weidentifiedpredictorsofseriousbacterialinfectionobtained
+fromkeynotepapersonpredictiveresearchinchildrenwith
+fever,whichwerereadilyavailableatfirstassessmentandhave
+smallinterobservervariability.5 7 11 20 24-39Desaturationwas
+definedasoxygensaturationlevelslessthan94%measuredby
+pulseoximetry.40Inthederivationpopulationsthenursescored
+illappearanceona2pointscale:illversusnon-illappearance.
+IntheCoventryvalidationpopulationillappearancewasdefined
+asamodifiedYalescoreofmorethan6.27Weincludedall
+candidatepredictorvariablesinthemodelindependentoftheir
+No commercial reuse: See rights and reprints http://www.bmj.com/permissions Subscribe: http://www.bmj.com/subscribe
+BMJ2013;346:f1706doi:10.1136/bmj.f1706(Published2April2013) Page2of16
+RESEARCH
+statisticalcontribution.Continuousvariableswereincludedas
+continuoustop

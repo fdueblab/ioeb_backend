@@ -22,6 +22,7 @@ from app.models.user_action_log import UserActionLog
 from app.models.user_service_relation import UserServiceRelation
 from app.models.service_message import ServiceMessage
 from app.models.mcp_packaging_job import McpPackagingJob
+from app.models.clinical_creation_job import ClinicalCreationJob
 
 # 导入所有模型，使它们可以通过app.models直接访问
 from app.models.user.user import User
@@ -48,6 +49,7 @@ __all__ = [
     "MetaAppConfig",
     "AlgorithmArtifact",
     "AlgorithmRun",
+    "ClinicalCreationJob",
     "Dictionary",
     "Dataset",
     "Feedback",

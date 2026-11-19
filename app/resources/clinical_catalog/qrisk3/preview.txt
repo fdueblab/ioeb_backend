@@ -1,0 +1,224 @@
+DevelopmentandvalidationofQRISK3riskprediction
+algorithms to estimate future risk of cardiovascular
+disease: prospective cohort study
+OPEN ACCESS
+JuliaHippisley-Cox professor of clinical epidemiology and general practice
+1
+,CarolCoupland professor
+of medical statistics in primary care
+1
+, Peter Brindleevaluation and implementation theme lead,
+NIHR CLAHRC West
+2
+1DivisionofPrimaryCare,UniversityPark,NottinghamNG27RD,UK; 2BristolPrimaryClinicalCommissioningGroupandTheNationalInstitutefor
+Health Research Collaboration for Leadership in Applied Health Research and Care West (NIHR CLAHRC West) at University Hospitals Bristol
+NHS Foundation Trust, UK, UK
+Abstract
+ObjectivesTo develop and validate updated QRISK3 prediction
+algorithms to estimate the 10 year risk of cardiovascular disease in
+women and men accounting for potential new risk factors.
+DesignProspective open cohort study.
+SettingGeneralpracticesinEnglandprovidingdatafortheQResearch
+database.
+Participants1309 QResearch general practices in England: 981
+practices were used to develop the scores and a separate set of 328
+practices were used to validate the scores. 7.89 million patients aged
+25-84 years were in the derivation cohort and 2.67 million patients in
+the validation cohort. Patients were free of cardiovascular disease and
+not prescribed statins at baseline.
+MethodsCox proportional hazards models in the derivation cohort to
+derive separate risk equations in men and women for evaluation at 10
+years.RiskfactorsconsideredincludedthosealreadyinQRISK2(age,
+ethnicity, deprivation, systolic blood pressure, body mass index, total
+cholesterol: high density lipoprotein cholesterol ratio, smoking, family
+historyofcoronaryheartdiseaseinafirstdegreerelativeagedlessthan
+60 years, type 1 diabetes, type 2 diabetes, treated hypertension,
+rheumatoidarthritis,atrialfibrillation,chronickidneydisease(stage4or
+5)) and new risk factors (chronic kidney disease (stage 3, 4, or 5), a
+measure of systolic blood pressure variability (standard deviation of
+repeated measures), migraine, corticosteroids, systemic lupus
+erythematosus (SLE), atypical antipsychotics, severe mental illness,
+and HIV/AIDs). We also considered erectile dysfunction diagnosis or
+treatment in men. Measures of calibration and discrimination were
+determinedinthevalidationcohortformenandwomenseparatelyand
+for individual subgroups by age group, ethnicity, and baseline disease
+status.
+Mainoutcomemeasures Incidentcardiovasculardiseaserecordedon
+anyofthefollowingthreelinkeddatasources:generalpractice,mortality,
+or hospital admission records.
+Results363565incidentcasesofcardiovasculardiseasewereidentified
+inthederivationcohortduringfollow-uparisingfrom50.8millionperson
+years of observation. All new risk factors considered met the model
+inclusion criteria except for HIV/AIDS, which was not statistically
+significant.Themodelshadgoodcalibrationandhighlevelsofexplained
+variation and discrimination. In women, the algorithm explained 59.6%
+of the variation in time to diagnosis of cardiovascular disease (R
+2
+, with
+higher values indicating more variation), and the D statistic was 2.48
+andHarrell’sCstatisticwas0.88(bothmeasuresofdiscrimination,with
+highervaluesindicatingbetterdiscrimination).Thecorrespondingvalues
+formenwere54.8%,2.26,and0.86.Overallperformanceoftheupdated
+QRISK3 algorithms was similar to the QRISK2 algorithms.
+ConclusionUpdated QRISK3 risk prediction models were developed
+and validated. The inclusion of additional clinical variables in QRISK3
+(chronickidneydisease,ameasureofsystolicbloodpressurevariability
+(standard deviation of repeated measures), migraine, corticosteroids,
+SLE, atypical antipsychotics, severe mental illness, and erectile
+dysfunction) can help enable doctors to identify those at most risk of
+heart disease and stroke.
+Introduction
+ThefirstQRISKmodeltoestimate10yearriskofcardiovascular
+diseasewaspublishedin2007. 1Itwasfollowedbyanupdated
+Correspondence to: J Hippisley-Cox julia.hippisley-cox@nottingham.ac.uk
+Data supplements on bmj.com (see http://www.bmj.com/content/357/bmj.j2099?tab=related#datasupp)
+Appendix: Supplementary materials
+Appendix: Supplementary figures
+Open Access: Reuse allowed Subscribe: http://www.bmj.com/subscribe
+BMJ2017;357:j2099 doi: 10.1136/bmj.j2099 (Published 24 May 2017) Page 1 of 21
+Research
+RESEARCH
+ on 15 April 2019 by guest. Protected by copyright.http://www.bmj.com/ BMJ: first published as 10.1136/bmj.j2099 on 23 May 2017. Downloaded from 
+model(QRISK2)in2008,whichincludedethnicoriginand
+additionalriskfactors(type2diabetes,rheumatoidarthritis,
+atrialfibrillation,andchronicrenaldisease).Sincethen,
+QRISK2hasbeenupdatedannuallyandrecalibratedtothelatest
+versionoftheQResearchdatabase 2;theagerangeacrosswhich
+itapplieshasalsobeenextendedfrom35-74yearsto25-84
+years,type1diabeteshasbeenincludedasaseparatevariable,
+smokingisassessedatfivelevelsinsteadoftwo,andthe
+Townsendscorehasbeenupdatedusingthemostrecentvalues
+fromthe2011census.Thishelpstoensurethatthealgorithms
+reflectthechangesinpopulationcharacteristics(suchaschanges
+inprevalenceofsmoking,bodymassindex,ordeclining
+incidenceofcardiovasculardisease)andimprovementsindata
+quality(suchasimprovedrecordingofriskfactorsanddata
+linkagetoHospitalEpisodeStatistics, 3whichhasincreased
+ascertainmentofcardiovascularevents4).TheQRISKalgorithms
+havebeenvalidatedbyourselvesandothersinindependent
+groupsofpatientsusingUKprimarycaredatabasessuchas
+QResearch,4ClinicalPracticeResearchDatalink(CPRD), 4The
+HealthImprovementNetwork(THIN), 5-9andclinicalcohorts 10-12
+aswellasininternationalpopulations. 13 14Theirusehasbeen
+evaluatedinobservationalstudies, 15costeffectiveness
+evaluations,16andclinicaltrials. 17 18
+QRISK2isnowusedacrossEngland’shealthservice(NHS
+England)andrecommendedintheNHSQualityandOutcomes
+Framework,19guidancefromtheNationalInstituteofHealth
+andCareExcellence, 20andNHSHealthCheck. 21QRISK2is
+alsousedinoccupationalhealthsettingsandinternationally,
+withovertwomillionhitsontheQRISKwebsite(www.qrisk.
+org).AnewNICEguidelineonlipidmodificationand
+cardiovascularriskassessmentwaspublishedin2014. 20This
+guidelinehighlightedanumberofconditionsassociatedwith
+increasedcardiovascularriskthatmaynotbefullycapturedby
+QRISK2,includingHIV/AIDS,stage3kidneydisease,systemic
+lupuserythematosus(SLE),severementalillness,anduseof
+atypicalantipsychoticsorcorticosteroids. 20Theseconditions
+arenotspecificallyidentifiedwithinQRISK2,whichmayresult
+inunderestimationofriskintherelevantpatientgroups.In
+addition,recentlypublishedresearchhashighlightedincreased
+cardiovascularriskandpotentialprognosticimportancefor
+erectiledysfunction, 22-24migraine,25andbloodpressure
+variability.26Wethereforederivedandvalidatedanewversion
+ofthealgorithms,QRISK3,todeterminewhetherthesefactors
+shouldbeincorporatedintothealgorithmstoimproveestimation
+ofcardiovascularriskforthesepatients.
+Methods
+Study design and data source
+UsingtheQResearchdatabase(version41)weundertooka
+cohortstudyinalargepopulationofprimarycarepatients.We
+includedallpracticesinEnglandthathadbeenusingtheEMIS
+computersystemforatleastoneyearandrandomlyallocated
+threequartersofpracticestothederivationdatasetandthe
+remaindertoavalidationdataset.Weidentifiedanopencohort
+ofpatientsaged25-84yearsregisteredwiththepractices
+between1January1998and31December2015.Patientswere
+excludediftheyhadnopostcoderelatedTownsendscore(since
+theseusuallyresultfrompatientsmovingtonewlybuilthouses
+withnewpostcodesnotbeingyetlinkedtodeprivationdataor
+frompatientsbeinghomelessornothavingapermanent
+residence),hadpre-existingcardiovasculardisease(ongeneral
+practicerecordsorlinkedhospitalrecords),orwereusing
+prescribedstatinsatcohortentry.Wedeterminedanentrydate
+tothecohortforeachpatient,whichwasthelatestofthe
+following:25thbirthday,dateofregistrationwiththepractice
+plusoneyear,dateonwhichthepracticecomputersystemwas
+installedplusoneyear,orthestudystartdate(1January1998).
+Patientswerecensoredattheearliestdateofthediagnosisof
+cardiovasculardisease,death,deregistrationwiththepractice,
+lastuploadofcomputeriseddata,orstudyenddate(31
+December2015).
+Outcomes
+Ouroutcomewascardiovasculardisease,whichwasdefinedas
+acompositeoutcomeofcoronaryheartdisease,ischaemic
+stroke,ortransientischaemicattack.TheQResearchdatabase
+islinkedatindividualpatientleveltohospitaladmissionsdata
+(HospitalEpisodeStatistics),andmortalityrecordsobtained
+fromtheOfficeforNationalStatistics.Therecordsarelinked
+usingapseudonymisedNHSnumberspecifictotheQResearch
+database.TherecordingofNHSnumbersisvalidandcomplete
+for99.8%ofpatientswithdataonQResearch,99.9%forONS
+mortalityrecords,and98%forhospitaladmissionsrecords. 3 27
+Weclassifiedpatientsashavingcardiovasculardiseaseifthere
+wasarecordoftherelevantclinicalcodeineithertheirgeneral
+practicerecord,theirlinkedhospitalrecord,ortheirlinked
+mortalityrecord.WeusedReadcodestoidentifycardiovascular
+diseasecasesfromthegeneralpracticerecord.TheReadcodes
+arelistedintable1⇓ ofthewebappendix.WeusedICD-10
+(internationalclassificationofdiseases,10threvision)clinical
+codestoidentifycasesfromhospitalandmortalityrecords
+exceptforthethreeyearsbetween1January1998and31
+December2000,whenICD-9wasinuseformortalityrecords.
+TheICD-10codesusedwereG45(transientischaemicattack
+andrelatedsyndromes),I20(anginapectoris),I21(acute
+myocardialinfarction),I22(subsequentmyocardialinfarction),
+I23(complicationsaftermyocardialinfarction),I24(otheracute
+ischaemicheartdisease),I25(chronicischaemicheartdisease),
+I63(cerebralinfarction),andI64(strokenotspecifiedas
+haemorrhageorinfarction).ThecorrespondingICD-9codes
+usedwere410,411,412,413,414,434,and436.General
+practiceandlinkedmortalityandHospitalEpisodeStatistics
+datawereavailableuntil31December2015.Weusedthe
+earliestrecordeddateofcardiovasculardiseaseonanyofthe
+threedatasourcesastheoutcomedate.
+Predictor variables
+Weexaminedthepredictorvariablesinbox1basedon
+establishedriskfactorsalreadyincludedinthecurrentversion
+ofQRISK2andnewcandidatevariableshighlightedinthe
+literatureorNationalInstituteforHealthandCareExcellence
+guidelines.
+Fromthegeneralpracticerecordweextracteddatafor
+demographicfactors,clinicaldiagnoses,andclinicalvalues.
+Forclinicalvalues(systolicbloodpressureandbodymassindex)
+andsmokingstatusweobtainedthemostrecentvaluesrecorded
+beforethebaselinedate.Weselectedtheclosestvaluetocohort
+entryfortotalcholesterol:highdensitylipoproteincholesterol
+ratio,restrictingvaluesafterthebaselinedatetothosebefore
+thepatienthadadiagnosisofcardiovasculardiseaseorwas
+censored,andbeforeanystatinprescriptions.Toassess
+variabilityinsystolicbloodpressure,weidentifiedallsystolic
+bloodpressurevaluesrecordedinthefiveyearsbeforestudy
+entryandcalculatedthestandarddeviationwheretherewere
+twoormorerecordedvalues.Useofdrugsatbaselinewas
+definedasatleasttwoprescriptions,withthemostrecentone
+nomorethan28daysbeforethedateofentrytothecohort.All
+otherpredictorvariableswerebasedonthelatestinformation
+recordedinthegeneralpracticerecordbeforeentrytothecohort.
+Open Access: Reuse allowed Subscribe: http://www.bmj.com/subscribe
+BMJ2017;357:j2099 doi: 10.1136/bmj.j2099 (Published 24 May 2017) Page 2 of 21
+RESEARCH
+ on 15 April 2019 by guest. Protected by copyright.http://www.bmj.com/ BMJ: first published as 10.1136/bmj.j2099 on 23 May 2017. Downloaded from 
+Box 1: Variables used in QRISK algorithms
+Existing variables from QRISK2-2017
+Age at study entry (baseline)
+Ethnic origin (nine categories)
+Deprivation (as measured by the Townsend score, where higher values indicate higher levels of material deprivation)
+Systolic blood pressure
+Body mass index
+Total cholesterol: high density lipoprotein cholesterol ratio
+Smoking status (non-smoker, former smoker, light smoker (1-9/day), moderate smoker (10-19/day), or heavy smoker (≥20/day))
+Family history of coronary heart disease in a first degree relative aged less than 60 years
+Diabetes (type 1, type 2, or no diabetes)
+Treated hypertension (diagnosis of hypertension and treatment with at least one antihypertensive drug)
+Rheumatoid arthritis (diagnosis of rheumatoid a

@@ -1,0 +1,294 @@
+the bmj |  BMJ 2017;356:i6432  |  d oi: 10.1136/bmj.i6432
+RESEARCH 1
+open access
+1Department of 
+Gastroenterology, Glasgow 
+Royal Infirmary, Glasgow G4 
+OSF, UK
+2Section of Digestive Diseases, 
+Yale School of Medicine, New 
+Haven, and VA Connecticut 
+Healthcare System, West Haven, 
+CT, USA
+3Gastrointestinal Unit, Royal 
+Cornwall Hospital, Cornwall, UK
+4Department of 
+Gastroenterology and 
+Hepatology, Singapore General 
+Hospital, Singapore
+5Department of Medicine, 
+Dunedin School of Medicine, 
+University of Otago, Dunedin, 
+New Zealand
+6Department of Medical 
+Gastroenterology, Odense 
+University Hospital, Odense, 
+Denmark
+7Gastroenterology Unit, 
+Southern District Health Board, 
+Dunedin Hospital, Dunedin, 
+New Zealand
+Correspondence to: A J Stanley 
+adrian.stanley@ggc.scot.nhs.uk
+Additional material is published 
+online only. To view please visit 
+the journal online.
+Cite this as: BMJ 2017;356:i6432
+http://dx.doi.org/10.1136/bmj.i6432
+Accepted: 25 November 2016
+Comparison of risk scoring systems for patients presenting 
+with upper gastrointestinal bleeding: international multicentre 
+prospective study
+Adrian J Stanley,1 Loren Laine,2 Harry R Dalton,3 Jing H Ngu,4 Michael Schultz,5 ,7 Roseta Abazi,6 
+Liam Zakko,2 Susan Thornton,1 Kelly Wilkinson,3 Cristopher J L Khor,4 Iain A Murray,3 Stig B Laursen6 
+on behalf of the International Gastrointestinal Bleeding Consortium
+ABSTRACT
+ObjeC tive
+To compare the predictive accuracy and clinical utility 
+of five risk scoring systems in the assessment of 
+patients with upper gastrointestinal bleeding.
+Design
+International multicentre prospective study.
+set
+ting
+Six large hospitals in Europe, North America, Asia, and 
+Oceania.
+Parti
+Ci
+Pant
+s
+3012 consecutive patients presenting over 12 months 
+with upper gastrointestinal bleeding.
+Main 
+O
+utC
+OM
+e 
+M
+easures
+Comparison of pre-endoscopy scores (admission 
+Rockall, AIMS65, and Glasgow Blatchford) and 
+post-endoscopy scores (full Rockall and PNED) for their 
+ability to predict predefined clinical endpoints: a 
+composite endpoint (transfusion, endoscopic 
+treatment, interventional radiology, surgery, or 30 day 
+mortality), endoscopic treatment, 30 day mortality, 
+rebleeding, and length of hospital stay. Optimum 
+score thresholds to identify low risk and high risk 
+patients were determined.
+r
+esults
+The Glasgow Blatchford score was best (area under the 
+receiver operating characteristic curve (AUROC) 0.86) 
+at predicting intervention or death compared with the 
+full Rockall score (0.70), PNED score (0.69), admission 
+Rockall score (0.66, and AIMS65 score (0.68) (all 
+P<0.001). A Glasgow Blatchford score of ≤1 was the 
+optimum threshold to predict survival without 
+intervention (sensitivity 98.6%, specificity 34.6%). The 
+Glasgow Blatchford score was better at predicting 
+endoscopic treatment (AUROC 0.75) than the AIMS65 
+(0.62) and admission Rockall scores (0.61) (both 
+P<0.001). A Glasgow Blatchford score of ≥7 was the 
+optimum threshold to predict endoscopic treatment 
+(sensitivity 80%, specificity 57%). The PNED (AUROC 
+0.77) and AIMS65 scores (0.77) were best at predicting 
+mortality, with both superior to admission Rockall 
+score (0.72) and Glasgow Blatchford score (0.64; 
+P<0.001). Score thresholds of ≥4 for PNED, ≥2 for 
+AIMS65, ≥4 for admission Rockall, and ≥5 for full 
+Rockall were optimal at predicting death, with 
+sensitivities of 65.8-78.6% and specificities of 
+65.0-65.3%. No score was helpful at predicting 
+rebleeding or length of stay.
+CO
+n
+Cl
+usi
+O
+ns
+The Glasgow Blatchford score has high accuracy at 
+predicting need for hospital based intervention or 
+death. Scores of ≤1 appear the optimum threshold for 
+directing patients to outpatient management. AUROCs 
+of scores for the other endpoints are less than 0.80, 
+therefore their clinical utility for these outcomes 
+seems to be limited.
+trial
+ registrati
+O
+n
+Current Controlled Trials ISRCTN16235737 .
+Introduction
+Upper gastrointestinal bleeding is a common cause of 
+admission to hospital worldwide, with a UK incidence 
+of 103-172 per 100
+ 000 ad
+ults each year and mortality of 
+8-14%.1-3  Man y risk assessment scores have been devel -
+oped to predict clinically relevant outcomes, including 
+mor
+tality, need for hospital based intervention, 
+rebleeding, and length of hospital stay. 4-9  S everal of 
+these, including the Rockall score and recently 
+described progetto nazionale emorragia digestive 
+(PNED) score require endoscopy before calculation. 4 5  
+The R
+ockall score has been widely reported and it has 
+been suggested that the PNED score is superior to it, 
+although it has not been externally validated. 5  Other 
+endosc
+opy based scores have been described but are 
+not appropriate for unselected patients with upper gas-
+trointestinal bleeding, have not been externally vali -
+dated, or have been shown to be inferior to the Rockall 
+sc
+ore or PNED score. 10  H owever, requiring endoscopy 
+to calculate a score might delay risk assessment in 
+WhAT IS A l R e A dy knoW n on T h IS Top IC
+Several pre-endoscopy and post-endoscopy risk scores have been reported to predict 
+a variety of endpoints in patients presenting with upper gastrointestinal bleeding
+Using low and high scores to direct patient care to outpatient management or 
+urgent endoscopy and higher level care has been suggested
+The accuracy and generalisability of these scores and the optimum thresholds to 
+predict low risk and high risk patients to help direct care remain unclear
+WhAT T h IS ST udy A dd S
+This international study suggests that the Glasgow Blatchford score is accurate in 
+predicting need for intervention, or death at all centres, with a score ≤1 the optimal 
+threshold for directing low risk patients to outpatient management
+All scores have low predictive accuracy for other specific outcomes, including 
+endoscopic treatment and mortality, therefore their clinical utility to direct 
+management of high risk patients seems limited
+Widespread use of the Glasgow Blatchford score in the emergency departments of 
+many countries might allow up to 19% of patients with upper gastrointestinal 
+bleeding to be safely managed as outpatients
+bmj.i6432.indd   1 02-01-2017   9:55:54 AM
+ on 4 June 2019 by guest. Protected by copyright.http://www.bmj.com/ BMJ: first published as 10.1136/bmj.i6432 on 4 January 2017. Downloaded from 
+doi: 10.1136/bmj.i6432 | BMJ 2017;356:i6432  |  the  bmj
+RESEARCH
+2
+some healthcare settings, as there can be considerable 
+delays in performing endoscopy out of hours or on 
+weekends.11
+Recently, much interest has been shown in pre-endo-
+scopic risk scores for upper gastrointestinal bleeding, 
+w
+hich can be calculated shortly after presentation to 
+hospital. The most widely studied scores are the abbre-
+viated “admission” Rockall score, Glasgow Blatchford 
+sc
+ore, and recently described AIMS65 (albumin level 
+<30 g/L (A), international normalised ratio > 1.5 (I), 
+altered mental status (M), systolic blood pressure ≤ 90 
+mm Hg (S), and age >65 years (65)) score.7 8  These sc or -
+ing systems use clinical, haemodynamic, and (for 
+Glas
+gow Blatchford and AIMS65 scores) readily avail -
+able laboratory variables. Some studies have suggested 
+th
+at these scores could be used to identify patients at 
+very low risk who could be managed as outpatients.12-14  
+S
+tudies have also suggested that these scores could 
+identify patients at higher risk who might require 
+urgent endoscopy or management in high dependency 
+or intensive care units.15 16
+Several studies have compared scores in their ability to 
+predict various outcomes.12 16-19  Al though the Glasgow 
+Blatchford score seems useful in identifying very low risk 
+patients in the UK many studies have been small and sin-
+gle centre and no international study has compared all 
+the c
+ommonly used scores. Recent guidelines have sug-
+gested use of risk scores for patients with upper gastroin-
+testinal bleeding, but uncertainty remains about their 
+e
+xact role in clinical practice. 20-23 In this prospective 
+international study we compared five endoscopic and 
+pre-endoscopic risk assessment scores for their ability to 
+predict clinically relevant endpoints. In addition we 
+assessed the clinical utility of these scores, by determin-
+ing optimal thresholds for identifying patients at very 
+low risk w
+ho could be managed as outpatients, and 
+higher risk patients who might require specific manage-
+ment strategies aimed at improving outcome.
+Methods
+The study was undertaken in Yale-New Haven Hospital 
+(USA), Glasgow Royal Infirmary (Scotland), Royal Corn-
+wall Hospital Truro (England), Odense University Hos-
+pital (Denmark), Singapore General Hospital 
+(
+Singapore), and Dunedin Hospital (New Zealand).
+The predetermined clinical endpoints were the com-
+posite endpoint of need for hospital based intervention 
+(r
+ed blood cell transfusion, endoscopic treatment, 
+interventional radiology, or surgery) or death, endo -
+scopic treatment, 30 day mortality, rebleeding within 
+se
+ven days, and length of hospital stay.
+Patient management
+Patients were included if they presented to the hospital 
+with evidence of upper gastrointestinal bleeding 
+defined by haematemesis, coffee-ground vomiting, or 
+melaena. We excluded patients who developed upper 
+gastrointestinal bleeding while an inpatient for another 
+reason.
+All patients presenting to each hospital with upper 
+gastrointestinal bleeding were initially assessed in the 
+emergency department or acute assessment unit. Two 
+centres (Glasgow and Odense) had a policy of non-ad -
+mission for those with Glasgow Blatchford scores of 1 
+or less
+, and one centre (Truro) for those with Glasgow 
+Blatchford scores of 2 or less and aged less than 70 
+years, unless required for other reasons. Outpatient 
+endoscopy was arranged in all three centres. Proton 
+pump inhibitors (PPIs) were not routinely given to all 
+admitted patients before endoscopy. The practice in all 
+centres was to perform endoscopy within 24 hours in 
+all admitted patients where possible. After endoscopy, 
+the policy in all centres was to administer high dose 
+PPIs by intravenous bolus followed by infusion to 
+patients with high risk ulcer stigmata who required 
+endoscopic treatment, and to other selected patients 
+depending on clinical judgment. 20-23  For patients with 
+suspected variceal bleeding, the policy in all centres 
+was to give intravenous vasopressors and antibiotics 
+before endoscopy.21 24
+The endoscopic practice in all centres for patients 
+with high risk stigmata of non-variceal bleeding was by 
+injection of dilute adrenaline (epinephrine) into and 
+around the bleeding point, thermal contact or clips, or 
+both, but not adrenaline alone. 20-23  B and ligation or 
+injection of tissue glue with or without transjugular 
+intrahepatic portosystemic stent shunt was performed 
+in cases of oesophageal or gastric variceal bleeding, 
+respectively.21 24  In line with r ecent evidence and guide-
+lines, the policy was to administer red blood cells at a 
+haemo
+globin threshold of 70-80 g/L (7 -8 g/dL), or as 
+guided by the clinician in patients with severe haemor-
+rhage.24 25
+Data collection
+At each centre, data on consecutive, unselected patients 
+presenting to the hospital with upper gastrointestinal 
+bleeding were collected over a 12 month period between 
+March 2014 and March 2015. Data on patients managed 
+as outpatients in Glasgow, Truro, and Odense were also 
+included. A dedicated research nurse, doctor, or medi-
+cal student collected data at each site. The data col -
+lected included patient characteristics and 
+haemod
+ynamic and laboratory variables at presenta -
+tion necessary to calculate the full Rockall, admission 
+R
+ockall, Glasgow Blatchford, AIMS65, and PNED scores 
+(see supplementary table 1). Endoscopic findings were 
+recorded.
+Blood transfusion, endoscopic treatment, and inter -
+ventional radiology or surgery were recorded, as was 
+r
+ebleeding within seven days, as previously defined 
+(see supplementary ta

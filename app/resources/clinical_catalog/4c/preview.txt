@@ -1,0 +1,264 @@
+the bmj |  BMJ 2020;370:m3339 | doi: 10.1136/bmj.m3339  1
+RESEARCH
+Risk stratification of patients admitted to hospital with covid-19 
+using the ISARIC WHO Clinical Characterisation Protocol:  
+development and validation of the 4C Mortality Score
+Stephen R Knight,1 Antonia Ho,2,3 Riinu Pius,1 Iain Buchan,4 Gail Carson,5 Thomas M Drake,1 
+Jake Dunning,6,7 Cameron J Fairfield,1 Carrol Gamble,8 Christopher A Green,9 Rishi Gupta,10  
+Sophie Halpin,8 Hayley E Hardwick,11 Karl A Holden,11 Peter W Horby,5 Clare Jackson,8  
+Kenneth A Mclean,1 Laura Merson,5 Jonathan S Nguyen-Van-Tam,12 Lisa Norman,1  
+Mahdad Noursadeghi,13 Piero L Olliaro,14 Mark G Pritchard,14 Clark D Russell,15  
+Catherine A Shaw,1 Aziz Sheikh,1 Tom Solomon,11,16 Cathie Sudlow,17 Olivia V Swann,18  
+Lance CW Turtle,11,19 Peter JM Openshaw,7 J Kenneth Baillie,20,21 Malcolm G Semple,11,22  
+Annemarie B Docherty,1,21 Ewen M Harrison,1,23 on behalf of the ISARIC4C investigators
+AbstrAct
+Objective
+To develop and validate a pragmatic risk score to 
+predict mortality in patients admitted to hospital with 
+coronavirus disease 2019 (covid-19).
+Design
+Prospective observational cohort study.
+set
+ting
+International Severe Acute Respiratory and 
+emerging Infections Consortium (ISARIC) World 
+Health Organization (WHO) Clinical Characterisation 
+Protocol UK (CCP-UK) study (performed by the ISARIC 
+Coronavirus Clinical Characterisation Consortium—
+ISARIC-4C) in 260 hospitals across England, Scotland, 
+and Wales. Model training was performed on a cohort 
+of patients recruited between 6 February and 20 
+May 2020, with validation conducted on a second 
+cohort of patients recruited after model development 
+between 21 May and 29 June 2020.
+Partici
+Pant
+s
+Adults (age ≥18 years) admitted to hospital with covid-19 
+at least four weeks before final data extraction.
+Main 
+O
+utcOM
+e 
+M
+easure
+In-hospital mortality.
+r
+esults
+35
+ 463 p
+atients were included in the derivation 
+dataset (mortality rate 32.2%) and 22
+ 361 in the 
+v
+alidation dataset (mortality rate 30.1%). The final 
+4C Mortality Score included eight variables readily 
+available at initial hospital assessment: age, sex, 
+number of comorbidities, respiratory rate, peripheral 
+oxygen saturation, level of consciousness, urea level, 
+and C reactive protein (score range 0-21 points). The 
+4C Score showed high discrimination for mortality 
+(derivation cohort: area under the receiver operating 
+characteristic curve 0.79, 95% confidence interval 
+0.78 to 0.79; validation cohort: 0.77, 0.76 to 0.77) 
+with excellent calibration (validation: calibration-
+in-the-large=0, slope=1.0). Patients with a score 
+of at least 15 (n=4158, 19%) had a 62% mortality 
+(positive predictive value 62%) compared with 1% 
+mortality for those with a score of 3 or less (n=1650, 
+7%; negative predictive value 99%). Discriminatory 
+performance was higher than 15 pre-existing risk 
+stratification scores (area under the receiver operating 
+characteristic curve range 0.61-0.76), with scores 
+developed in other covid-19 cohorts often performing 
+poorly (range 0.63-0.73).
+c
+O
+nclusi
+O
+ns
+An easy-to-use risk stratification score has been 
+developed and validated based on commonly 
+available parameters at hospital presentation. The 4C 
+Mortality Score outperformed existing scores, showed 
+utility to directly inform clinical decision making, and 
+can be used to stratify patients admitted to hospital 
+with covid-19 into different management groups. The 
+score should be further validated to determine its 
+applicability in other populations.
+stu
+Dy
+ registrati
+O
+n
+ISRCTN66726260
+Introduction
+Disease resulting from infection with severe acute 
+respiratory syndrome coronavirus 2 (SARS-CoV-2) 
+has a high mortality rate with deaths predominantly 
+caused by respiratory failure.1 As of 1 September 2020, 
+For numbered affiliations see 
+end of the article.
+Correspondence to: M G Semple 
+m.g.semple@liverpool.ac.uk  
+(or @ProfCalumSemple on Twitter:  
+ORCID 0000-0001-9700-0418)
+Additional material is published 
+online only. To view please visit 
+the journal online.
+cit e this as: BMJ2020;370:m3339
+http:/ /dx.doi.org/10.1136/bmj.m3339
+Accepted: 25 August 2020
+WhAt  I s A lre A dy knoW n on th I s top I c
+Robust, validated clinical prediction tools are lacking that identify patients with 
+coronavirus disease 2019 (covid-19) who are at the highest risk of mortality
+Given the uncertainty about how to stratify patients with covid-19, considerable 
+interest exists in risk stratification scores to support frontline clinical decision 
+making
+Available risk stratification tools have a high risk of bias, small sample size 
+resulting in uncertainty, poor reporting, and lack formal validation
+WhAt  th I s study A dds
+Most existing covid-19 risk stratification tools performed poorly in our cohort; 
+caution is needed when novel tools based on small patient populations are 
+applied to cohorts in hospital with covid-19
+The 4C (Coronavirus Clinical Characterisation Consortium) Mortality Score is 
+an easy-to-use and valid prediction tool for in-hospital mortality, accurately 
+categorising patients as being at low, intermediate, high, or very high risk of 
+death
+This pragmatic and clinically applicable score outperformed other risk 
+stratification tools, showed clinical decision making utility, and had similar 
+performance to more complex models
+ on 16 September 2020 at UCL Library Services. Protected by copyright.http://www.bmj.com/ BMJ: first published as 10.1136/bmj.m3339 on 9 September 2020. Downloaded from 
+RESEARCH
+2 d oi: 10.1136/bmj.m3339  |  BMJ 2020;370:m3339 | the bmj
+over 25 million people had confirmed coronavirus 
+disease 2019 (covid-19) worldwide and at least 
+850
+ 000 people had died fr
+om the disease. 2 3  As 
+hospitals around the world are faced with an influx 
+of patients with covid-19, there is an urgent need for 
+a pragmatic risk stratification tool that will allow the 
+early identification of patients infected with SARS-
+CoV-2 who are at the highest risk of death to guide 
+management and optimise resource allocation.
+Prognostic scores attempt to transform complex 
+clinical pictures into tangible numerical values. 
+Prognostication is more difficult when dealing with 
+a severe pandemic illness such as covid-19 because 
+strain on healthcare resources and rapidly evolving 
+treatments alter the risk of death over time. Early 
+information has suggested that the clinical course 
+of a patient with covid-19 is different from that of 
+pneumonia, seasonal influenza, or sepsis. 4 Most 
+patients with severe covid-19 have developed a clinical 
+picture characterised by pneumonitis, profound 
+hypoxia, and systemic inflammation affecting multiple 
+organs.1
+A recent review identified many prognostic scores 
+used for covid-19, 5 which varied in their setting, pre -
+dict
+ed outcome measure, and the clinical parameters 
+included. The large number of risk stratification tools 
+reflects difficulties in their application, with most scores 
+showing moderate performance at best and no benefit 
+to clinical decision making. 6 7  Many novel covid-19 
+prognostic scores have been found to have a high 
+risk of bias, which could reflect development in small 
+cohorts, and many have been published without clear 
+details of model derivation and testing. 5 Therefore, a 
+risk stratification tool within a large national cohort of 
+patients admitted to hospital with covid-19 is needed 
+with clear development and validation details.
+Our aim was to develop and validate a pragmatic, 
+clinically relevant risk stratification score that uses 
+routinely available clinical information at hospital 
+presentation to predict in-hospital mortality in patients 
+admitted to hospital with covid-19. We then aimed to 
+compare this score with existing prognostic models.
+Methods
+s
+tudy design and setting
+The International Severe Acute Respiratory and 
+emerging Infections Consortium (ISARIC) World 
+Health Organization (WHO) Clinical Characterisation 
+Protocol UK (CCP-UK) study is an ongoing prospective 
+cohort study. The study is being performed by 
+the ISARIC Coronavirus Clinical Characterisation 
+Consortium (ISARIC-4C) in 260 hospitals across 
+England, Scotland, and Wales (National Institute for 
+Health Research Clinical Research Network Central 
+Portfolio Management System ID 14152). The protocol 
+and further study details are available online. 8 Model 
+development and reporting followed the TRIPOD 
+(transparent reporting of a multivariable prediction 
+model for individual prediction or diagnosis) guide -
+lines
+.9 The study is being conducted according to a 
+predefined protocol (appendix 1).
+Participants
+The study recruited consecutive patients aged 18 
+years and older with a completed index admission to 
+one of 260 hospitals in England, Scotland, or Wales. 8 
+Reverse transcriptase polymerase chain reaction was 
+the only mode of testing available during the period 
+of study. The decision to test was at the discretion of 
+the clinician attending the patient, and not defined 
+by protocol. The enrolment criterion “high likelihood 
+of infection” reflected that a preparedness protocol 
+cannot assume a diagnostic test will be available for 
+an emergent pathogen. In this activation, site training 
+emphasised the importance of only recruiting proven 
+cases.
+Data collection
+Demographic, clinical, and outcome data were 
+collected by using a prespecified case report form. 
+Comorbidities were defined according to a modified 
+Charlson comorbidity index.10 Comorbidities collected 
+were chronic cardiac disease, chronic respiratory 
+disease (excluding asthma), chronic renal disease 
+(estimated glomerular filtration rate ≤30), mild to 
+severe liver disease, dementia, chronic neurological 
+conditions, connective tissue disease, diabetes mellitus 
+(diet, tablet, or insulin controlled), HIV or AIDS, and 
+malignancy. These conditions were selected a priori 
+by a global consortium to provide rapid, coordinated 
+clinical investigation of patients presenting with any 
+severe or potentially severe acute infection of public 
+interest and enabled standardisation.
+Clinician defined obesity was also included as a 
+comorbidity owing to its probable association with 
+adverse outcomes in patients with covid-19. 11 12  The 
+clinical information used to calculate prognostic scores 
+was taken from the day of admission to hospital. 13 
+A practical approach was taken to sample size 
+requirements.14 We used all available data to maximise 
+the power and generalisability of our results. Model 
+reliability was assessed by using a temporally distinct 
+validation cohort with geographical subsetting, 
+together with sensitivity analyses.
+Outcomes
+The primary outcome was in-hospital mortality. This 
+outcome was selected because of the importance of the 
+early identification of patients likely to develop severe 
+illness from SARS-CoV-2 infection (a rule in test). We 
+chose to restrict analysis of outcomes to patients who 
+were admitted more than four weeks before final data 
+extraction (29 June 2020) to enable most patients to 
+complete their hospital admission.
+independent predictor variables
+A reduced set of potential predictor variables was 
+selected a priori, including patient demographic 
+information, common clinical investigations, and 
+parameters consistently identified as clinically 
+important in covid-19 cohorts following the methods 
+described by Wynants and colleagues (appendix 2). 5 
+Candidate predictor variables were selected based on 
+ on 16 September 2020 at UCL Library Services. Protected by copyright.http://www.bmj.com/ BMJ: first published as 10.1136/bmj.m3339 on 9 September 2020. Downloaded from 
+RESEARCH
+the bmj |  BMJ 2020;370:m3339 | doi: 10.1136/bmj.m3339  3
+three common criteria15: patient and clinical variables 
+known to influence outcome in pneumonia and flu-
+like illness; clinical biomarkers previously identified 
+within the literature as potential predictors in patients 
+with covid-19; values available
