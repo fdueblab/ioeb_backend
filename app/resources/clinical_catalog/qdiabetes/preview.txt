@@ -1,0 +1,248 @@
+the bmj |  BMJ 2017;359:j5019 | doi: 10.1136/bmj.j5019  1
+RESEARCH
+Development and validation of QDiabetes-2018 risk prediction 
+algorithm to estimate future risk of type 2 diabetes: cohort study
+Julia Hippisley-Cox,1,2 Carol Coupland1
+ABSTRACT
+OBJECTIVES
+To derive and validate updated QDiabetes-2018 
+prediction algorithms to estimate the 10 year risk of 
+type 2 diabetes in men and women, taking account 
+of potential new risk factors, and to compare their 
+performance with current approaches.
+DESIGN
+Prospective open cohort study.
+SETTING
+Routinely collected data from 1457 general practices 
+in England contributing to the QResearch database: 
+1094 were used to develop the scores and a separate 
+set of 363 were used to validate the scores.
+PARTICIPANTS
+11.5 million people aged 25-84 and free of diabetes 
+at baseline: 8.87 million in the derivation cohort and 
+2.63 million in the validation cohort.
+METHODS
+Cox proportional hazards models were used in the 
+derivation cohort to derive separate risk equations 
+in men and women for evaluation at 10 years. 
+Risk factors considered included those already in 
+QDiabetes (age, ethnicity, deprivation, body mass 
+index, smoking, family history of diabetes in a first 
+degree relative, cardiovascular disease, treated 
+hypertension, and regular use of corticosteroids) 
+and new risk factors: atypical antipsychotics, statins, 
+schizophrenia or bipolar affective disorder, learning 
+disability, gestational diabetes, and polycystic ovary 
+syndrome. Additional models included fasting blood 
+glucose and glycated haemoglobin (HBA1c). Measures 
+of calibration and discrimination were determined in 
+the validation cohort for men and women separately 
+and for individual subgroups by age group, ethnicity, 
+and baseline disease status.
+MAIN OUTCOME MEASURE
+Incident type 2 diabetes recorded on the general 
+practice record.
+RESULTS
+In the derivation cohort, 178
+ 314 inc
+ident cases 
+of type 2 diabetes were identified during follow-
+up arising from 42.72 million person years of 
+observation. In the validation cohort, 62
+ 326 inc
+ident 
+cases of type 2 diabetes were identified from 14.32 
+million person years of observation. All new risk 
+factors considered met our model inclusion criteria. 
+Model A included age, ethnicity, deprivation, body 
+mass index, smoking, family history of diabetes in a 
+first degree relative, cardiovascular disease, treated 
+hypertension, and regular use of corticosteroids, 
+and new risk factors: atypical antipsychotics, statins, 
+schizophrenia or bipolar affective disorder, learning 
+disability, and gestational diabetes and polycystic 
+ovary syndrome in women. Model B included the 
+same variables as model A plus fasting blood glucose. 
+Model C included HBA1c instead of fasting blood 
+glucose. All three models had good calibration and 
+high levels of explained variation and discrimination. 
+In women, model B explained 63.3% of the variation 
+in time to diagnosis of type 2 diabetes (R2), the D 
+statistic was 2.69 and the Harrell’s C statistic value 
+was 0.89. The corresponding values for men were 
+58.4%, 2.42, and 0.87. Model B also had the highest 
+sensitivity compared with current recommended 
+practice in the National Health Service based on 
+bands of either fasting blood glucose or HBA1c. 
+However, only 16% of patients had complete data for 
+blood glucose measurements, smoking, and body 
+mass index.
+CONCLUSIONS
+Three updated QDiabetes risk models to quantify 
+the absolute risk of type 2 diabetes were developed 
+and validated: model A does not require a blood test 
+and can be used to identify patients for fasting blood 
+glucose (model B) or HBA1c (model C) testing. Model 
+B had the best performance for predicting 10 year 
+risk of type 2 diabetes to identify those who need 
+interventions and more intensive follow-up, improving 
+on current approaches. Additional external validation 
+of models B and C in datasets with more completely 
+collected data on blood glucose would be valuable 
+before the models are used in clinical practice.
+1Division of Primary Care, 
+University of Nottingham, 
+Nottingham NG2 7RD, UK
+2ClinRisk, Leeds, West Yorkshire, 
+UK
+Correspondence to:  
+J Hippisley-Cox  
+Julia.hippisley-cox@nottingham.
+ac.uk
+Additional material is published 
+online only. To view please visit 
+the journal online.
+Cite this as: BMJ 2017;359:j5019 
+http:/ /dx.doi.org/10.1136/bmj.j5019
+Accepted: 16 October 2017
+WhAT i S A l R e A dy knoW n on T hi S Topi C
+Methods to identify those at increased risk of type 2 diabetes are needed to identify 
+patients for whom interventions or more frequent assessment may be required
+QDiabetes is currently widely used to estimate 10 year risk of type 2 diabetes in 
+people aged 25-84 years both to communicate risk to patients and to identify 
+patients at high risk for interventions and active surveillance
+QDiabetes does not include some well established risk factors and so will 
+underestimate risk in these patients
+It also does not include fasting blood glucose or HBA1c values
+WhAT T hi S ST udy A dd S
+Updated algorithms (QDiabetes-2018) were developed to quantify absolute risks 
+of type 2 diabetes in adults aged 25-84, which include established risk factors 
+and new risk factors such as atypical antipsychotics, statins, schizophrenia 
+or bipolar affective disorder, learning disability, gestational diabetes, and 
+polycystic ovary syndrome, and also can incorporate fasting blood glucose and 
+HBA1c values
+The updated risk algorithms provide valid measures of absolute risk in the 
+general population of patients as shown by the performance in a separate 
+validation cohort
+The model that includes fasting blood glucose had the best discrimination and 
+the highest sensitivity compared with current recommended practice in the NHS 
+based on bands of either fasting blood glucose or HBA1c
+ on 16 April 2019 by guest. Protected by copyright.http://www.bmj.com/ BMJ: first published as 10.1136/bmj.j5019 on 20 November 2017. Downloaded from 
+RESEARCH
+2 d oi: 10.1136/bmj.j5019  |  BMJ 2017;359:j5019 | the bmj
+introduction
+Diabetes risk assessment tools are used to identify 
+people at increased risk of diabetes so they can have 
+blood tests, and to target interventions to reduce risk. The 
+first QDiabetes model to estimate 10 year risk of type 2 
+diabetes was published in 2009.1 Since then it has been 
+updated regularly and recalibrated to the latest version 
+of the QResearch database; the age range across which 
+it applies has also been extended, from 25-79 to 25-84 
+years, smoking is assessed at five levels instead of two, 
+and the Townsend score has been updated using most 
+recent values from the 2011 census.2-4 This helps ensure 
+that the algorithm reflects the changes in population 
+characteristics (such as changes in prevalence of 
+smoking, body mass index, and incidence of type 2 
+diabetes) and improvements in data quality such as 
+improved recording of risk factors or ascertainment 
+of diabetes. The QDiabetes algorithms have been 
+validated by ourselves and others in independent 
+groups of patients using UK primary care databases 
+such as QResearch,5 Clinical Practice Research Datalink 
+(CPRD),5 and The Health Improvement Network (THIN).6 
+The algorithms have been independently and externally 
+validated in international populations and compared 
+with other diabetes risk prediction models and been 
+shown to have best performance.7 The use of QDiabetes 
+has also been evaluated in observational studies and 
+systematic reviews.8-11
+QDiabetes is now integrated into leading UK general 
+practice computer systems and used within the UK 
+National Health Service. It is recommended in the NHS 
+Health Checks and National Institute for Health and 
+Care Excellence guidance on the prevention of type 
+2 diabetes in people at high risk. 12 13  It is also used 
+in occupational health settings and internationally 
+through the publicly available QDiabetes website (www.
+qdiabetes.org). A recent update to the NICE guideline 
+on diabetes prevention in 2017 has highlighted 
+several conditions associated with increased diabetes 
+risk that may not be fully captured by QDiabetes. 14 
+These include polycystic ovary syndrome, gestational 
+diabetes, learning disabilities, and mental health 
+problems.15 Furthermore, there is now good evidence 
+from both clinical trials and observational studies 
+that atypical antipsychotics and statins are associated 
+with an increased risk of diabetes. 16-23 These factors 
+are not specifically identified within QDiabetes, which 
+may result in under-estimation of risk in the relevant 
+patient groups.
+Once patients with an increased risk of developing 
+diabetes have been identified using a diabetes risk 
+assessment tool such as QDiabetes, then guidelines 
+recommend they undergo a blood glucose test, either 
+for glycated haemoglobin (HBA1c) or fasting blood 
+glucose.12 13 24  This is to determine who already has 
+diabetes; who is at high risk of progression to type 2 
+diabetes, and who is at moderate risk. 13 International 
+guidelines differ about which thresholds of fasting 
+blood glucose and HBA1c to use to define the high risk 
+group, mainly because of a lack of population based 
+data on which to base the analyses. 25 26 For example, 
+American guidelines recommend a fasting blood 
+glucose concentration of 5.6-6.9 mmol/L or HBA1c 
+value of 39-46 mmol/mol (5.7-6.4%). UK guidelines 
+recommend a fasting blood glucose concentration of 
+5.5-6.9 mmol/L or HBA1c value of 42-47 mmol/mol 
+(6.0-6.4%).12
+Widely used risk assessment tools do not incorporate 
+the results of either blood test, making it difficult to 
+provide patients with an accurate estimation of their 
+absolute level of risk after a blood test. We therefore 
+derived and validated a new version of the equation 
+(QDiabetes-2018) to determine whether these factors 
+should be incorporated into the equation and how they 
+could be used to improve the estimation of diabetes 
+risk and communication with patients as well as 
+improve the design of population based diabetes risk 
+assessment strategies.
+Methods
+Study design and data source
+We undertook a cohort study in a large population of 
+primary care patients in England who were registered 
+with practices contributing to the QResearch database 
+(version 42). EMIS Health is the leading commercial 
+supplier of general practice computer systems in the 
+UK and is used by approximately 4400 practices. 
+This is around 58% of all 7613 general practices in 
+England (NHS Information Centre, March 2016). Of 
+these, 1503 (34.2%) contribute to the QResearch 
+database. We included all English practices 
+contributing to QResearch who had been using their 
+EMIS Health computer system for at least a year. We 
+randomly allocated three quarters of practices to the 
+derivation dataset and the remaining quarter to a 
+validation dataset. We identified an open cohort of 
+patients aged 25-84 years registered with practices 
+between 1 January 2005 and 31 December 2016. We 
+excluded patients who did not have a postcode related 
+Townsend score (these usually result from patients 
+moving to newly built houses with new postcodes 
+not yet linked to deprivation data, or from patients 
+being homeless or not having a permanent residence) 
+and those with pre-existing type 1 or type 2 diabetes. 
+We also excluded those with a fasting blood glucose 
+concentration of 7 mmol/L or more or HBA1c value of 
+48 mmol/mol or more as these patients might be in the 
+process of having further tests to confirm a diagnosis of 
+diabetes. For each patient we determined an entry date 
+to the cohort, which was the latest of the following: 
+25th birthday, date of registration with the practice 
+plus one year, date on which the practice computer 
+system was installed plus one year, and the beginning 
+of the study period (1 January 2005). Patients were 
+censored at the earliest date of the diagnosis of type 2 
+diabetes, death, deregistration with the practice, last 
+uplo

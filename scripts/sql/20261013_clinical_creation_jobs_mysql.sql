@@ -1,0 +1,26 @@
+-- Apply before deploying the clinical creation workflow.
+CREATE TABLE IF NOT EXISTS clinical_creation_jobs (
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    owner_id VARCHAR(36) NOT NULL,
+    mode VARCHAR(16) NOT NULL,
+    status VARCHAR(24) NOT NULL DEFAULT 'draft',
+    name VARCHAR(100) NOT NULL DEFAULT '',
+    description TEXT NOT NULL,
+    notes TEXT NOT NULL,
+    messages_json LONGTEXT NOT NULL,
+    intake_json LONGTEXT NOT NULL,
+    reference_name VARCHAR(255) NOT NULL DEFAULT '',
+    reference_path TEXT NOT NULL,
+    reference_preview LONGTEXT NOT NULL,
+    reference_reviewed BOOLEAN NOT NULL DEFAULT FALSE,
+    progress_step INTEGER NOT NULL DEFAULT 0,
+    progress_text VARCHAR(500) NOT NULL DEFAULT '',
+    result_json LONGTEXT NULL,
+    error TEXT NULL,
+    service_id VARCHAR(36) NULL,
+    run_id VARCHAR(36) NULL,
+    heartbeat_at BIGINT NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL,
+    INDEX ix_clinical_creation_jobs_owner_id (owner_id)
+);

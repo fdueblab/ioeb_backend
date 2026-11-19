@@ -1,0 +1,227 @@
+Original article
+Development and validation of the Surgical Outcome Risk T ool
+(SORT)
+K. L. Protopapa1, J. C. Simpson2,N .C .E .S m i t h1 and S. R. Moonesinghe2
+1National Confidential Enquiry into Patient Outcome and Death (NCEPOD) and2University College London/University College London Hospitals
+Surgical Outcomes Research Centre (SOuRCe), National Institute for Health Research University College London Hospitals Biomedical Research
+Centre, Department of Anaesthesia, University College London Hospitals NHS Foundation Trust, London, UK
+Correspondence to: Mrs K. L. Protopapa, National Confidential Enquiry into Patient Outcome and Death (NCEPOD), Ground Floor, Abbey House,
+74–76St John Street, London EC1M 4DZ, UK (e-mail: kprotopapa@ncepod.org.uk)
+Background: Existing risk stratification tools have limitations and clinical experience suggests they are
+not used routinely.The aimof thisstudy was to develop andvalidatea preoperative riskstratificationtool
+to predict 30-day mortality after non-cardiac surgery in adults by analysis of data from the observational
+National Confidential Enquiry into Patient Outcome and Death (NCEPOD) Knowing the Risk study.
+Methods: The data set was split into derivation and validation cohorts. Logistic regression was used to
+construct a model in the derivation cohort to create the Surgical Outcome Risk Tool (SORT), which was
+tested in the validation cohort.
+Results: Prospective data for 19097 cases in 326 hospitals were obtained from the NCEPOD study.
+Following exclusionof 2309, details of 16788 patients were analysed (derivation cohort 11219, validation
+cohort 5569). A model of 45 risk factors was refined on repeated regression analyses to develop a
+model comprising six variables: American Society of Anesthesiologists Physical Status (ASA-PS) grade,
+urgencyofsurgery(expedited,urgent,immediate),high-risksurgicalspecialty(gastrointestinal,thoracic,
+vascular), surgical severity (from minor to complex major), cancer and age 65years or over. In the
+validationcohort,theSORTwaswellcalibratedanddemonstratedbetterdiscriminationthantheASA-PS
+and Surgical Risk Scale; areas under the receiver operating characteristic (ROC) curve were 0⋅91 (95 per
+cent c.i. 0⋅88 to 0⋅94), 0⋅87 (0⋅84 to 0⋅91) and 0⋅88 (0⋅84 to 0⋅92) respectively (P <0⋅001).
+Conclusion: The SORT allows rapid and simple data entry of six preoperative variables, and provides a
+percentage mortality risk for individuals undergoing surgery.
+Paper accepted 25 July 2014
+Published online in Wiley Online Library (www.bjs.co.uk).DOI: 10.1002/bjs.9638
+Introduction
+Approximately8millionsurgicalproceduresareperformed
+intheUKeachyear,and230millionworldwide 1.Accurate
+risk stratification facilitates meaningful informed patient
+consent and shared decision-making. It might also iden-
+tify high-risk patients who could benefit from targeted
+interventions including goal-directed fluid therapy2, post-
+operative respiratory support3 and admission to critical
+care4. There is some evidence that appropriately tar-
+getedinterventions5 canreducemortality 6,7,morbidityand
+length of hospital stay8.
+Clinical judgement alone is not a reliable predictor
+of adverse outcome9. Thus a variety of risk assessment
+tools have been developed to help clinicians calculate
+perioperative risk10 that complement investigations for
+identifying high-risk patients, such as cardiopulmonary
+exercise testing 11,12 and biomarker assays 13. Exercise
+testing facilities are not available routinely14,15 and are
+inappropriate in urgent or emergency surgical patients.
+The potential value of biomarkers such as N-terminal
+pro-B-type natriuretic peptide is still emerging 16–18.
+Risk stratification tools remain the most readily and
+widely available means of determining perioperative
+risk.
+Some risk stratification tools consist entirely of pre-
+operative variables, such as the American Society of
+Anesthesiologists Physical Status (ASA-PS) grade19 and
+the Surgical Risk Scale (SRS) 20. Other tools combine
+preoperative data with intraoperative/postoperative vari-
+ables, such as the Physiological and Operative Severity
+Score for the enUmeration of Mortality and morbidity
+© 2014 The Authors.BJS published by John Wiley & Sons Ltd on behalf of BJS Society Ltd.
+This is an open access article under the terms of the Creative Commons Attribution-NonCommercial-NoDerivs License, which permits use and distribution in any
+medium, provided the original work is properly cited, the use is non-commercial and no modifications or adaptations are made.
+Surgical Outcome Risk Tool 1775
+Case report forms collected in
+Knowing the Risk study n = 19 097
+Excluded based on exclusion criteria n = 262 (1·4%)
+    Aged < 16 years n = 8
+    Duplicate n = 120
+    Specialty not surgical n = 102
+    Operation date outside study interval n = 32
+Excluded owing to missing data n = 2047
+patients (10·7% of original data set)
+    Mortality status n = 916
+    Age n = 7
+    ASA-PS grade n = 367
+    Operative urgency n = 381
+    Surgical severity n = 74
+    Operation date n = 86
+    Surgical specialty n = 216
+Eligible patients n = 18 835
+Included in analysis n = 16 788
+Fig. 1 Reasons for exclusion from the study. ASA-PS, American Society of Anesthesiologists Physical Status
+(POSSUM)21, and the subsequent Portsmouth version
+(P-POSSUM)22. Clinical experience suggests that their
+incorporation into clinical practice is variable. Reluctance
+to use them may relate to concerns over the accuracy,
+complexity23 and/or accessibility of data, for example if
+a blood test is required. A recent systematic review23 of
+risk stratification tools validated in heterogeneous patient
+cohorts found that P-POSSUM and the SRS were the
+most widely validated and accurate risk stratification tools
+available. However, both have their limitations. Overall,
+clinical experience suggests that existing risk stratification
+tools are not widely used in the UK or elsewhere.
+In 2011, the National Confidential Enquiry into Patient
+Outcome and Death (NCEPOD) published Knowing the
+Risk, a report assessing perioperative care14. Key recom-
+mendations included the introduction of a national system
+to identify patients at high risk of morbidity and death
+after surgery; and that a mortality risk assessment should
+be made explicit to patients before surgery, and docu-
+mented on the consent form. It was also recommended
+that high-risk patients be identified before operation to
+aid planning and provision of critical care resources. An
+important step towards meeting these recommendations
+wouldbeachievedbyariskstratificationtoolthatconsisted
+entirely of readily available preoperative variables which
+enabled easy calculation of a predicted percentage mortal-
+ity.Thus,a post hocanalysisofdatacollectedintheKnowing
+theRiskstudywasconducted,todevelopandvalidatearisk
+stratification tool that met these requirements, and com-
+pare it with existing preoperative risk stratification tools.
+Methods
+The Knowing the Risk study was a prospective, multi-
+centre, observational cohort study. The initial data collec-
+tion was undertaken for 7days from midnight on 1 March
+until midnight on 8 March 2010. National Health Service
+(NHS) hospitals in England, Wales and Northern Ireland,
+public hospitals in the Isle of Man, Guernsey and Jersey,
+and independent-sector hospitals in all these regions, were
+invited to participate. Perioperative data were collected on
+paper forms by anaesthetists at the time of surgery. Details
+of the study design and data collection methodology have
+been described previously14 and an extract of the form can
+be found in Appendix S1 (supporting information). Data
+werecollectedwithoutobtainingpatientconsentorethical
+approvalasthestudywasnotdefinedasresearchunderthe
+Health Research Authority (formerly National Research
+Ethics Service). However, Section 251 approval had been
+obtained from the Health Research Authority Confiden-
+tiality Advisory Group (formerly the National Informa-
+tion Governance Board, NIGB) to collect identifiable data
+without consent. For the work described here, further
+NIGB approval was obtained to extend the data-holding
+interval for England and Wales. Data Access Agreements
+were drawn up for each Northern Ireland Trust during
+the Knowing the Risk study. Approval was subsequently
+obtainedfromthePrivacyAdvisoryCommitteeforNorth-
+ern Ireland to extend the data-holding interval.
+© 2014 The Authors.BJS published by John Wiley & Sons Ltd www.bjs.co.uk BJS 2014; 101: 1774–1783
+on behalf of BJS Society Ltd.
+1776 K. L Protopapa, J. C. Simpson, N. C. E. Smith and S. R. Moonesinghe
+Table 1 Descriptive data for patients excluded for missing
+mortality status in comparison with the whole data set
+Mortality data
+missing
+(n=916)
+Mortality data
+known
+(n=16788)
+Mean age (years) 60 ⋅55 5 ⋅8
+Missing data 59 (6 ⋅4) –
+Sex ratio (M:F) 428:488 7481:9307
+ASA-PS grade
+I 253 (27 ⋅6) 5416 (32 ⋅3)
+II 370 (40 ⋅4) 7585 (45 ⋅2)
+III 179 (19 ⋅5) 3339 (19 ⋅9)
+IV 28 (3 ⋅1) 417 (2 ⋅5)
+V1 ( 0 ⋅1) 31 (0 ⋅2)
+Missing data 85 (9 ⋅3) –
+Urgency of surgery
+Elective 569 (62 ⋅1) 10987 (65 ⋅4)
+Expedited 95 (10 ⋅4) 2136 (12 ⋅7)
+Urgent 176 (19 ⋅2) 3424 (20 ⋅4)
+Immediate 8 (0 ⋅9) 241 (1 ⋅4)
+Missing data 68 (7 ⋅4) –
+Severity
+Minor 72 (7 ⋅9) 1423 (8 ⋅5)
+Intermediate 188 (20 ⋅5) 4134 (24 ⋅6)
+Major 281 (30 ⋅7) 5488 (32 ⋅7)
+Xmajor/complex 299 (32 ⋅6) 5743 (34 ⋅2)
+Missing data 76 (8 ⋅3) –
+Co-morbidities
+None documented 551 (60 ⋅2) 9472 (56 ⋅4)
+Arrhythmia 85 (9 ⋅3) 1177 (7 ⋅0)
+Cancer 84 (9 ⋅2) 1649 (9 ⋅8)
+Cirrhosis 10 (1 ⋅1) 123 (0 ⋅7)
+Congestive cardiac failure 26 (2 ⋅8) 276 (1 ⋅6)
+Smoker 71 (7 ⋅8) 1689 (10 ⋅1)
+Diabetes (insulin-dependent) 15 (1 ⋅6) 445 (2 ⋅7)
+Diabetes (non-insulin-dependent) 58 (6 ⋅3) 1128 (6 ⋅7)
+Ischaemic heart disease 99 (10 ⋅8) 1635 (9 ⋅7)
+Respiratory disease 109 (11 ⋅9) 2082 (12 ⋅4)
+TIA/stroke 34 (3 ⋅7) 677 (4 ⋅0)
+Values in parentheses are percentages. ASA-PS, American Society of
+Anesthesiologists Physical Status; Xmajor, extra major; TIA, transient
+ischaemic attack.
+Inclusion/exclusion criteria
+Data were analysed for patients aged 16years or over who
+underwent surgery of any urgency (immediate, urgent,
+expedited or elective) and required a planned overnight
+admission. Surgery was defined as a procedure performed
+in an operating theatre by a surgeon. Patients undergoing
+day-case surgery, obstetric procedures, neurosurgery, car-
+diac or transplant surgery were excluded. If a patient had
+more than one procedure during the study interval, data
+for the most complex procedure were used. Patients were
+excludedifanyofthefollowingkeyvariablesweremissing:
+age/date of birth, operative procedure or urgency, opera-
+tiondateandsurgicalseverity,ASA-PSgradeandmortality
+status.
+Data set
+In the prospectively collected Knowing the Risk data set,
+the surgical procedure was described using free text. In
+the analysis described below, data coders used this to cat-
+egorize each procedure according to surgical type (for
+exampleabdominal – gastrointestinal)andseverity.Where
+the free-text surgical procedure was missing, the opera-
+tionwasidentifiedfromOPCScodingobtainedretrospec-
+tively using patient identifiers provided during the initial
+study.Severitycodingintofourcategories(minor,interme-
+diate, major or extra major (Xmajor)/complex) was based
+on the reference manual for the AXA Specialist Procedure
+Codes24, which is used to grade the magnitude of surgical
+procedures in UK independent hospitals. A comparison of
+the surgical severity for all orthopaedic and gastrointesti-
+nal surgical procedures (the two most common surgical
+specialty groups in the study sample) was made to assess
+similaritiesbetweentheAXAandBritishUnitedProvident
+Association(BUPA)codingschedules,astheBUPAsched-
+ulehasbeenusedinpreviousstudies 20.Clinicaljudgement
+was used for procedures falling under more than one sur-
+gical type, and where there was no listing for a procedure
+intheAXAschedule.Twoclinicalreviewersreachedagree-
+ment on how to classify such procedures.
+Data on deaths within 30days were provided retrospe

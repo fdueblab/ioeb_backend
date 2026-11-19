@@ -1,0 +1,264 @@
+ 
+ 
+ 
+ 
+ 
+Edinburgh Research Explorer 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Predicting functional outcome in acute stroke: comparison of a
+simple six variable model with other predictive systems and
+informal clinical prediction
+Citation for published version:
+Counsell, C, Dennis, M & McDowall, M 2004, 'Predicting functional outcome in acute stroke: comparison of
+a simple six variable model with other predictive systems and informal clinical prediction', Journal of
+Neurology Neurosurgery & Psychiatry, vol. 75, no. 3, pp. 401-5. https://doi.org/10.1136/jnnp.2003.018085
+Digital Object Identifier (DOI):
+10.1136/jnnp.2003.018085
+Link:
+Link to publication record in Edinburgh Research Explorer
+Document Version:
+Publisher's PDF, also known as Version of record
+Published In:
+Journal of Neurology Neurosurgery & Psychiatry
+Publisher Rights Statement:
+available via europepmc link
+General rights
+Copyright for the publications made accessible via the Edinburgh Research Explorer is retained by the author(s)
+and / or other copyright owners and it is a condition of accessing these publications that users recognise and
+abide by the legal requirements associated with these rights.
+Take down policy
+The University of Edinburgh has made every reasonable effort to ensure that Edinburgh Research Explorer
+content complies with UK legislation. If you believe that the public display of this file breaches copyright please
+contact openaccess@ed.ac.uk providing details, and we will remove access to the work immediately and
+investigate your claim.
+Download date: 18. Nov. 2026
+PAPER
+Predicting functional outcome in acute stroke: comparison of
+a simple six variable model with other predictive systems
+and informal clinical prediction
+C Counsell, M Dennis, M McDowall
+.............................................................................................................................. .
+See end of article for
+authors’ affiliations
+.......................
+Correspondence to:
+Dr Carl Counsell,
+Department of Medicine
+and Therapeutics,
+University of Aberdeen,
+Polwarth Building,
+Foresterhill, Aberdeen
+AB25 2ZD, UK;
+cec@iahs.abdn.ac.uk
+Received 22 May 2003
+In revised form
+7 August 2003
+Accepted 8 August 2003
+.......................
+J Neurol Neurosurg Psychiatry 2004;75:401–405. doi: 10.1136/jnnp.2003.018085
+Background: Statistical models that predict functional outcome after stroke using six simple variables (SSV)
+have recently been developed and validated.
+Objective: To compare the accuracy of these models with other simple ways of predicting outcome soon
+after stroke.
+Methods: The SSV model for being alive and independent (modified Rankin score (2) six months or one
+year after stroke was compared with predictions based on a model that included only age and Oxford
+community stroke project classification, with predictions based on conscious level and urinary continence,
+and with informal clinical predictions made by clinicians interested in stroke. Predictions were compared in
+an independent hospital based cohort of stroke patients using receiver operator characteristic (ROC)
+curves.
+Results: The SSV model at six months had a significantly greater area under the curve (0.84) than the
+model with only age and stroke classification (0.75). Predictions based on conscious level and urinary
+continence were no better than those of the SSV model and were unable to predict subjects with a high
+probability of good outcome. The sensitivity and specificity for informal clinical predictions at one year lay
+on or below the SSV model curve, implying that the SSV model was at least as good as clinical predictions.
+Conclusions: The SSV models performed as well as or better than other simple predictive systems. These
+models will be useful in epidemiological studies but should not be used to guide clinical management until
+their impact on patient care and outcome has been evaluated.
+A
+ccurate prediction of outcome in the acute and
+subacute phase of stroke would have several uses in
+both epidemiological research and clinical practice.1 We
+have recently described the development and validation of
+logistic regression models that use six simple variables
+(table 1), collected shortly after the onset of ischaemic or
+haemorrhagic stroke, to predict the probability of a patient
+being alive and independent at six or 12 months. 1–3 We
+wished to test whether these new models gave more accurate
+predictions than other predictive systems that have been
+developed, and whether they were as accurate as informal
+predictions of outcome made by clinicians looking after
+stroke patients. The latter may be better than any statistical
+model because clinicians can take the whole clinical picture
+into account as well their previous experience and intuition.
+METHODS
+Initially, we hoped to compare the six simple variables (SSV)
+models with other models from a recent systematic review 4
+that predicted functional outcome at six to 12 months.
+However, this was not possible because all except one of the
+previous models included some variables that were not
+collected in the cohort that we used to compare the models.
+The remaining model was described in insufficient detail for
+it to be used. We therefore compared the SSV models with
+two other simple predictive systems: first, a model that
+included only two variables, age and the Oxfordshire
+community stroke project (OCSP) classification of stroke
+syndrome (which has been used previously to provide a
+simple assessment of prognosis 5–7); and second, predictions
+based on two variables (conscious level and urinary
+continence) which others have suggested give as good a
+prediction as those based on more complex predictive
+models.89 We also tested how the SSV models compared
+with early informal clinical predictions of outcome made by
+physicians of varying stroke experience.
+The various prediction methods were compared in the first
+1330 patients from the Lothian stroke register (LSR), an
+independent hospital based cohort of patients (that is, it was
+not used to generate any of the models), in which the median
+time from stroke onset to patient assessment was 2.8 days
+(interquartile range 1 to 7 days). 1 ‘‘Alive and independent’’
+was defined as a modified Rankin score of 2 or less.
+Prediction of outcome using age and OCSP
+classification
+A logistic regression model for being alive and independent at
+six months using only these two variables was produced on
+the same 530 patients in the OCSP cohort who were used to
+generate the original SSV models. This new model was then
+validated on 1200 patients in the LSR cohort (130 had
+missing outcome data) and its area under the receiver
+operator characteristic (ROC) curve was compared with that
+of the SSV model as previously described. 1
+Prediction of outcome using conscious level and
+urinary continence
+Data on conscious level, urinary continence, and six months
+outcome were available for 1187 of the 1330 patients in the
+LSR. Previous investigators 89 have suggested that a simple
+............................................................... .
+Abbreviations: GCS, Glasgow coma scale; LSR, Lothian stroke register;
+OCSP, Oxfordshire community stroke project; ROC, receiver operator
+characteristic; SSV, six simple variables model
+See Editorial Commentary, p 351
+401
+www.jnnp.com
+classification of alert versus drowsy/comatose provided good
+predictions of short term outcome. Unfortunately, conscious
+level in patients in the LSR was only defined in terms of the
+Glasgow coma scale (GCS) rather than as being alert or not.
+We therefore reclassified patients in the LSR as ‘‘alert’’ if their
+initial GCS was 15/15 in those without dysphasia or a
+combined motor and eye component of 10/10 in those with
+dysphasia. The remaining patients were classified as drowsy
+or comatose. Urinary incontinence was defined as any
+episode of incontinence—patients with a catheter or penile
+sheath were classified as incontinent. The sensitivity and
+specificity for the four possible categories of conscious level
+and continence (alert versus not, continent versus not, alert
+and continent versus not, alert or continent versus neither)
+were used to plot an ROC curve for alive and independent at
+six months. These curves were then compared qualitatively to
+the ROC curves of the SSV model. Formal statistical testing of
+the difference in areas under the ROC curves was not
+undertaken because there were so few points for conscious
+level and continence.
+Informal clinical prediction of outcome
+All patients in the LSR were seen by one of six neurology
+trainees or three consultants, who all had a special interest in
+stroke. After they had seen the patient, each clinician used
+their clinical judgement to predict the patient’s modified
+Rankin score at one year. The clinical forecasts were made
+after the same assessment of the patient that was used to
+collect the baseline data for the SSV model; they were thus
+directly comparable with the model’s predictions. However,
+none of the forecasts was made using the SSV models and
+most (1071 of 1330, 80%) were made before the model was
+developed.
+Analyses
+The patient’s actual status was established by telephone
+follow up by staff blind to the baseline clinical and model
+prediction. The level of agreement over that expected by
+chance between the informal clinical prediction and the
+actual outcome was assessed by calculating a weighted k
+value.10 The sensitivity, specificity, and positive and negative
+predictive values of the clinical predictions were calculated
+(plus 95% confidence intervals) and plotted on the ROC curve
+for the validated SSV model for alive and independent at one
+year. As we had previously shown that the SSV model had
+much poorer discrimination in outpatients than in inpatients,
+performance of the informal clinical predictions was analysed
+in outpatients and inpatients separately. We were unable to
+assess the relative performance of predictions made by
+consultants versus trainees, because the person who made
+the prediction was not entered into the database for most
+patients. However, most predictions for inpatients were made
+by trainees while most outpatient predictions were made by
+consultants.
+RESULTS
+Prediction of outcome using age and OCSP
+classification
+The validation showed that the model including only age and
+stroke syndrome had a significantly smaller (2p ,0.0001)
+area under the ROC curve than the corresponding SSV model,
+implying worse discrimination (fig 1).
+Prediction of outcome using conscious level and
+urinary continence
+The sensitivities for predicting a good outcome were high for
+all categories ( .0.90) (that is, very few patients who had a
+good outcome were initially not alert or continent), but the
+specificities were low ( ,0.5) (table 2). Urinary continence
+alone had a significantly greater specificity than conscious
+level alone. Figure 2 shows that the points for conscious level
+and continence all lie below the ROC curve for the SSV
+Table 1 Six simple variables for predicting outcome after stroke
+Variable* Definition of variable
+OR for being alive and independent (95% CI)
+At six months At one year
+Age Age at onset (years) 0.95/C192 (0.93 to 0.97) 0.92 /C192 (0.89 to 0.94)
+Living alone Nobody permanently living with
+patient before stroke 0.52 (0.31 to 0.86) 0.68 (0.41 to 1.13)
+Independent pre-stroke Modified Rankin score (2
+before stroke 15.55 (5.68 to 42.58) 23.90 (6.83 to 83.63)
+Normal GCS verbal GCS verbal score = 5 (that is,
+oriented) 8.67 (3.43 to 21.91) 8.82 (3.28 to 23.70)
+Able to lift arms Able to lift both arms to horizontal
+(MRC score >3 in both arms) 8.22 (3.25 to 20.76) 10.16 (3.72 to 27.78)
+Able to walk Walks without the help of another
+person (can use stick/frame) 3.71 (1.77 to 7.77) 3.17 (1.44 to 6.97)
+*Dichotomous variables were coded 1 = Yes, 2 = No.
+/C192Per year of age.
+CI, confidence interval; GCS, Glasgow coma scale; OR, odds ratio.
+Figure 1 Receiver operator characteristic curves for prediction

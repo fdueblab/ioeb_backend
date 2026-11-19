@@ -1,0 +1,271 @@
+{
+  "departments": [
+    {
+      "id": "cardiology",
+      "name": "心血管内科"
+    },
+    {
+      "id": "respiratory",
+      "name": "呼吸内科"
+    },
+    {
+      "id": "gastroenterology",
+      "name": "消化内科"
+    },
+    {
+      "id": "endocrinology",
+      "name": "内分泌科"
+    },
+    {
+      "id": "nephrology",
+      "name": "肾内科"
+    },
+    {
+      "id": "neurology",
+      "name": "神经内科"
+    },
+    {
+      "id": "oncology",
+      "name": "肿瘤科"
+    },
+    {
+      "id": "surgery",
+      "name": "外科"
+    },
+    {
+      "id": "obstetrics",
+      "name": "妇产科"
+    },
+    {
+      "id": "pediatrics",
+      "name": "儿科"
+    },
+    {
+      "id": "emergency",
+      "name": "急诊与重症"
+    },
+    {
+      "id": "anesthesia",
+      "name": "麻醉科"
+    },
+    {
+      "id": "general",
+      "name": "全科与跨科室"
+    }
+  ],
+  "papers": [
+    {
+      "id": "qrisk3",
+      "modelName": "QRISK3 心血管风险预测",
+      "doi": "10.1136/bmj.j2099",
+      "year": 2017,
+      "departmentIds": [
+        "cardiology",
+        "general"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/bmj.j2099",
+      "pdfUrl": "https://www.bmj.com/content/bmj/357/bmj.j2099.full.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现QRISK3 心血管风险预测模型；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY-NC 4.0",
+      "checkedAt": "2026-11-18",
+      "sha256": "8cf5b4fb97d18822c8f551657ff6f40a2261d47af0668698180907f8a4ff9dc8",
+      "materialSourceUrl": "https://ora.ox.ac.uk/objects/uuid:0e6ef864-2d85-454d-a013-c0d89b2f931e/files/mcb8ba09c1ca380346c1a198d7c04692a"
+    },
+    {
+      "id": "4c",
+      "modelName": "4C 住院死亡风险评分",
+      "doi": "10.1136/bmj.m3339",
+      "year": 2020,
+      "departmentIds": [
+        "respiratory",
+        "emergency"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/bmj.m3339",
+      "pdfUrl": "https://www.bmj.com/content/bmj/370/bmj.m3339.full.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现4C Mortality Score 的评分规则及原文支持的风险分层；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY 4.0",
+      "checkedAt": "2026-11-18",
+      "sha256": "98b90045017b1d5988930dfb13cff2cbf4784e0ee77f8128d9252e07d66e8d8b",
+      "materialSourceUrl": "https://discovery.ucl.ac.uk/id/eprint/10110251/1/bmj.m3339.full.pdf"
+    },
+    {
+      "id": "gbs",
+      "modelName": "上消化道出血风险评分比较研究",
+      "doi": "10.1136/bmj.i6432",
+      "year": 2017,
+      "departmentIds": [
+        "gastroenterology"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/bmj.i6432",
+      "pdfUrl": "https://www.bmj.com/content/bmj/356/bmj.i6432.full.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现文中评估的 Glasgow-Blatchford 评分，优先使用原文明确给出的规则；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY-NC 3.0",
+      "checkedAt": "2026-11-18",
+      "sha256": "10877097f46533894c02f3d943819101d7c66bdfc8d6604384ad3dffb12082e8",
+      "materialSourceUrl": "https://eprints.gla.ac.uk/187156/1/187156.pdf"
+    },
+    {
+      "id": "qdiabetes",
+      "modelName": "QDiabetes-2018 糖尿病风险预测",
+      "doi": "10.1136/bmj.j5019",
+      "year": 2017,
+      "departmentIds": [
+        "endocrinology",
+        "general"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/bmj.j5019",
+      "pdfUrl": "https://www.bmj.com/content/bmj/359/bmj.j5019.full.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现QDiabetes-2018 的不含血液检查指标的模型 A；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY 4.0",
+      "checkedAt": "2026-11-18",
+      "sha256": "6cdc89fdadf1754526654e4550bb537a26eff82498a6d4cc8743728ce902dedb",
+      "materialSourceUrl": "https://ora.ox.ac.uk/objects/uuid%3A21d372df-2e4b-439b-b9f8-b2c001017ee4/files/me5f4e1afbbb9775f644bd12f4a9f6c0f"
+    },
+    {
+      "id": "qkidney",
+      "modelName": "QKidney 慢性肾病风险预测",
+      "doi": "10.1186/1471-2296-11-49",
+      "year": 2010,
+      "departmentIds": [
+        "nephrology",
+        "general"
+      ],
+      "sourceUrl": "https://doi.org/10.1186/1471-2296-11-49",
+      "pdfUrl": "https://www.qresearch.org/media/1088/qkidney-derivation-and-validation-2010.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现QKidney 的中重度慢性肾病风险预测模型；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY 2.0",
+      "checkedAt": "2026-11-18",
+      "sha256": "32015d46c5f6cdd2da70953c45be235adf51d492feb820eb375da5ce20d6cf54",
+      "materialSourceUrl": "https://www.qresearch.org/media/1088/qkidney-derivation-and-validation-2010.pdf"
+    },
+    {
+      "id": "ssv",
+      "modelName": "卒中六变量预后模型比较验证研究",
+      "doi": "10.1136/jnnp.2003.018085",
+      "year": 2004,
+      "departmentIds": [
+        "neurology"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/jnnp.2003.018085",
+      "pdfUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/10662150/Predicting_functional_outcome_in_acute_stroke.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现卒中六变量（SSV）预后模型，不混用其他比较模型；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "版权归作者及出版方；使用条件见原文与大学存档说明",
+      "checkedAt": "2026-11-18",
+      "sha256": "fdf02b1e13c02f19add9035b6e61334529780ce83386c8359ed537886738f6c2",
+      "materialSourceUrl": "https://www.pure.ed.ac.uk/ws/portalfiles/portal/10662150/Predicting_functional_outcome_in_acute_stroke.pdf"
+    },
+    {
+      "id": "adnex",
+      "modelName": "ADNEX 卵巢肿块诊断预测",
+      "doi": "10.1136/bmj.g5920",
+      "year": 2014,
+      "departmentIds": [
+        "oncology",
+        "obstetrics"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/bmj.g5920",
+      "pdfUrl": "https://www.bmj.com/content/bmj/349/bmj.g5920.full.pdf",
+      "version": "1",
+      "readiness": "needs_review",
+      "scope": "计划复现 ADNEX 卵巢肿块诊断预测模型；论文原文件待补齐。",
+      "accessNote": "公开下载源暂时不可用，平台尚未取得论文文件。",
+      "license": "请查看原文许可；未授权平台公开镜像",
+      "checkedAt": "2026-11-17"
+    },
+    {
+      "id": "sort",
+      "modelName": "SORT 非心脏手术预后预测",
+      "doi": "10.1002/bjs.9638",
+      "year": 2014,
+      "departmentIds": [
+        "surgery",
+        "anesthesia"
+      ],
+      "sourceUrl": "https://doi.org/10.1002/bjs.9638",
+      "pdfUrl": "https://ncepod.org.uk/pdf/publications/TheSurgicalOutcomeRiskTool.pdf",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现SORT 非心脏手术预后预测模型；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY-NC-ND（版本以原文为准）",
+      "checkedAt": "2026-11-18",
+      "sha256": "2740ead0f2e6bca9fe8a912660db6cef6ddbcd6e3f1f1c7d033021bb61d88216",
+      "materialSourceUrl": "https://ncepod.org.uk/pdf/publications/TheSurgicalOutcomeRiskTool.pdf"
+    },
+    {
+      "id": "febrile-child",
+      "modelName": "发热儿童严重细菌感染预测",
+      "doi": "10.1136/bmj.f1706",
+      "year": 2013,
+      "departmentIds": [
+        "pediatrics"
+      ],
+      "sourceUrl": "https://doi.org/10.1136/bmj.f1706",
+      "pdfUrl": "https://www.bmj.com/content/346/bmj.f1706",
+      "version": "2",
+      "readiness": "needs_review",
+      "scope": "依据论文复现论文中的发热儿童严重细菌感染预测模型；必要参数缺失时提示补充。",
+      "accessNote": "平台已保存论文原文件，可自动带入。该模型尚未完成独立复现验收。",
+      "license": "CC BY-NC 3.0",
+      "checkedAt": "2026-11-18",
+      "sha256": "05eda41650ab615f4ff1ac30c3292b1ce929ee194ec1242756e1f505be5c5070",
+      "materialSourceUrl": "https://pure.eur.nl/ws/files/47482946/REPUB_70245_OA.pdf"
+    },
+    {
+      "id": "priest",
+      "modelName": "PRIEST 急诊风险评分",
+      "doi": "10.1371/journal.pone.0245840",
+      "year": 2021,
+      "departmentIds": [
+        "emergency",
+        "respiratory"
+      ],
+      "sourceUrl": "https://doi.org/10.1371/journal.pone.0245840",
+      "pdfUrl": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0245840&type=printable",
+      "version": "1",
+      "readiness": "ready",
+      "scope": "依据原文评分表和已核对补充转录，生成总分与分项计算；不重新训练、不输出未经支持的个体概率。",
+      "accessNote": "示例包含已核对的补充转录。原验收候选计算通过，新生成版本仍需独立检查。",
+      "license": "请查看原文许可；未授权平台公开镜像",
+      "checkedAt": "2026-11-17",
+      "sha256": "d28afc718c17310c2601cd523f44c13c5df5cc26070c8b9febdb76186b71cd0f"
+    },
+    {
+      "id": "abc2sph",
+      "modelName": "ABC₂-SPH 住院风险评分",
+      "doi": "10.1016/j.ijid.2021.07.049",
+      "year": 2021,
+      "departmentIds": [
+        "respiratory",
+        "emergency"
+      ],
+      "sourceUrl": "https://doi.org/10.1016/j.ijid.2021.07.049",
+      "pdfUrl": "https://www.sciencedirect.com/science/article/pii/S1201971221006056/pdfft",
+      "version": "1",
+      "readiness": "ready",
+      "scope": "依据原文评分表和已核对补充转录，生成总分与分项计算；不重新训练、不输出未经支持的个体概率。",
+      "accessNote": "示例包含已核对的补充转录。原验收候选计算通过，新生成版本仍需独立检查。",
+      "license": "请查看原文许可；未授权平台公开镜像",
+      "checkedAt": "2026-11-17",
+      "sha256": "cca04167054033dc267538c8e2d84952d2e38d248926a93590c7a9664f39c150"
+    }
+  ]
+}
