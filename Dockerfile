@@ -9,7 +9,15 @@ ENV FLASK_APP=wsgi.py
 ENV FLASK_DEBUG=0
 
 # 安装系统依赖
-RUN apt-get update \
+ARG DEBIAN_MIRROR=""
+RUN if [ -n "$DEBIAN_MIRROR" ]; then \
+        for source in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do \
+            if [ -f "$source" ]; then \
+                sed -i "s|https\?://deb.debian.org/debian\([ /]\|$\)|${DEBIAN_MIRROR}\1|g" "$source"; \
+            fi; \
+        done; \
+    fi \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
         gcc \
         curl \
@@ -33,7 +41,9 @@ RUN ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-c
 
 # 安装Python依赖
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+ARG PYTHON_PACKAGE_INDEX=https://pypi.org/simple
+RUN PIP_INDEX_URL="$PYTHON_PACKAGE_INDEX" PIP_DEFAULT_TIMEOUT=120 \
+    python -m pip install --no-cache-dir --retries 5 -r requirements.txt
 
 # 复制项目文件
 COPY . .
