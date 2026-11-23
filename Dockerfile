@@ -13,7 +13,7 @@ ARG DEBIAN_MIRROR=""
 RUN if [ -n "$DEBIAN_MIRROR" ]; then \
         for source in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do \
             if [ -f "$source" ]; then \
-                sed -i "s|https\?://deb.debian.org/debian\([ /]\|$\)|${DEBIAN_MIRROR}\1|g" "$source"; \
+                sed -i "s#https\?://deb.debian.org/debian\([ /]\|$\)#${DEBIAN_MIRROR}\1#g" "$source"; \
             fi; \
         done; \
     fi \
